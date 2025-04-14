@@ -443,7 +443,7 @@
             steps += `         = ${beforeR.toFixed(2)} × ${(1 - r).toFixed(3)}\n`;
             steps += `         = ${T.toFixed(2)}\n\n`;
             
-            steps += `=== 最终评标基准值 (T) ===\n${T.toFixed(2)} ({1-T/maxPrice})`;
+            steps += `=== 最终评标基准值 (T) ===\n${T.toFixed(2)} (${1-T/maxPrice})`;
             
             // 显示计算步骤
             document.getElementById('calculation-steps').textContent = steps;
