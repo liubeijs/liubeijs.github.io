@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>六随机五区间报价得分模型计算器</title>
@@ -68,7 +69,8 @@
             padding: 15px;
             background-color: #e8f4f8;
             border-left: 5px solid #3498db;
-            color: #333; /* 固定深色文字 */
+            color: #333;
+            white-space: pre-wrap; /* 添加这一行 */
         }
         .error {
             color: #e74c3c;
@@ -108,6 +110,16 @@
             margin-top: 5px;
         }
         /* 移除所有与暗色模式相关的样式 */
+        /* 在 style 标签内添加以下样式 */
+        
+        .fixed-button {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
     </style>
 </head>
 <body>
@@ -186,11 +198,17 @@
         <small>(取值范围: 1.00 ≤ u<sub>i</sub> ≤ 9.00)</small>
     </div>
     
-    <button type="button" id="calculate">计算评标基准值</button>
+
+    <button type="button" id="calculate" class="fixed-button">计算评标基准值</button>
     
     <div id="calculation-steps"></div>
     
     <div id="result-range"></div>
+    
+    <!-- 修改图表容器 -->
+    <div style="margin-top: 20px; padding: 15px; background-color: #fff; height: 400px;">
+        <canvas id="distributionChart"></canvas>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -443,8 +461,8 @@
             steps += `         = ${beforeR.toFixed(2)} × ${(1 - r).toFixed(3)}\n`;
             steps += `         = ${T.toFixed(2)}\n\n`;
 
-            const ratio = 1-T/maxPrice;
-            steps += `=== 最终评标基准值 (T) ===\n${T.toFixed(2)} ${ratio.toFixed(2)}`;
+            const ratio = (1-T/maxPrice)*100;
+            steps += `=== 最终评标基准值 (T) ===\n${T.toFixed(2)} [${ratio.toFixed(2)}%]`;
             
             // 显示计算步骤
             document.getElementById('calculation-steps').textContent = steps;
@@ -462,14 +480,113 @@
             const T3 = (maxPrice * C_max + C * (1 - C_max)) * (1 - r_min);
             const T4 = (maxPrice * C_max + C * (1 - C_max)) * (1 - r_max);
             
-            rangeText += `1. 当 C₁取最小值(0.4), r取最小值(2%)时:\n   T = ${T1.toFixed(2)}\n\n`;
-            rangeText += `2. 当 C₁取最小值(0.4), r取最大值(10%)时:\n   T = ${T2.toFixed(2)}\n\n`;
-            rangeText += `3. 当 C₁取最大值(0.6), r取最小值(2%)时:\n   T = ${T3.toFixed(2)}\n\n`;
-            rangeText += `4. 当 C₁取最大值(0.6), r取最大值(10%)时:\n   T = ${T4.toFixed(2)}\n\n`;
+            rangeText += `1. 当 C₁取最小值(0.4), r取最小值(2%)时：T = ${T1.toFixed(2)}\n`;
+            rangeText += `2. 当 C₁取最小值(0.4), r取最大值(10%)时：T = ${T2.toFixed(2)}\n`;
+            rangeText += `3. 当 C₁取最大值(0.6), r取最小值(2%)时：T = ${T3.toFixed(2)}\n`;
+            rangeText += `4. 当 C₁取最大值(0.6), r取最大值(10%)时：T = ${T4.toFixed(2)}\n`;
             
-            rangeText += `因此，评标基准值可能的取值范围为:\n${Math.min(T2, T4).toFixed(2)} 到 ${Math.max(T1, T3).toFixed(2)}`;
-            
+            const minT = Math.min(T1, T2, T3, T4);
+            const maxT = Math.max(T1, T2, T3, T4);
+            const minT_ratio = (1-minT/maxPrice)*100;
+            const maxT_ratio = (1-maxT/maxPrice)*100;
+            rangeText += `\n因此，评标基准值可能的取值范围为:\n${minT.toFixed(2)} 到 ${maxT.toFixed(2)}`;
+            rangeText += `\n下浮范围为: ${minT_ratio.toFixed(2)}% 到 ${maxT_ratio.toFixed(2)}%`;
+
             document.getElementById('result-range').textContent = rangeText;
+        
+            // 生成并绘制分布图
+            const samples = [];
+            // 模拟1000次随机组合
+            for (let i = 0; i < 10000; i++) {
+                // 随机生成参数
+                const randomC1 = Math.random() * (0.6 - 0.4) + 0.4;
+                const randomR = Math.random() * (0.1 - 0.02) + 0.02;
+                
+                // 计算该组合下的评标基准值
+                const randomT = (maxPrice * randomC1 + C * (1 - randomC1)) * (1 - randomR);
+                const randomT_ratio = (1-randomT/maxPrice)*100;
+                samples.push(randomT_ratio);
+            }
+
+            // 清除旧图表
+            const chartCanvas = document.getElementById('distributionChart');
+            if (window.myChart) {
+                window.myChart.destroy();
+            }
+
+            // 计算数据分布
+            const binCount = 20;
+            const min = Math.min(...samples);
+            const max = Math.max(...samples);
+            const binWidth = (max - min) / binCount;
+            const bins = new Array(binCount).fill(0);
+            
+            samples.forEach(value => {
+                const binIndex = Math.min(
+                    Math.floor((value - min) / binWidth),
+                    binCount - 1
+                );
+                bins[binIndex]++;
+            });
+
+            // 生成标签
+            const labels = bins.map((_, i) => 
+                `${(min + i * binWidth).toFixed(2)}`
+            );
+
+            // 创建图表
+            window.myChart = new Chart(chartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '频次分布',
+                        data: bins,
+                        backgroundColor: 'rgba(52, 152, 219, 0.5)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '出现次数'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '评标基准值'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '评标基准值分布情况（模拟10000次）',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `出现次数: ${context.raw}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
     </script>
 </body>
