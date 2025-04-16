@@ -43,51 +43,328 @@
             background-color: #f8f9fa;
             border-radius: 4px;
         }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .section-header:hover {
+            opacity: 0.8;
+        }
+        
+        .section-content {
+            display: none;
+            transition: all 0.3s ease;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        .arrow {
+            margin-right: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .arrow.active {
+            transform: rotate(90deg);
+        }
+        
+        .toggle-all-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
+        }
+        
+        .toggle-all-button:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
 <body>
+    <button class="toggle-all-button" id="toggleAll">展开全部</button>
     <div class="section">
-        <h2>官网网站</h2>
-        <div class="grid">
-            <a href="https://jtw.beijing.gov.cn/" target="_blank">北京市交通委员会</a>
-            <a href="https://jtw.sh.gov.cn" target="_blank">上海市交通委员会</a>
-            <a href="https://jtys.tj.gov.cn/" target="_blank">天津市交通运输委员会</a>
-            <a href="https://jtj.cq.gov.cn/" target="_blank">重庆市交通局</a>
-            <a href="https://jtyst.hebei.gov.cn" target="_blank">河北省交通运输厅</a>
-            <a href="https://jtyst.shanxi.gov.cn" target="_blank">山西省交通运输厅</a>
-            <a href="https://jtyst.nmg.gov.cn" target="_blank">内蒙古自治区交通运输厅</a>
-            <a href="https://jtyst.ln.gov.cn" target="_blank">辽宁省交通运输厅</a>
-            <a href="https://jtyst.jl.gov.cn" target="_blank">吉林省交通运输厅</a>
-            <a href="https://jtyst.hlj.gov.cn" target="_blank">黑龙江省交通运输厅</a>
-            <a href="https://jtw.jiangsu.gov.cn" target="_blank">江苏省交通运输厅</a>
-            <a href="https://jtyst.zj.gov.cn" target="_blank">浙江省交通运输厅</a>
-            <a href="https://jtyst.ah.gov.cn" target="_blank">安徽省交通运输厅</a>
-            <a href="https://jtyst.fujian.gov.cn" target="_blank">福建省交通运输厅</a>
-            <a href="https://jtyst.jiangxi.gov.cn" target="_blank">江西省交通运输厅</a>
-            <a href="https://jtyst.shandong.gov.cn" target="_blank">山东省交通运输厅</a>
-            <a href="https://jtyst.henan.gov.cn" target="_blank">河南省交通运输厅</a>
-            <a href="https://jtyst.hubei.gov.cn" target="_blank">湖北省交通运输厅</a>
-            <a href="https://jtyst.hunan.gov.cn" target="_blank">湖南省交通运输厅</a>
-            <a href="https://jtyst.gd.gov.cn" target="_blank">广东省交通运输厅</a>
-            <a href="https://jtyst.gxzf.gov.cn" target="_blank">广西壮族自治区交通运输厅</a>
-            <a href="https://jtyst.hainan.gov.cn" target="_blank">海南省交通运输厅</a>
-            <a href="https://jtyst.sc.gov.cn" target="_blank">四川省交通运输厅</a>
-            <a href="https://jtyst.guizhou.gov.cn" target="_blank">贵州省交通运输厅</a>
-            <a href="https://jtyst.yn.gov.cn" target="_blank">云南省交通运输厅</a>
-            <a href="https://jtyst.xizang.gov.cn" target="_blank">西藏自治区交通运输厅</a>
-            <a href="https://jtyst.shaanxi.gov.cn" target="_blank">陕西省交通运输厅</a>
-            <a href="https://jtyst.gansu.gov.cn" target="_blank">甘肃省交通运输厅</a>
-            <a href="https://jtyst.qh.gov.cn" target="_blank">青海省交通运输厅</a>
-            <a href="https://jtyst.nx.gov.cn" target="_blank">宁夏回族自治区交通运输厅</a>
-            <a href="https://jtyst.xinjiang.gov.cn" target="_blank">新疆维吾尔自治区交通运输厅</a>
+        <div class="section-header active">
+            <span class="arrow active">▶</span>
+            <h2>交通运输部门</h2>
+        </div>
+        <div class="section-content active">
+            <div class="grid">
+                <a href="https://jtw.beijing.gov.cn/" target="_blank">北京市交通委员会</a>
+                <a href="https://jtw.sh.gov.cn" target="_blank">上海市交通委员会</a>
+                <a href="https://jtys.tj.gov.cn/" target="_blank">天津市交通运输委员会</a>
+                <a href="https://jtj.cq.gov.cn/" target="_blank">重庆市交通局</a>
+                <a href="https://jtt.hebei.gov.cn/zwgk/" target="_blank">河北省交通运输厅</a>
+                <a href="https://jtyst.shanxi.gov.cn" target="_blank">山西省交通运输厅</a>
+                <a href="https://jtyst.nmg.gov.cn" target="_blank">内蒙古自治区交通运输厅</a>
+                <a href="https://jtt.ln.gov.cn/" target="_blank">辽宁省交通运输厅</a>
+                <a href="http://jtyst.jl.gov.cn/" target="_blank">吉林省交通运输厅</a>
+                <a href="https://jt.hlj.gov.cn/" target="_blank">黑龙江省交通运输厅</a>
+                <a href="https://jtyst.jiangsu.gov.cn/" target="_blank">江苏省交通运输厅</a>
+                <a href="https://jtyst.zj.gov.cn" target="_blank">浙江省交通运输厅</a>
+                <a href="https://jtt.ah.gov.cn/" target="_blank">安徽省交通运输厅</a>
+                <a href="https://jtyst.fujian.gov.cn/" target="_blank">福建省交通运输厅</a>
+                <a href="https://jt.jiangxi.gov.cn/" target="_blank">江西省交通运输厅</a>
+                <a href="https://jtt.shandong.gov.cn/" target="_blank">山东省交通运输厅</a>
+                <a href="https://jtyst.henan.gov.cn" target="_blank">河南省交通运输厅</a>
+                <a href="https://jtt.hubei.gov.cn/" target="_blank">湖北省交通运输厅</a>
+                <a href="https://jtt.hunan.gov.cn/" target="_blank">湖南省交通运输厅</a>
+                <a href="https://td.gd.gov.cn/" target="_blank">广东省交通运输厅</a>
+                <a href="http://jtt.gxzf.gov.cn/" target="_blank">广西壮族自治区交通运输厅</a>
+                <a href="https://jt.hainan.gov.cn/" target="_blank">海南省交通运输厅</a>
+                <a href="http://jtt.sc.gov.cn/" target="_blank">四川省交通运输厅</a>
+                <a href="http://jt.guizhou.gov.cn/" target="_blank">贵州省交通运输厅</a>
+                <a href="https://jtyst.yn.gov.cn" target="_blank">云南省交通运输厅</a>
+                <a href="https://jtt.xizang.gov.cn/" target="_blank">西藏自治区交通运输厅</a>
+                <a href="https://jtyst.shaanxi.gov.cn" target="_blank">陕西省交通运输厅</a>
+                <a href="http://jtys.gansu.gov.cn/" target="_blank">甘肃省交通运输厅</a>
+                <a href="https://jtyst.qinghai.gov.cn/" target="_blank">青海省交通运输厅</a>
+                <a href="https://jtt.nx.gov.cn/" target="_blank">宁夏回族自治区交通运输厅</a>
+                <a href="https://jtyst.xinjiang.gov.cn/" target="_blank">新疆维吾尔自治区交通运输厅</a>
+            </div>
         </div>
     </div>
 
     <div class="section">
-        <h2>小工具</h2>
-        <div class="grid">
-            <a href="https://pages.liubeijs.com/cal65.html" target="_blank">六随机五区间计算器</a>
+        <div class="section-header">
+            <span class="arrow">▶</span>
+            <h2>住房建设部门</h2>
+        </div>
+        <div class="section-content">
+            <div class="grid">
+                <a href="https://zjw.beijing.gov.cn" target="_blank">北京市住房和城乡建设委员会</a>
+                <a href="https://zjw.sh.gov.cn" target="_blank">上海市住房和城乡建设管理委员会</a>
+                <a href="https://zfcxjs.tj.gov.cn" target="_blank">天津市住房和城乡建设委员会</a>
+                <a href="https://zfcxjw.cq.gov.cn" target="_blank">重庆市住房和城乡建设委员会</a>
+                <a href="https://zfcxjst.hebei.gov.cn" target="_blank">河北省住房和城乡建设厅</a>
+                <a href="https://zjt.shanxi.gov.cn" target="_blank">山西省住房和城乡建设厅</a>
+                <a href="https://zjt.nmg.gov.cn" target="_blank">内蒙古自治区住房和城乡建设厅</a>
+                <a href="https://zjt.ln.gov.cn" target="_blank">辽宁省住房和城乡建设厅</a>
+                <a href="http://jst.jl.gov.cn" target="_blank">吉林省住房和城乡建设厅</a>
+                <a href="https://zfcxjst.hlj.gov.cn" target="_blank">黑龙江省住房和城乡建设厅</a>
+                <a href="https://jsszfhcxjst.jiangsu.gov.cn" target="_blank">江苏省住房和城乡建设厅</a>
+                <a href="https://jst.zj.gov.cn" target="_blank">浙江省住房和城乡建设厅</a>
+                <a href="http://dohurd.ah.gov.cn/index.html" target="_blank">安徽省住房和城乡建设厅</a>
+                <a href="https://zjt.fujian.gov.cn" target="_blank">福建省住房和城乡建设厅</a>
+                <a href="https://zjt.jiangxi.gov.cn" target="_blank">江西省住房和城乡建设厅</a>
+                <a href="http://zjt.shandong.gov.cn" target="_blank">山东省住房和城乡建设厅</a>
+                <a href="https://hnjs.henan.gov.cn" target="_blank">河南省住房和城乡建设厅</a>
+                <a href="https://zjt.hubei.gov.cn" target="_blank">湖北省住房和城乡建设厅</a>
+                <a href="https://zjt.hunan.gov.cn" target="_blank">湖南省住房和城乡建设厅</a>
+                <a href="http://zfcxjst.gd.gov.cn" target="_blank">广东省住房和城乡建设厅</a>
+                <a href="http://zjt.gxzf.gov.cn" target="_blank">广西壮族自治区住房和城乡建设厅</a>
+                <a href="https://zjt.hainan.gov.cn" target="_blank">海南省住房和城乡建设厅</a>
+                <a href="http://jst.sc.gov.cn" target="_blank">四川省住房和城乡建设厅</a>
+                <a href="https://zfcxjst.guizhou.gov.cn" target="_blank">贵州省住房和城乡建设厅</a>
+                <a href="https://zfcxjst.yn.gov.cn" target="_blank">云南省住房和城乡建设厅</a>
+                <a href="https://zjt.xizang.gov.cn" target="_blank">西藏自治区住房和城乡建设厅</a>
+                <a href="https://js.shaanxi.gov.cn" target="_blank">陕西省住房和城乡建设厅</a>
+                <a href="https://zjt.gansu.gov.cn" target="_blank">甘肃省住房和城乡建设厅</a>
+                <a href="http://zjt.qinghai.gov.cn" target="_blank">青海省住房和城乡建设厅</a>
+                <a href="https://jst.nx.gov.cn" target="_blank">宁夏回族自治区住房和城乡建设厅</a>
+                <a href="https://zjt.xinjiang.gov.cn" target="_blank">新疆维吾尔自治区住房和城乡建设厅</a>
+            </div>
         </div>
     </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span class="arrow">▶</span>
+            <h2>水利部门</h2>
+        </div>
+        <div class="section-content">
+            <div class="grid">
+                <a href="https://swj.beijing.gov.cn" target="_blank">北京市水务局</a>
+                <a href="https://swj.sh.gov.cn" target="_blank">上海市水务局</a>
+                <a href="https://swj.tj.gov.cn" target="_blank">天津市水务局</a>
+                <a href="https://slj.cq.gov.cn/" target="_blank">重庆市水利局</a>
+                <a href="http://slt.hebei.gov.cn/" target="_blank">河北省水利厅</a>
+                <a href="https://slt.shanxi.gov.cn" target="_blank">山西省水利厅</a>
+                <a href="https://slt.nmg.gov.cn" target="_blank">内蒙古自治区水利厅</a>
+                <a href="https://slt.ln.gov.cn" target="_blank">辽宁省水利厅</a>
+                <a href="http://slt.jl.gov.cn/" target="_blank">吉林省水利厅</a>
+                <a href="https://slt.hlj.gov.cn" target="_blank">黑龙江省水利厅</a>
+                <a href="http://jswater.jiangsu.gov.cn/" target="_blank">江苏省水利厅</a>
+                <a href="https://slt.zj.gov.cn" target="_blank">浙江省水利厅</a>
+                <a href="https://slt.ah.gov.cn" target="_blank">安徽省水利厅</a>
+                <a href="https://slt.fujian.gov.cn" target="_blank">福建省水利厅</a>
+                <a href="https://slt.jiangxi.gov.cn" target="_blank">江西省水利厅</a>
+                <a href="http://wr.shandong.gov.cn/" target="_blank">山东省水利厅</a>
+                <a href="https://slt.henan.gov.cn" target="_blank">河南省水利厅</a>
+                <a href="https://slt.hubei.gov.cn" target="_blank">湖北省水利厅</a>
+                <a href="https://slt.hunan.gov.cn" target="_blank">湖南省水利厅</a>
+                <a href="http://slt.gd.gov.cn/" target="_blank">广东省水利厅</a>
+                <a href="https://slt.gxzf.gov.cn" target="_blank">广西壮族自治区水利厅</a>
+                <a href="http://swt.hainan.gov.cn/" target="_blank">海南省水利厅</a>
+                <a href="https://slt.sc.gov.cn" target="_blank">四川省水利厅</a>
+                <a href="https://mwr.guizhou.gov.cn/" target="_blank">贵州省水利厅</a>
+                <a href="https://wcb.yn.gov.cn/" target="_blank">云南省水利厅</a>
+                <a href="http://slt.xizang.gov.cn" target="_blank">西藏自治区水利厅</a>
+                <a href="https://slt.shaanxi.gov.cn" target="_blank">陕西省水利厅</a>
+                <a href="https://slt.gansu.gov.cn" target="_blank">甘肃省水利厅</a>
+                <a href="http://slt.qinghai.gov.cn/" target="_blank">青海省水利厅</a>
+                <a href="https://slt.nx.gov.cn" target="_blank">宁夏回族自治区水利厅</a>
+                <a href="https://slt.xinjiang.gov.cn" target="_blank">新疆维吾尔自治区水利厅</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span class="arrow">▶</span>
+            <h2>发改部门</h2>
+        </div>
+        <div class="section-content">
+            <div class="grid">
+                <a href="https://fgw.beijing.gov.cn" target="_blank">北京市发展和改革委员会</a>
+                <a href="https://fgw.sh.gov.cn" target="_blank">上海市发展和改革委员会</a>
+                <a href="https://fzgg.tj.gov.cn" target="_blank">天津市发展和改革委员会</a>
+                <a href="https://fzggw.cq.gov.cn" target="_blank">重庆市发展和改革委员会</a>
+                <a href="https://hbdrc.hebei.gov.cn" target="_blank">河北省发展和改革委员会</a>
+                <a href="https://fgw.shanxi.gov.cn" target="_blank">山西省发展和改革委员会</a>
+                <a href="https://fgw.nmg.gov.cn" target="_blank">内蒙古自治区发展和改革委员会</a>
+                <a href="https://fgw.ln.gov.cn" target="_blank">辽宁省发展和改革委员会</a>
+                <a href="https://jldrc.jl.gov.cn" target="_blank">吉林省发展和改革委员会</a>
+                <a href="https://drc.hlj.gov.cn" target="_blank">黑龙江省发展和改革委员会</a>
+                <a href="https://fzggw.jiangsu.gov.cn" target="_blank">江苏省发展和改革委员会</a>
+                <a href="https://fzggw.zj.gov.cn" target="_blank">浙江省发展和改革委员会</a>
+                <a href="https://fzggw.ah.gov.cn" target="_blank">安徽省发展和改革委员会</a>
+                <a href="https://fgw.fujian.gov.cn" target="_blank">福建省发展和改革委员会</a>
+                <a href="http://drc.jiangxi.gov.cn" target="_blank">江西省发展和改革委员会</a>
+                <a href="http://fgw.shandong.gov.cn" target="_blank">山东省发展和改革委员会</a>
+                <a href="https://fgw.henan.gov.cn" target="_blank">河南省发展和改革委员会</a>
+                <a href="https://fgw.hubei.gov.cn" target="_blank">湖北省发展和改革委员会</a>
+                <a href="https://fgw.hunan.gov.cn" target="_blank">湖南省发展和改革委员会</a>
+                <a href="https://drc.gd.gov.cn" target="_blank">广东省发展和改革委员会</a>
+                <a href="http://fgw.gxzf.gov.cn" target="_blank">广西壮族自治区发展和改革委员会</a>
+                <a href="http://plan.hainan.gov.cn" target="_blank">海南省发展和改革委员会</a>
+                <a href="https://fgw.sc.gov.cn" target="_blank">四川省发展和改革委员会</a>
+                <a href="https://fgw.guizhou.gov.cn" target="_blank">贵州省发展和改革委员会</a>
+                <a href="https://yndrc.yn.gov.cn/html/fagaishuju" target="_blank">云南省发展和改革委员会</a>
+                <a href="https://drc.xizang.gov.cn" target="_blank">西藏自治区发展和改革委员会</a>
+                <a href="https://sndrc.shaanxi.gov.cn" target="_blank">陕西省发展和改革委员会</a>
+                <a href="http://fzgg.gansu.gov.cn" target="_blank">甘肃省发展和改革委员会</a>
+                <a href="http://fgw.qinghai.gov.cn/index.html?chanldesc=0&?pc" target="_blank">青海省发展和改革委员会</a>
+                <a href="https://fzggw.nx.gov.cn" target="_blank">宁夏回族自治区发展和改革委员会</a>
+                <a href="http://xjdrc.xinjiang.gov.cn" target="_blank">新疆维吾尔自治区发展和改革委员会</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span class="arrow">▶</span>
+            <h2>自然资源部门</h2>
+        </div>
+        <div class="section-content">
+            <div class="grid">
+                <a href="https://ghzrzyw.beijing.gov.cn" target="_blank">北京市规划和自然资源委员会</a>
+                <a href="https://ghzyj.sh.gov.cn" target="_blank">上海市规划和自然资源局</a>
+                <a href="https://ghhzrzy.tj.gov.cn/" target="_blank">天津市规划和自然资源局</a>
+                <a href="http://ghzrzyj.cq.gov.cn/" target="_blank">重庆市规划和自然资源局</a>
+                <a href="https://zrzy.hebei.gov.cn" target="_blank">河北省自然资源厅</a>
+                <a href="http://zrzyt.shanxi.gov.cn/" target="_blank">山西省自然资源厅</a>
+                <a href="https://zrzy.nmg.gov.cn" target="_blank">内蒙古自治区自然资源厅</a>
+                <a href="https://zrzy.ln.gov.cn" target="_blank">辽宁省自然资源厅</a>
+                <a href="http://zrzy.jl.gov.cn/" target="_blank">吉林省自然资源厅</a>
+                <a href="http://zrzyt.hlj.gov.cn/" target="_blank">黑龙江省自然资源厅</a>
+                <a href="https://zrzy.jiangsu.gov.cn" target="_blank">江苏省自然资源厅</a>
+                <a href="https://zrzyt.zj.gov.cn/" target="_blank">浙江省自然资源厅</a>
+                <a href="https://zrzyt.ah.gov.cn/" target="_blank">安徽省自然资源厅</a>
+                <a href="https://zrzyt.fujian.gov.cn/" target="_blank">福建省自然资源厅</a>
+                <a href="https://bnr.jiangxi.gov.cn/" target="_blank">江西省自然资源厅</a>
+                <a href="http://dnr.shandong.gov.cn/" target="_blank">山东省自然资源厅</a>
+                <a href="https://dnr.henan.gov.cn/" target="_blank">河南省自然资源厅</a>
+                <a href="https://zrzyt.hubei.gov.cn/" target="_blank">湖北省自然资源厅</a>
+                <a href="http://zrzyt.hunan.gov.cn/" target="_blank">湖南省自然资源厅</a>
+                <a href="https://nr.gd.gov.cn/" target="_blank">广东省自然资源厅</a>
+                <a href="https://dnr.gxzf.gov.cn/" target="_blank">广西壮族自治区自然资源厅</a>
+                <a href="https://lr.hainan.gov.cn/" target="_blank">海南省自然资源厅</a>
+                <a href="http://dnr.sc.gov.cn/" target="_blank">四川省自然资源厅</a>
+                <a href="https://zrzy.guizhou.gov.cn" target="_blank">贵州省自然资源厅</a>
+                <a href="http://dnr.yn.gov.cn/" target="_blank">云南省自然资源厅</a>
+                <a href="http://zrzyt.xizang.gov.cn/" target="_blank">西藏自治区自然资源厅</a>
+                <a href="https://zrzyt.shaanxi.gov.cn/" target="_blank">陕西省自然资源厅</a>
+                <a href="https://zrzy.gansu.gov.cn" target="_blank">甘肃省自然资源厅</a>
+                <a href="https://zrzyt.qinghai.gov.cn/" target="_blank">青海省自然资源厅</a>
+                <a href="https://zrzyt.nx.gov.cn/" target="_blank">宁夏回族自治区自然资源厅</a>
+                <a href="https://zrzyt.xinjiang.gov.cn/" target="_blank">新疆维吾尔自治区自然资源厅</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span class="arrow">▶</span>
+            <h2>小工具</h2>
+        </div>
+        <div class="section-content">
+            <div class="grid">
+                <a href="https://pages.liubeijs.com/cal65.html" target="_blank">六随机五区间计算器</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const headers = document.querySelectorAll('.section-header');
+            const toggleAllButton = document.getElementById('toggleAll');
+            let isAllExpanded = false;
+            
+            headers.forEach(header => {
+                header.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    const arrow = this.querySelector('.arrow');
+                    
+                    // 切换当前section的状态
+                    content.classList.toggle('active');
+                    arrow.classList.toggle('active');
+                    this.classList.toggle('active');
+                });
+            });
+            
+            toggleAllButton.addEventListener('click', function() {
+                isAllExpanded = !isAllExpanded;
+                
+                headers.forEach(header => {
+                    const content = header.nextElementSibling;
+                    const arrow = header.querySelector('.arrow');
+                    
+                    if (isAllExpanded) {
+                        content.classList.add('active');
+                        arrow.classList.add('active');
+                        header.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                        arrow.classList.remove('active');
+                        header.classList.remove('active');
+                    }
+                });
+                
+                this.textContent = isAllExpanded ? '收起全部' : '展开全部';
+            });
+            
+            function updateToggleButtonText() {
+                const allContents = document.querySelectorAll('.section-content');
+                const expandedCount = Array.from(allContents).filter(content => 
+                    content.classList.contains('active')).length;
+                
+                isAllExpanded = expandedCount === allContents.length;
+                toggleAllButton.textContent = isAllExpanded ? '收起全部' : '展开全部';
+            }
+        });
+    </script>
 </body>
 </html>
