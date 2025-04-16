@@ -496,8 +496,8 @@
         
             // 生成并绘制分布图
             const samples = [];
-            // 模拟1000次随机组合
-            for (let i = 0; i < 10000; i++) {
+            // 模拟80000次随机组合
+            for (let i = 0; i < 80000; i++) {
                 // 随机生成参数
                 const randomC1 = Math.random() * (0.6 - 0.4) + 0.4;
                 const randomR = Math.random() * (0.1 - 0.02) + 0.02;
@@ -515,7 +515,7 @@
             }
 
             // 计算数据分布
-            const binCount = 20;
+            const binCount = 40;
             const min = Math.min(...samples);
             const max = Math.max(...samples);
             const binWidth = (max - min) / binCount;
@@ -572,7 +572,7 @@
                     plugins: {
                         title: {
                             display: true,
-                            text: '评标基准值分布情况（模拟10000次）',
+                            text: '评标基准值分布情况（模拟80000次）',
                             font: {
                                 size: 16
                             }
