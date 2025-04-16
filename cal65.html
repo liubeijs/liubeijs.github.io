@@ -289,9 +289,11 @@
             let bids = [];
             
             bidLines.forEach(line => {
-                const trimmed = line.trim();
-                if (trimmed) {
-                    const value = parseFloat(trimmed);
+                // 只保留数字和小数点，过滤其他字符
+                const filteredLine = line.replace(/[^\d.,]/g, '');
+
+                if (filteredLine) {
+                    const value = parseFloat(filteredLine);
                     if (!isNaN(value)) {
                         bids.push(value);
                     }
