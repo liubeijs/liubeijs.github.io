@@ -85,11 +85,25 @@
     <div id="result"></div>
 
     <script>
+
+        function filterBidsByStats(bids, statsStr) {
+            // 如果没有 stats 参数，返回原始数组
+            console.log(statsStr);
+            if (!statsStr) return bids;
+            // 将 stats 字符串转换为数组
+            const statsArray = statsStr.split(',').map(s => s.trim());
+            // 过滤报价数组
+            return bids.filter((_, index) => {
+                return !(statsArray[index] == "废标" || statsArray[index]== "未入围");
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // 获取URL参数
             const urlParams = new URLSearchParams(window.location.search);
             const maxPriceParam = urlParams.get('maxPrice');
             const bidsParam = urlParams.get('bids');
+            const statsParam = urlParams.get('stats');
             const tParam = urlParams.get('t');
             
             // 检查是否需要重定向
@@ -97,7 +111,15 @@
                 // 构建新的URL参数
                 const newParams = new URLSearchParams();
                 if (maxPriceParam) newParams.append('maxPrice', maxPriceParam);
-                if (bidsParam) newParams.append('bids', bidsParam);
+                if (statsParam) {
+                    if (bidsParam) {
+                        const bids = bidsParam.split(',').map(bid => bid.trim());
+                        bids = filterBidsByStats(bids, statsParam);
+                        newParams.append(bids.join(','));
+                    } else {
+                        newParams.append('bids', bidsParam);
+                    }
+                }
                 
                 // 重定向到新地址
                 const redirectUrl = 'https://pages.liubeijs.com/cal65.html' + 
@@ -112,7 +134,7 @@
             }
             
             if (bidsParam) {
-                const bids = bidsParam.split(',').map(bid => bid.trim());
+                const bids = filterBidsByStats(bidsParam.split(',').map(bid => bid.trim()), statsParam);
                 document.getElementById('bids-input').value = bids.join('\n');
             }
         });
