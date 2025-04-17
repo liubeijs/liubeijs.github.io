@@ -336,10 +336,12 @@
             // 计算步骤
             let steps = "=== 评标基准值计算过程 ===\n\n";
             
+            steps += `共有 ${bids.length} 家投标单位\n\n`;
+
             // 1. 获取有效报价
             steps += "1. 获取有效报价:\n";
             steps += `- 最高限价 (Y): ${maxPrice}\n`;
-            steps += `- 投标报价: ${bids.join(', ')} (W=${len(bids)})\n`;
+            steps += `- 投标报价: ${bids.join(', ')}\n`;
             
             const minValidPrice = maxPrice * 0.8;
             const validBids = bids.filter(bid => bid >= minValidPrice);
