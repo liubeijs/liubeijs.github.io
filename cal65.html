@@ -339,7 +339,7 @@
             // 1. 获取有效报价
             steps += "1. 获取有效报价:\n";
             steps += `- 最高限价 (Y): ${maxPrice}\n`;
-            steps += `- 投标报价: ${bids.join(', ')}\n`;
+            steps += `- 投标报价: ${bids.join(', ')} (W=${len(bids)})\n`;
             
             const minValidPrice = maxPrice * 0.8;
             const validBids = bids.filter(bid => bid >= minValidPrice);
