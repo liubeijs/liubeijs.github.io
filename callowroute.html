@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最低价基准值计算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        input[type="number"] {
+            width: 200px;
+        }
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        .lowest-price {
+            background-color: #fff3cd;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>最低价基准值计算器</h1>
+    
+    <div class="form-group">
+        <label for="max-price">招标控制价:</label>
+        <input type="number" id="max-price" step="0.01" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="bids-input">投标报价（每行一个报价）:</label>
+        <textarea id="bids-input" placeholder="每行输入一个报价，例如：
+99.5
+98.2
+97.1
+96.3"></textarea>
+    </div>
+    
+    <button onclick="calculateLowest()">计算最低价基准值</button>
+    
+    <div id="result"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const maxPriceParam = urlParams.get('maxPrice');
+            const bidsParam = urlParams.get('bids');
+            const tParam = urlParams.get('t');
+            
+            // 检查是否需要重定向
+            if (tParam === 'c65') {
+                // 构建新的URL参数
+                const newParams = new URLSearchParams();
+                if (maxPriceParam) newParams.append('maxPrice', maxPriceParam);
+                if (bidsParam) newParams.append('bids', bidsParam);
+                
+                // 重定向到新地址
+                const redirectUrl = 'https://pages.liubeijs.com/cal65.html' + 
+                    (newParams.toString() ? '?' + newParams.toString() : '');
+                window.location.href = redirectUrl;
+                return;
+            }
+            
+            // 原有的参数设置逻辑
+            if (maxPriceParam) {
+                document.getElementById('max-price').value = parseFloat(maxPriceParam);
+            }
+            
+            if (bidsParam) {
+                const bids = bidsParam.split(',').map(bid => bid.trim());
+                document.getElementById('bids-input').value = bids.join('\n');
+            }
+        });
+
+        function calculateLowest() {
+            const maxPrice = parseFloat(document.getElementById('max-price').value);
+            const bidsText = document.getElementById('bids-input').value;
+            
+            if (!maxPrice) {
+                alert('请输入招标控制价');
+                return;
+            }
+            
+            // 解析并验证报价
+            const bids = bidsText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line)
+                .map(line => parseFloat(line))
+                .filter(price => !isNaN(price));
+            
+            if (bids.length === 0) {
+                alert('请输入至少一个有效报价');
+                return;
+            }
+            
+            // 按价格从高到低排序
+            const sortedBids = bids.sort((a, b) => b - a);
+            
+            // 生成表格HTML
+            let tableHtml = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>投标报价</th>
+                            <th>下浮率</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            sortedBids.forEach((bid, index) => {
+                const ratio = ((maxPrice - bid) / maxPrice * 100).toFixed(2);
+                const isLowest = index === sortedBids.length - 1;
+                
+                tableHtml += `
+                    <tr class="${isLowest ? 'lowest-price' : ''}">
+                        <td>${index + 1}</td>
+                        <td>${bid.toFixed(2)}</td>
+                        <td>${ratio}%</td>
+                    </tr>
+                `;
+            });
+            
+            tableHtml += `
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('result').innerHTML = tableHtml;
+        }
+    </script>
+</body>
+</html>
