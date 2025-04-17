@@ -213,6 +213,25 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+
+            // 获取URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const maxPriceParam = urlParams.get('maxPrice');
+            const bidsParam = urlParams.get('bids');
+            
+            // 设置最高限价
+            if (maxPriceParam) {
+                document.getElementById('max-price').value = parseFloat(maxPriceParam);
+            }
+            
+            // 设置投标报价
+            if (bidsParam) {
+                // 解析报价字符串，格式为逗号分隔的数字
+                const bids = bidsParam.split(',').map(bid => bid.trim());
+                document.getElementById('bids-input').value = bids.join('\n');
+            }
+
             // 随机生成权重按钮
             document.getElementById('randomize-weights').addEventListener('click', randomizeWeights);
             
