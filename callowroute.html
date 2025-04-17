@@ -116,9 +116,9 @@
                         const bids = bidsParam.split(',').map(bid => bid.trim());
                         const fBids = filterBidsByStats(bids, statsParam);
                         newParams.append('bids', fBids.join(','));
-                    } else {
-                        newParams.append('bids', bidsParam);
                     }
+                } else {
+                    newParams.append('bids', bidsParam);
                 }
                 
                 // 重定向到新地址
