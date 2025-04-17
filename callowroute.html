@@ -114,8 +114,8 @@
                 if (statsParam) {
                     if (bidsParam) {
                         const bids = bidsParam.split(',').map(bid => bid.trim());
-                        bids = filterBidsByStats(bids, statsParam);
-                        newParams.append(bids.join(','));
+                        const fBids = filterBidsByStats(bids, statsParam);
+                        newParams.append(fBids.join(','));
                     } else {
                         newParams.append('bids', bidsParam);
                     }
