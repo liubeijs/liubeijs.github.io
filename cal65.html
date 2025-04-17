@@ -120,6 +120,142 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+            background-color: #ffffff; /* 固定白色背景 */
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333; /* 固定深色文字 */
+        }
+        input, textarea, button {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #ffffff; /* 输入框白色背景 */
+            color: #333; /* 输入文字深色 */
+        }
+        input[type="number"] {
+            width: 100px;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            border: none;
+            padding: 10px 15px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #calculation-steps {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            border: 1px solid #ddd; /* 添加边框 */
+        }
+        #result-range {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4f8;
+            border-left: 5px solid #3498db;
+            color: #333;
+            white-space: pre-wrap; /* 添加这一行 */
+        }
+        .error {
+            color: #e74c3c;
+            font-size: 0.9em;
+        }
+        .random-weights {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .weight-input {
+            display: flex;
+            align-items: center;
+        }
+        .weight-input label {
+            margin-right: 5px;
+            width: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            background-color: #ffffff; /* 表格白色背景 */
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .example {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        /* 移除所有与暗色模式相关的样式 */
+        /* 在 style 标签内添加以下样式 */
+        
+        .fixed-button {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+    /* 添加表格样式 */
+    .price-distribution-table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+    }
+    
+    .price-distribution-table th,
+    .price-distribution-table td {
+        padding: 8px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+    
+    .price-distribution-table th {
+        background-color: #f5f5f5;
+    }
+    
+    .price-distribution-table tr:hover {
+        background-color: #f8f9fa;
+    }
+
     </style>
 </head>
 <body>
@@ -295,466 +431,7 @@
             document.getElementById('u6').value = scaledU6;
             document.getElementById('u7').value = scaledU7;
         }
-        
-        function calculate() {
-            // 获取输入值
-            const maxPrice = parseFloat(document.getElementById('max-price').value);
-            const c1 = parseFloat(document.getElementById('c1').value);
-            const r = parseFloat(document.getElementById('r').value);
-            
-            // 获取所有报价
-            const bidsText = document.getElementById('bids-input').value;
-            const bidLines = bidsText.split('\n');
-            let bids = [];
-            
-            bidLines.forEach(line => {
-                // 只保留数字和小数点，过滤其他字符
-                const filteredLine = line.replace(/[^\d.,]/g, '');
 
-                if (filteredLine) {
-                    const value = parseFloat(filteredLine);
-                    if (!isNaN(value)) {
-                        bids.push(value);
-                    }
-                }
-            });
-            
-            if (bids.length === 0) {
-                alert('请输入至少一个有效报价');
-                return;
-            }
-            
-            // 获取随机权重
-            const u1 = parseFloat(document.getElementById('u1').value);
-            const u2 = parseFloat(document.getElementById('u2').value);
-            const u3 = parseFloat(document.getElementById('u3').value);
-            const u4 = parseFloat(document.getElementById('u4').value);
-            const u5 = parseFloat(document.getElementById('u5').value);
-            const u6 = parseFloat(document.getElementById('u6').value);
-            const u7 = parseFloat(document.getElementById('u7').value);
-            
-            // 计算步骤
-            let steps = "=== 评标基准值计算过程 ===\n\n";
-            
-            steps += `共有 ${bids.length} 家投标单位\n\n`;
-
-            // 1. 获取有效报价
-            steps += "1. 获取有效报价:\n";
-            steps += `- 最高限价 (Y): ${maxPrice}\n`;
-            steps += `- 投标报价: ${bids.join(', ')}\n`;
-            
-            const minValidPrice = maxPrice * 0.8;
-            const validBids = bids.filter(bid => bid >= minValidPrice);
-            const invalidBids = bids.filter(bid => bid < minValidPrice);
-            
-            steps += `- 有效报价需 ≥ ${minValidPrice} (最高限价的80%)\n`;
-            steps += `- 剔除的报价: ${invalidBids.length > 0 ? invalidBids.join(', ') : '无'}\n`;
-            steps += `- 剩余有效报价: ${validBids.join(', ')}\n`;
-            steps += `- 有效报价单位数 (W): ${validBids.length}\n\n`;
-            
-            // 2. 剔除极值
-            steps += "2. 剔除极值:\n";
-            let bidsForCalculation = [...validBids].sort((a, b) => a - b);
-            let removedBids = [];
-            
-            if (validBids.length >= 10) {
-                // 去掉最低10%和最高15%
-                const removeLow = Math.round(validBids.length * 0.1);
-                const removeHigh = Math.round(validBids.length * 0.15);
-                
-                removedBids = [
-                    ...bidsForCalculation.slice(0, removeLow),
-                    ...bidsForCalculation.slice(-removeHigh)
-                ];
-                
-                bidsForCalculation = bidsForCalculation.slice(removeLow, -removeHigh);
-                
-                steps += `- W ≥ 10，去掉最低10%(${removeLow}家)和最高15%(${removeHigh}家)的报价\n`;
-                steps += `- 剔除的报价: ${removedBids.join(', ')}\n`;
-            } else {
-                steps += "- W < 10，不去掉任何报价\n";
-            }
-            
-            steps += `- 纳入基准价计算的报价: ${bidsForCalculation.join(', ')}\n`;
-            steps += `- 纳入计算的单位数 (N): ${bidsForCalculation.length}\n\n`;
-            
-            // 3. 计算平均价 C
-            steps += "3. 计算平均价 (C):\n";
-            
-            if (bidsForCalculation.length < 5) {
-                steps += "- N < 5，使用简化公式: C = eμ + fM + gG\n";
-            } else {
-                steps += "- N ≥ 5，使用完整公式: C = aμ + bM + c((Q₁+Q₃)/2) + dG\n";
-            }
-            
-            // 计算统计量
-            const μ = bidsForCalculation.reduce((sum, bid) => sum + bid, 0) / bidsForCalculation.length;
-            steps += `- 算术平均数 (μ): ${μ.toFixed(2)}\n`;
-            
-            // 中位数
-            const sortedBids = [...bidsForCalculation].sort((a, b) => a - b);
-            let M;
-            if (sortedBids.length % 2 === 1) {
-                M = sortedBids[Math.floor(sortedBids.length / 2)];
-            } else {
-                M = (sortedBids[sortedBids.length / 2 - 1] + sortedBids[sortedBids.length / 2]) / 2;
-            }
-            steps += `- 中位数 (M): ${M.toFixed(2)}\n`;
-            
-            // 四分位数
-            let Q1, Q3;
-            if (bidsForCalculation.length >= 5) {
-                const θ = 0.25 * (sortedBids.length + 1);
-                const γ = 0.75 * (sortedBids.length + 1);
-                
-                const i = Math.floor(θ);
-                const iPrime = Math.floor(γ);
-                
-                Q1 = sortedBids[i - 1] + (θ - i) * (sortedBids[i] - sortedBids[i - 1]);
-                Q3 = sortedBids[iPrime - 1] + (γ - iPrime) * (sortedBids[iPrime] - sortedBids[iPrime - 1]);
-                
-                steps += `- 第一四分位数 (Q₁): ${Q1.toFixed(2)}\n`;
-                steps += `- 第三四分位数 (Q₃): ${Q3.toFixed(2)}\n`;
-                steps += `- (Q₁ + Q₃)/2: ${((Q1 + Q3) / 2).toFixed(2)}\n`;
-            }
-            
-            // 几何平均数 (简化计算)
-            const product = sortedBids.reduce((prod, bid) => prod * bid, 1);
-            const G = Math.pow(product, 1 / sortedBids.length);
-            steps += `- 几何平均数 (G): ${G.toFixed(2)}\n`;
-            
-            // 计算权重
-            let a, b, c, d, e, f, g;
-            if (bidsForCalculation.length >= 5) {
-                const s1 = u1 + u2 + u3 + u4;
-                a = u1 / s1;
-                b = u2 / s1;
-                c = u3 / s1;
-                d = u4 / s1;
-                
-                steps += "\n- 随机权重计算 (N ≥ 5):\n";
-                steps += `  u₁ = ${u1}, u₂ = ${u2}, u₃ = ${u3}, u₄ = ${u4}\n`;
-                steps += `  s₁ = u₁ + u₂ + u₃ + u₄ = ${s1.toFixed(2)}\n`;
-                steps += `  a = u₁/s₁ = ${a.toFixed(4)}\n`;
-                steps += `  b = u₂/s₁ = ${b.toFixed(4)}\n`;
-                steps += `  c = u₃/s₁ = ${c.toFixed(4)}\n`;
-                steps += `  d = u₄/s₁ = ${d.toFixed(4)}\n`;
-                
-                // 计算C
-                const C = a * μ + b * M + c * (Q1 + Q3) / 2 + d * G;
-                steps += `\n- 平均价 C = aμ + bM + c((Q₁+Q₃)/2) + dG\n`;
-                steps += `            = ${a.toFixed(4)}×${μ.toFixed(2)} + ${b.toFixed(4)}×${M.toFixed(2)} + ${c.toFixed(4)}×${((Q1 + Q3) / 2).toFixed(2)} + ${d.toFixed(4)}×${G.toFixed(2)}\n`;
-                steps += `            = ${(a * μ).toFixed(2)} + ${(b * M).toFixed(2)} + ${(c * (Q1 + Q3) / 2).toFixed(2)} + ${(d * G).toFixed(2)}\n`;
-                steps += `            = ${C.toFixed(2)}\n`;
-            } else {
-                const s2 = u5 + u6 + u7;
-                e = u5 / s2;
-                f = u6 / s2;
-                g = u7 / s2;
-                
-                steps += "\n- 随机权重计算 (N < 5):\n";
-                steps += `  u₅ = ${u5}, u₆ = ${u6}, u₇ = ${u7}\n`;
-                steps += `  s₂ = u₅ + u₆ + u₇ = ${s2.toFixed(2)}\n`;
-                steps += `  e = u₅/s₂ = ${e.toFixed(4)}\n`;
-                steps += `  f = u₆/s₂ = ${f.toFixed(4)}\n`;
-                steps += `  g = u₇/s₂ = ${g.toFixed(4)}\n`;
-                
-                // 计算C
-                const C = e * μ + f * M + g * G;
-                steps += `\n- 平均价 C = eμ + fM + gG\n`;
-                steps += `            = ${e.toFixed(4)}×${μ.toFixed(2)} + ${f.toFixed(4)}×${M.toFixed(2)} + ${g.toFixed(4)}×${G.toFixed(2)}\n`;
-                steps += `            = ${(e * μ).toFixed(2)} + ${(f * M).toFixed(2)} + ${(g * G).toFixed(2)}\n`;
-                steps += `            = ${C.toFixed(2)}\n`;
-            }
-            
-            const C = bidsForCalculation.length >= 5 ? 
-                a * μ + b * M + c * (Q1 + Q3) / 2 + d * G :
-                e * μ + f * M + g * G;
-            
-            // 4. 计算评标基准价 T
-            steps += "\n4. 计算评标基准价 (T):\n";
-            steps += `- 公式: T = [Y × C₁ + C × (1 - C₁)] × (1 - r)\n`;
-            steps += `         = [${maxPrice} × ${c1} + ${C.toFixed(2)} × ${(1 - c1).toFixed(2)}] × ${(1 - r).toFixed(3)}\n`;
-            
-            const part1 = maxPrice * c1;
-            const part2 = C * (1 - c1);
-            steps += `         = [${part1.toFixed(2)} + ${part2.toFixed(2)}] × ${(1 - r).toFixed(3)}\n`;
-            
-            const beforeR = part1 + part2;
-            const T = beforeR * (1 - r);
-            steps += `         = ${beforeR.toFixed(2)} × ${(1 - r).toFixed(3)}\n`;
-            steps += `         = ${T.toFixed(2)}\n\n`;
-
-            const ratio = (1-T/maxPrice)*100;
-            steps += `=== 最终评标基准值 (T) ===\n${T.toFixed(2)} [${ratio.toFixed(2)}%]`;
-            
-            // 显示计算步骤
-            document.getElementById('calculation-steps').textContent = steps;
-            
-            // 计算并显示取值范围
-            let rangeText = "工程施工类项目评标基准值取值范围:\n\n";
-            
-            // 计算C1和r的极端值组合
-            const C_min = 0.4, C_max = 0.6;
-            const r_min = 0.02, r_max = 0.1;
-            
-            // 计算四种极端组合
-            const T1 = (maxPrice * C_min + C * (1 - C_min)) * (1 - r_min);
-            const T2 = (maxPrice * C_min + C * (1 - C_min)) * (1 - r_max);
-            const T3 = (maxPrice * C_max + C * (1 - C_max)) * (1 - r_min);
-            const T4 = (maxPrice * C_max + C * (1 - C_max)) * (1 - r_max);
-            
-            rangeText += `1. 当 C₁取最小值(0.4), r取最小值(2%)时：T = ${T1.toFixed(2)}\n`;
-            rangeText += `2. 当 C₁取最小值(0.4), r取最大值(10%)时：T = ${T2.toFixed(2)}\n`;
-            rangeText += `3. 当 C₁取最大值(0.6), r取最小值(2%)时：T = ${T3.toFixed(2)}\n`;
-            rangeText += `4. 当 C₁取最大值(0.6), r取最大值(10%)时：T = ${T4.toFixed(2)}\n`;
-            
-            const minT = Math.min(T1, T2, T3, T4);
-            const maxT = Math.max(T1, T2, T3, T4);
-            const minT_ratio = (1-minT/maxPrice)*100;
-            const maxT_ratio = (1-maxT/maxPrice)*100;
-            rangeText += `\n因此，评标基准值可能的取值范围为:\n${minT.toFixed(2)} 到 ${maxT.toFixed(2)}`;
-            rangeText += `\n下浮范围为: ${minT_ratio.toFixed(2)}% 到 ${maxT_ratio.toFixed(2)}%`;
-
-            document.getElementById('result-range').textContent = rangeText;
-        
-            // 生成并绘制分布图
-            const samples = [];
-            // 模拟80000次随机组合
-            for (let i = 0; i < 80000; i++) {
-                // 随机生成参数
-                const randomC1 = Math.random() * (0.6 - 0.4) + 0.4;
-                const randomR = Math.random() * (0.1 - 0.02) + 0.02;
-                
-                // 计算该组合下的评标基准值
-                const randomT = (maxPrice * randomC1 + C * (1 - randomC1)) * (1 - randomR);
-                const randomT_ratio = (1-randomT/maxPrice)*100;
-                samples.push(randomT_ratio);
-            }
-
-            // 清除旧图表
-            const chartCanvas = document.getElementById('distributionChart');
-            if (window.myChart) {
-                window.myChart.destroy();
-            }
-
-            // 计算数据分布
-            const binCount = 40;
-            const min = Math.min(...samples);
-            const max = Math.max(...samples);
-            const binWidth = (max - min) / binCount;
-            const bins = new Array(binCount).fill(0);
-            
-            samples.forEach(value => {
-                const binIndex = Math.min(
-                    Math.floor((value - min) / binWidth),
-                    binCount - 1
-                );
-                bins[binIndex]++;
-            });
-
-            // 生成标签
-            const labels = bins.map((_, i) => 
-                `${(min + i * binWidth).toFixed(2)}`
-            );
-
-            // 创建图表
-            window.myChart = new Chart(chartCanvas, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: '频次分布',
-                        data: bins,
-                        backgroundColor: 'rgba(52, 152, 219, 0.5)',
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: '出现次数'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: '评标基准值'
-                            },
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '评标基准值分布情况（模拟80000次）',
-                            font: {
-                                size: 16
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `出现次数: ${context.raw}`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    </script>
-</body>
-</html>
-
-<style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-            background-color: #ffffff; /* 固定白色背景 */
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333; /* 固定深色文字 */
-        }
-        input, textarea, button {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #ffffff; /* 输入框白色背景 */
-            color: #333; /* 输入文字深色 */
-        }
-        input[type="number"] {
-            width: 100px;
-        }
-        textarea {
-            width: 100%;
-            height: 120px;
-            resize: vertical;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            cursor: pointer;
-            border: none;
-            padding: 10px 15px;
-            margin-right: 10px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        #calculation-steps {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            white-space: pre-wrap;
-            border: 1px solid #ddd; /* 添加边框 */
-        }
-        #result-range {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e8f4f8;
-            border-left: 5px solid #3498db;
-            color: #333;
-            white-space: pre-wrap; /* 添加这一行 */
-        }
-        .error {
-            color: #e74c3c;
-            font-size: 0.9em;
-        }
-        .random-weights {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .weight-input {
-            display: flex;
-            align-items: center;
-        }
-        .weight-input label {
-            margin-right: 5px;
-            width: 30px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-            background-color: #ffffff; /* 表格白色背景 */
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .example {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 5px;
-        }
-        /* 移除所有与暗色模式相关的样式 */
-        /* 在 style 标签内添加以下样式 */
-        
-        .fixed-button {
-            position: fixed;
-            right: 20px;
-            bottom: 20px;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-    /* 添加表格样式 */
-    .price-distribution-table {
-        width: 100%;
-        margin-top: 20px;
-        border-collapse: collapse;
-    }
-    
-    .price-distribution-table th,
-    .price-distribution-table td {
-        padding: 8px;
-        text-align: center;
-        border: 1px solid #ddd;
-    }
-    
-    .price-distribution-table th {
-        background-color: #f5f5f5;
-    }
-    
-    .price-distribution-table tr:hover {
-        background-color: #f8f9fa;
-    }
-    </style>
-
-    <script>
         function calculate() {
             // 获取输入值
             const maxPrice = parseFloat(document.getElementById('max-price').value);
@@ -793,6 +470,8 @@
             // 计算步骤
             let steps = "=== 评标基准值计算过程 ===\n\n";
             
+            steps += `共有 ${bids.length} 家投标单位\n\n`;
+
             // 1. 获取有效报价
             steps += "1. 获取有效报价:\n";
             steps += `- 最高限价 (Y): ${maxPrice}\n`;
