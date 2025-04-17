@@ -852,9 +852,9 @@
                 steps += `- (Q₁ + Q₃)/2: ${((Q1 + Q3) / 2).toFixed(2)}\n`;
             }
             
-            // 几何平均数 (简化计算)
-            const product = sortedBids.reduce((prod, bid) => prod * bid, 1);
-            const G = Math.pow(product, 1 / sortedBids.length);
+            // 几何平均数计算（使用对数法）
+            const logSum = sortedBids.reduce((sum, bid) => sum + Math.log(bid), 0);
+            const G = Math.exp(logSum / sortedBids.length);
             steps += `- 几何平均数 (G): ${G.toFixed(2)}\n`;
             
             // 计算权重
