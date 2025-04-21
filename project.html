@@ -6,6 +6,7 @@
     <title>项目投标信息</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .company-link {
             color: #666;
@@ -14,6 +15,16 @@
         }
         .company-link:hover {
             color: #007bff;
+        }
+        .sort-btn {
+            font-size: 0.8em;
+            margin-left: 5px;
+            padding: 2px 5px;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -42,15 +53,31 @@
 
         <!-- 投标信息表格 -->
         <div class="card">
-            <div class="card-header">
-                投标信息列表
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    投标信息列表
+                    <div id="companyStats" class="mt-2" style="font-size: 0.9em;"></div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-secondary active" id="sortByRatio">
+                        <i class="bi bi-sort-numeric-down"></i> 按下浮率排序
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" id="sortByType">
+                        <i class="bi bi-sort-alpha-down"></i> 按单位类型排序
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
                             <th>序号</th>
-                            <th>投标单位</th>
+                            <th>
+                                投标单位
+                                <button class="btn btn-sm btn-outline-secondary sort-btn" id="sortByType">
+                                    按单位类型排序 <i class="bi bi-sort-alpha-down"></i>
+                                </button>
+                            </th>
                             <th>投标价格</th>
                             <th>下浮率</th>
                             <th>状态</th>
@@ -62,12 +89,225 @@
                 </table>
             </div>
         </div>
+
+        <!-- 添加下浮率分布图 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                下浮率分布图
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="scatterChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
+            let sortedBids = [];
+            let scatterChart = null;
+
+            // 统一的颜色定义
+            const colors = {
+                '湖南省内': 'rgba(255, 99, 132, 0.6)',   // 红色
+                '中字头': 'rgba(54, 162, 235, 0.6)',    // 蓝色
+                '其他省外': 'rgba(75, 192, 192, 0.6)'   // 青色
+            };
+
+            // 统一的渲染函数
+            // 添加样式
+            const styleBlock = `
+                <style>
+                    .company-type-indicator {
+                        display: inline-block;
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 2px;
+                        margin-right: 8px;
+                    }
+                </style>
+            `;
+            $('head').append(styleBlock);
+
+            // 修改渲染函数
+            function renderBidList(bids) {
+                const $bidList = $('#bidList');
+                $bidList.empty();
+
+                // 计算各类型单位数量
+                const stats = {
+                    '湖南省内': 0,
+                    '中字头': 0,
+                    '其他省外': 0
+                };
+
+                bids.forEach((bid) => {
+                    const type = getCompanyType(bid.bid_corp_name);
+                    stats[type]++;
+                    
+                    const row = `
+                        <tr>
+                            <td>${bid.bid_id}</td>
+                            <td>
+                                <span class="company-type-indicator" style="background-color: ${colors[type]}"></span>
+                                ${bid.bid_corp_name}
+                                <a href="https://aiqicha.baidu.com/s?q=${encodeURIComponent(bid.bid_corp_name)}" 
+                                   target="_blank" 
+                                   class="company-link" 
+                                   title="查看企业信息">
+                                    <i class="bi bi-search"></i>
+                                </a>
+                            </td>
+                            <td>${bid.bid_price.toLocaleString('zh-CN', {
+                                style: 'currency',
+                                currency: 'CNY'
+                            })}</td>
+                            <td>${(bid.bid_down_ratio * 100).toFixed(2)}%</td>
+                            <td>${bid.bid_stat || '-'}</td>
+                        </tr>
+                    `;
+                    $bidList.append(row);
+                });
+
+                // 渲染统计信息
+                const statsHtml = Object.entries(stats)
+                    .map(([type, count]) => `
+                        <span class="me-3">
+                            <span class="company-type-indicator" style="background-color: ${colors[type]}"></span>
+                            ${type}：${count}家
+                        </span>
+                    `)
+                    .join('');
+                
+                $('#companyStats').html(statsHtml);
+            }
+
+            function getCompanyType(companyName) {
+                const hunanCities = [
+                    // 省会城市
+                    '长沙', '芙蓉', '天心', '岳麓', '开福', '雨花', '望城', '长沙县', '浏阳', '宁乡',
+                    // 株洲
+                    '株洲', '荷塘', '芦淞', '石峰', '天元', '渌口', '攸县', '茶陵', '炎陵', '醴陵',
+                    // 湘潭
+                    '湘潭', '雨湖', '岳塘', '湘潭县', '湘乡', '韶山',
+                    // 衡阳
+                    '衡阳', '珠晖', '雁峰', '石鼓', '蒸湘', '南岳', '衡阳', '衡南', '衡山', '衡东', '祁东', '耒阳', '常宁',
+                    // 邵阳
+                    '邵阳', '双清', '大祥', '北塔', '邵东', '新邵', '邵阳', '隆回', '洞口', '绥宁', '新宁', '城步', '武冈',
+                    // 岳阳
+                    '岳阳', '岳阳楼', '云溪', '君山', '岳阳县', '华容', '湘阴', '平江', '汨罗', '临湘',
+                    // 常德
+                    '常德', '武陵', '鼎城', '安乡', '汉寿', '澧县', '临澧', '桃源', '石门', '津市',
+                    // 张家界
+                    '张家界', '永定', '武陵源', '慈利', '桑植',
+                    // 益阳
+                    '益阳', '资阳', '赫山', '南县', '桃江', '安化', '沅江',
+                    // 郴州
+                    '郴州', '北湖', '苏仙', '桂阳', '宜章', '永兴', '嘉禾', '临武', '汝城', '桂东', '安仁', '资兴',
+                    // 永州
+                    '永州', '零陵', '冷水滩', '祁阳', '东安', '双牌', '道县', '江永', '宁远', '蓝山', '新田', '江华',
+                    // 怀化
+                    '怀化', '鹤城', '中方', '沅陵', '辰溪', '溆浦', '会同', '麻阳', '新晃', '芷江', '靖州', '通道', '洪江',
+                    // 娄底
+                    '娄底', '娄星', '双峰', '新化', '冷水江', '涟源',
+                    // 湘西土家族苗族自治州
+                    '湘西', '吉首', '泸溪', '凤凰', '花垣', '保靖', '古丈', '永顺', '龙山'
+                ];
+                
+                // 检查是否为湖南省内单位
+                if (companyName.includes('湖南') || 
+                    hunanCities.some(city => companyName.includes(city))) {
+                    return '湖南省内';
+                }
+                // 检查是否为中字头单位
+                if (companyName.startsWith('中')) {
+                    return '中字头';
+                }
+                // 其他省外单位
+                return '其他省外';
+            }
+
+            function createScatterChart(bids) {
+                const ctx = document.getElementById('scatterChart').getContext('2d');
+                const companyDatasets = {};
+                
+                bids.forEach(bid => {
+                    const type = getCompanyType(bid.bid_corp_name);
+                    if (!companyDatasets[type]) {
+                        companyDatasets[type] = {
+                            label: type,
+                            data: [],
+                            backgroundColor: colors[type],  // 使用统一的颜色定义
+                            pointRadius: 8,
+                            pointHoverRadius: 10
+                        };
+                    }
+                    companyDatasets[type].data.push({
+                        x: Math.floor(bid.bid_down_ratio * 100),
+                        y: (bid.bid_down_ratio * 100) % 1 * 100,
+                        bid_corp_name: bid.bid_corp_name,
+                        bid_down_ratio: bid.bid_down_ratio
+                    });
+                });
+            
+                if (scatterChart instanceof Chart) {
+                    scatterChart.destroy();
+                }
+            
+                scatterChart = new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: Object.values(companyDatasets)
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '下浮率整数部分 (%)'
+                                },
+                                ticks: {
+                                    callback: value => `${value}%`
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: '下浮率小数部分 (%)'
+                                },
+                                ticks: {
+                                    callback: value => `${value.toFixed(1)}%`
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        const point = context.raw;
+                                        return [
+                                            `单位: ${point.bid_corp_name}`,
+                                            `下浮率: ${(point.bid_down_ratio * 100).toFixed(2)}%`
+                                        ];
+                                    }
+                                }
+                            },
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 10
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
             // 获取URL参数中的project_id
             const urlParams = new URLSearchParams(window.location.search);
             const projectId = urlParams.get('project_id');
@@ -77,58 +317,61 @@
                 return;
             }
 
-            // 加载项目数据
-            $.ajax({
-                url: `http://sf.liubeijs.com/api/project/${projectId}`,
-                method: 'GET',
-                success: function(response) {
-                    const project = response.data[0];
-                    
-                    // 更新项目基本信息
-                    $('#projectTitle').text(project.project_name);
-                    $('#projectId').text(project.project_id);
-                    $('#maxPrice').text(project.project_max_price.toLocaleString('zh-CN', {
-                        style: 'currency',
-                        currency: 'CNY'
-                    }));
+            // 统一的数据加载函数
+            function loadProjectData() {
+                $.ajax({
+                    url: `http://sf.liubeijs.com/api/project/${projectId}`,
+                    method: 'GET',
+                    success: function(response) {
+                        const project = response.data[0];
+                        
+                        // 更新项目基本信息
+                        $('#projectTitle').text(project.project_name);
+                        $('#projectId').text(project.project_id);
+                        $('#maxPrice').text(project.project_max_price.toLocaleString('zh-CN', {
+                            style: 'currency',
+                            currency: 'CNY'
+                        }));
 
-                    // 对投标数据按下浮率排序（从高到低）
-                    const sortedBids = project.project_bids
-                        .filter(bid => bid.bid_price !== null)  // 过滤掉无效投标
-                        .sort((a, b) => b.bid_down_ratio - a.bid_down_ratio);
+                        // 对投标数据按下浮率排序（从高到低）
+                        sortedBids = project.project_bids
+                            .filter(bid => bid.bid_price !== null)
+                            .sort((a, b) => b.bid_down_ratio - a.bid_down_ratio);
 
-                    // 清空并填充投标列表
-                    const $bidList = $('#bidList');
-                    $bidList.empty();
+                        renderBidList(sortedBids);
+                        createScatterChart(sortedBids);
+                    },
+                    error: function(xhr, status, error) {
+                        alert('加载数据失败：' + error);
+                    }
+                });
+            }
 
-                    sortedBids.forEach((bid, index) => {
-                        const row = `
-                            <tr>
-                                <td>${bid.bid_id}</td>
-                                <td>
-                                    ${bid.bid_corp_name}
-                                    <a href="https://aiqicha.baidu.com/s?q=${encodeURIComponent(bid.bid_corp_name)}" 
-                                       target="_blank" 
-                                       class="company-link" 
-                                       title="查看企业信息">
-                                        <i class="bi bi-search"></i>
-                                    </a>
-                                </td>
-                                <td>${bid.bid_price.toLocaleString('zh-CN', {
-                                    style: 'currency',
-                                    currency: 'CNY'
-                                })}</td>
-                                <td>${(bid.bid_down_ratio * 100).toFixed(2)}%</td>
-                                <td>${bid.bid_stat || '-'}</td>
-                            </tr>
-                        `;
-                        $bidList.append(row);
-                    });
-                },
-                error: function(xhr, status, error) {
-                    alert('加载数据失败：' + error);
-                }
+            // 修改排序事件处理
+            $('#sortByType').click(function() {
+                $(this).addClass('active').siblings().removeClass('active');
+                sortedBids.sort((a, b) => {
+                    const typeA = getCompanyType(a.bid_corp_name);
+                    const typeB = getCompanyType(b.bid_corp_name);
+                    return typeA.localeCompare(typeB);
+                });
+                renderBidList(sortedBids);
+                createScatterChart(sortedBids);
             });
+
+            $('#sortByRatio').click(function() {
+                $(this).addClass('active').siblings().removeClass('active');
+                sortedBids.sort((a, b) => b.bid_down_ratio - a.bid_down_ratio);
+                renderBidList(sortedBids);
+                createScatterChart(sortedBids);
+            });
+
+            // 删除表格中的排序按钮
+            $('thead th:nth-child(2)').html('投标单位');
+
+            // 删除旧的省份排序相关代码
+            // 初始加载数据
+            loadProjectData();
         });
     </script>
 </body>
