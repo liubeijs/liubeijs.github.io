@@ -112,6 +112,7 @@
 
             // 统一的颜色定义
             const colors = {
+                '中标人': 'rgba(255, 165, 86, 0.8)', // 亮黄色
                 '湖南省内': 'rgba(255, 99, 132, 0.6)',   // 红色
                 '中字头': 'rgba(54, 162, 235, 0.6)',    // 蓝色
                 '其他省外': 'rgba(75, 192, 192, 0.6)'   // 青色
@@ -141,11 +142,12 @@
                 const stats = {
                     '湖南省内': 0,
                     '中字头': 0,
-                    '其他省外': 0
+                    '其他省外': 0,
+                    '中标人': 0
                 };
 
                 bids.forEach((bid) => {
-                    const type = getCompanyType(bid.bid_corp_name);
+                    const type = getCompanyType(bid);
                     stats[type]++;
                     
                     const row = `
@@ -177,7 +179,7 @@
                     .map(([type, count]) => `
                         <span class="me-3">
                             <span class="company-type-indicator" style="background-color: ${colors[type]}"></span>
-                            ${type}：${count}家
+                            ${type}：${count}
                         </span>
                     `)
                     .join('');
@@ -185,7 +187,9 @@
                 $('#companyStats').html(statsHtml);
             }
 
-            function getCompanyType(companyName) {
+            function getCompanyType(bid) {
+                const companyName = bid.bid_corp_name;
+                const bidStat = bid.bid_stat;
                 const hunanCities = [
                     // 省会城市
                     '长沙', '芙蓉', '天心', '岳麓', '开福', '雨花', '望城', '长沙县', '浏阳', '宁乡',
@@ -216,7 +220,12 @@
                     // 湘西土家族苗族自治州
                     '湘西', '吉首', '泸溪', '凤凰', '花垣', '保靖', '古丈', '永顺', '龙山'
                 ];
-                
+
+                // 检查是否为中标人
+                if (bidStat === '第一候选人' || bidStat === '中标单位') {
+                    return '中标人';
+                }
+
                 // 检查是否为湖南省内单位
                 if (companyName.includes('湖南') || 
                     hunanCities.some(city => companyName.includes(city))) {
@@ -235,7 +244,8 @@
                 const companyDatasets = {};
                 
                 bids.forEach(bid => {
-                    const type = getCompanyType(bid.bid_corp_name);
+                    const type = getCompanyType(bid);
+                
                     if (!companyDatasets[type]) {
                         companyDatasets[type] = {
                             label: type,
@@ -292,8 +302,7 @@
                                         const point = context.raw;
                                         return [
                                             `单位: ${point.bid_corp_name}`,
-                                            `下浮率: ${(point.bid_down_ratio * 100).toFixed(2)}%`,
-                                            `基准值范围: ${baselineRange.min} - ${baselineRange.max}`
+                                            `下浮率: ${(point.bid_down_ratio * 100).toFixed(2)}%`
                                         ];
                                     }
                                 }
@@ -371,8 +380,8 @@
             $('#sortByType').click(function() {
                 $(this).addClass('active').siblings().removeClass('active');
                 sortedBids.sort((a, b) => {
-                    const typeA = getCompanyType(a.bid_corp_name);
-                    const typeB = getCompanyType(b.bid_corp_name);
+                    const typeA = getCompanyType(a);
+                    const typeB = getCompanyType(b);
                     return typeA.localeCompare(typeB);
                 });
                 renderBidList(sortedBids);
