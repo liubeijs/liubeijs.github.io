@@ -171,6 +171,13 @@
                             <td>
                                 <span class="company-type-indicator" style="background-color: ${colors[type]}"></span>
                                 ${bid.bid_corp_name}
+                                <!-- 新增复制按钮 -->
+                                <a href="javascript:void(0)" 
+                                   class="company-link copy-name" 
+                                   title="复制企业名称"
+                                   data-company="${bid.bid_corp_name}">
+                                    <i class="bi bi-clipboard"></i>
+                                </a>
                                 <a href="https://www.qcc.com/web/search?key=${encodeURIComponent(bid.bid_corp_name)}" 
                                    target="_blank" 
                                    class="company-link" 
@@ -433,9 +440,14 @@
                     const typeA = getCompanyType(a);
                     const typeB = getCompanyType(b);
                 
-                    // 将“中标人”类型放在第一位
+                    // 将"中标人"类型放在第一位
                     if (typeA === '中标人') return -1;
                     if (typeB === '中标人') return 1;
+                
+                    // 如果类型相同，按企业名称排序
+                    if (typeA === typeB) {
+                        return a.bid_corp_name.localeCompare(b.bid_corp_name);
+                    }
                 
                     return typeA.localeCompare(typeB);
                 });
@@ -460,6 +472,33 @@
             const url = `http://yyjc.hnsdzjy.org:20005/sun/project?searchValue=${encodeURIComponent(projectName)}&searchType=projectInfo`;
             window.open(url, '_blank');
         });
+
+        // 添加复制功能
+        $(document).on('click', '.copy-name', function(e) {
+            e.preventDefault();
+            const companyName = $(this).data('company');
+            
+            // 创建临时文本区域
+            const textarea = document.createElement('textarea');
+            textarea.value = companyName;
+            document.body.appendChild(textarea);
+            
+            // 选择文本并复制
+            textarea.select();
+            document.execCommand('copy');
+            
+            // 移除临时文本区域
+            document.body.removeChild(textarea);
+            
+            // 显示复制成功提示（可选）
+            const originalTitle = $(this).attr('title');
+            $(this).attr('title', '复制成功！');
+            setTimeout(() => {
+                $(this).attr('title', originalTitle);
+            }, 1000);
+        });
+
+
     </script>
 </body>
 </html>
