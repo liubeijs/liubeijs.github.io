@@ -53,4 +53,49 @@ router.get('/project/:projectId', async (req, res) => {
   }
 });
 
+// 获取公路信用评价
+router.get('/traffic-credit/:companyName', async (req, res) => {
+  try {
+    const companyName = req.params.companyName;
+    
+    // 构建请求参数
+    const requestData = {
+      app_id: "67fb6672450241050858e140",
+      entry_id: "67fac730ed9a63fef41ccdd3",
+      fields: ["corp_name", "aa_area", "aa_type", "y2022", "y2023", "y2024"],
+      filter: {
+        rel: "and",
+        cond: [{
+          field: "corp_name",
+          type: "text",
+          method: "eq",
+          value: companyName
+        }]
+      },
+      limit: 20
+    };
+
+    // 发送请求到简道云API
+    const response = await axios({
+      method: 'post',
+      url: `${API_CONFIG.baseURL}/app/entry/data/list`,
+      headers: {
+        'Authorization': `Bearer ${API_CONFIG.token}`,
+        'Content-Type': 'application/json'
+      },
+      data: requestData
+    });
+
+    // 返回结果
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error fetching traffic credit data:', error);
+    res.status(500).json({
+      error: '获取公路信用评价失败',
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;
