@@ -319,9 +319,16 @@
 
             // 统一的数据加载函数
             function loadProjectData() {
+                // 添加加载状态提示
+                $('#projectTitle').html('<div class="spinner-border spinner-border-sm me-2" role="status"></div>项目信息加载中...');
+                
                 $.ajax({
                     url: `https://sf.liubeijs.com/api/project/${projectId}`,
                     method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
                     success: function(response) {
                         const project = response.data[0];
                         
@@ -342,7 +349,19 @@
                         createScatterChart(sortedBids);
                     },
                     error: function(xhr, status, error) {
-                        alert('加载数据失败：' + error);
+                        let errorMessage = '加载失败';
+                        if (xhr.status === 403) {
+                            errorMessage = '访问被拒绝，请检查访问权限';
+                        } else if (xhr.status === 0) {
+                            errorMessage = '无法连接到服务器，请检查网络连接';
+                        }
+                        
+                        $('#projectTitle').html(`
+                            <div class="text-danger">
+                                <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                            </div>
+                        `);
+                        console.error('加载数据失败：', {status: xhr.status, error: error});
                     }
                 });
             }
