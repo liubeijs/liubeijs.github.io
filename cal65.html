@@ -332,6 +332,7 @@
         </div>
         <button type="button" id="randomize-weights">随机生成权重</button>
         <small>(取值范围: 1.00 ≤ u<sub>i</sub> ≤ 9.00)</small>
+        <div id="weights-display" style="margin-top: 15px;"></div>
     </div>
     
 
@@ -430,6 +431,20 @@
             document.getElementById('u5').value = scaledU5;
             document.getElementById('u6').value = scaledU6;
             document.getElementById('u7').value = scaledU7;
+
+            // 计算并展示 a, b, c, d, e, f, g
+            const a = (scaledU1 / 10).toFixed(2);
+            const b = (scaledU2 / 10).toFixed(2);
+            const c = (scaledU3 / 10).toFixed(2);
+            const d = (scaledU4 / 10).toFixed(2);
+            const e = (scaledU5 / 10).toFixed(2);
+            const f = (scaledU6 / 10).toFixed(2);
+            const g = (scaledU7 / 10).toFixed(2);
+
+            // 在页面上展示 a, b, c, d, e, f, g
+            document.getElementById('weights-display').innerHTML = `
+                a: ${a}, b: ${b}, c: ${c}, d: ${d}, e: ${e}, f: ${f}, g: ${g}
+            `;
         }
 
         function calculate() {
@@ -648,7 +663,7 @@
             const minT_ratio = (1-minT/maxPrice)*100;
             const maxT_ratio = (1-maxT/maxPrice)*100;
             rangeText += `\n因此，评标基准值可能的取值范围为:\n${minT.toFixed(2)} 到 ${maxT.toFixed(2)}`;
-            rangeText += `\n下浮范围为: ${minT_ratio.toFixed(2)}% 到 ${maxT_ratio.toFixed(2)}%`;
+            rangeText += `\n下浮范围为:  ${maxT_ratio.toFixed(2)}% 到 ${minT_ratio.toFixed(2)}%`;
 
             document.getElementById('result-range').textContent = rangeText;
         
