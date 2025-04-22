@@ -26,6 +26,16 @@
             height: 400px;
             margin-top: 20px;
         }
+        /* 添加按钮的淡蓝色样式 */
+        #analysisButton {
+            background-color: #5dc3e5; /* 淡蓝色 */
+            border-color: #5dc3e5;
+            color: #fff;
+        }
+        #analysisButton:hover {
+            background-color: #0eb0f0; /* 更深的蓝色用于悬停效果 */
+            border-color: #0eb0f0;
+        }
     </style>
 </head>
 <body>
@@ -36,6 +46,8 @@
         <div class="card mb-4">
             <div class="card-header">
                 项目基本信息
+                <!-- 在这里添加按钮 -->
+                <button id="analysisButton" class="btn btn-primary float-end">六随机基准值分析</button>
             </div>
             <div class="card-body">
                 <table class="table">
@@ -72,12 +84,7 @@
                     <thead>
                         <tr>
                             <th>序号</th>
-                            <th>
-                                投标单位
-                                <button class="btn btn-sm btn-outline-secondary sort-btn" id="sortByType">
-                                    按单位类型排序 <i class="bi bi-sort-alpha-down"></i>
-                                </button>
-                            </th>
+                            <th>投标单位</th>
                             <th>投标价格</th>
                             <th>下浮率</th>
                             <th>状态</th>
@@ -140,10 +147,10 @@
 
                 // 计算各类型单位数量
                 const stats = {
+                    '中标人': 0,                    
                     '湖南省内': 0,
                     '中字头': 0,
-                    '其他省外': 0,
-                    '中标人': 0
+                    '其他省外': 0
                 };
 
                 bids.forEach((bid) => {
@@ -327,6 +334,20 @@
                 return;
             }
 
+            // 绑定按钮点击事件
+            $('#analysisButton').click(function() {
+                // 获取ajax返回的数据
+                const maxPrice = $('#maxPrice').text().replace(/[^0-9.]/g, '');
+                const bids = sortedBids.map(bid => bid.bid_price).join(',');
+                const stats = sortedBids.map(bid => bid.bid_stat || '').join(',');
+
+                // 构建跳转URL
+                const url = `https://pages.liubeijs.com/cal65.html?maxPrice=${maxPrice}&bids=${bids}&stats=${encodeURIComponent(stats)}`;
+                
+                // 跳转到新页面
+                window.open(url, '_blank');
+            });
+
             // 统一的数据加载函数
             function loadProjectData() {
                 // 添加加载状态提示
@@ -382,6 +403,11 @@
                 sortedBids.sort((a, b) => {
                     const typeA = getCompanyType(a);
                     const typeB = getCompanyType(b);
+                
+                    // 将“中标人”类型放在第一位
+                    if (typeA === '中标人') return -1;
+                    if (typeB === '中标人') return 1;
+                
                     return typeA.localeCompare(typeB);
                 });
                 renderBidList(sortedBids);
