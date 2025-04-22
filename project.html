@@ -26,13 +26,18 @@
             height: 400px;
             margin-top: 20px;
         }
-        /* 添加按钮的淡蓝色样式 */
-        #analysisButton {
+        .button-group {
+            display: flex;
+            gap: 10px; /* 按钮之间的间距 */
+        }
+        .btn-primary {
             background-color: #5dc3e5; /* 淡蓝色 */
             border-color: #5dc3e5;
             color: #fff;
+            padding: 5px 15px; /* 调整按钮的内边距 */
+            font-size: 0.9em; /* 调整字体大小 */
         }
-        #analysisButton:hover {
+        .btn-primary:hover {
             background-color: #0eb0f0; /* 更深的蓝色用于悬停效果 */
             border-color: #0eb0f0;
         }
@@ -44,10 +49,13 @@
         
         <!-- 项目基本信息 -->
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 项目基本信息
-                <!-- 在这里添加按钮 -->
-                <button id="analysisButton" class="btn btn-primary float-end">六随机基准值分析</button>
+                <!-- 使用flexbox布局按钮 -->
+                <div class="button-group">
+                    <button id="sunshineRoomButton" class="btn btn-primary">省中心阳光房</button>
+                    <button id="analysisButton" class="btn btn-primary">六随机基准值分析</button>
+                </div>
             </div>
             <div class="card-body">
                 <table class="table">
@@ -163,11 +171,32 @@
                             <td>
                                 <span class="company-type-indicator" style="background-color: ${colors[type]}"></span>
                                 ${bid.bid_corp_name}
-                                <a href="https://aiqicha.baidu.com/s?q=${encodeURIComponent(bid.bid_corp_name)}" 
+                                <a href="https://www.qcc.com/web/search?key=${encodeURIComponent(bid.bid_corp_name)}" 
                                    target="_blank" 
                                    class="company-link" 
-                                   title="查看企业信息">
+                                   title="企业信息">
                                     <i class="bi bi-search"></i>
+                                </a>
+                                <!-- 阳光房图标 -->
+                                <a href="http://yyjc.hnsdzjy.org:20005/sun/main?searchValue=${encodeURIComponent(bid.bid_corp_name)}&searchType=mainInfo" 
+                                   target="_blank" 
+                                   class="company-link" 
+                                   title="阳光房信息">
+                                    <i class="bi bi-sun"></i>
+                                </a>
+                                <!-- 公路图标 -->
+                                <a href="https://hwdms.mot.gov.cn/BMWebSite/company/indexSearch.do?text=${encodeURIComponent(bid.bid_corp_name)}" 
+                                   target="_blank" 
+                                   class="company-link" 
+                                   title="公路信息">
+                                    <i class="bi bi-truck"></i>
+                                </a>
+                                <!-- 新增建筑图标 -->
+                                <a href="https://jzsc.mohurd.gov.cn/data/company?complexname=${encodeURIComponent(bid.bid_corp_name)}" 
+                                   target="_blank" 
+                                   class="company-link" 
+                                   title="建筑信息">
+                                    <i class="bi bi-building"></i> <!-- 使用Bootstrap Icons中的建筑图标 -->
                                 </a>
                             </td>
                             <td>${bid.bid_price.toLocaleString('zh-CN', {
@@ -424,6 +453,12 @@
             
             // 初始加载数据
             loadProjectData();
+        });
+        // 绑定省中心阳光房按钮点击事件
+        $('#sunshineRoomButton').click(function() {
+            const projectName = $('#projectTitle').text().substring(0, 20); // 获取项目名字的前20个字符
+            const url = `http://yyjc.hnsdzjy.org:20005/sun/project?searchValue=${encodeURIComponent(projectName)}&searchType=projectInfo`;
+            window.open(url, '_blank');
         });
     </script>
 </body>
