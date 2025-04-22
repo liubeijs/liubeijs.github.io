@@ -41,6 +41,52 @@
             background-color: #0eb0f0; /* 更深的蓝色用于悬停效果 */
             border-color: #0eb0f0;
         }
+
+    .menu-trigger {
+        cursor: pointer;
+        color: #666;
+        margin-left: 5px;
+    }
+
+    .menu-trigger:hover {
+        color: #007bff;
+    }
+
+/* 修改菜单样式为横向图标按钮组 */
+.icon-buttons {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    padding: 5px;
+    z-index: 1000;
+    margin-left: 5px;
+}
+
+.icon-buttons.show {
+    display: inline-flex;
+    gap: 8px;
+}
+
+.icon-button {
+    color: #666;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.icon-button:hover {
+    color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.icon-button i {
+    font-size: 1em;
+}    
+
     </style>
 </head>
 <body>
@@ -168,44 +214,39 @@
                     const row = `
                         <tr>
                             <td>${bid.bid_id}</td>
-                            <td>
-                                <span class="company-type-indicator" style="background-color: ${colors[type]}"></span>
-                                ${bid.bid_corp_name}
-                                <!-- 新增复制按钮 -->
-                                <a href="javascript:void(0)" 
-                                   class="company-link copy-name" 
-                                   title="复制企业名称"
-                                   data-company="${bid.bid_corp_name}">
-                                    <i class="bi bi-clipboard"></i>
-                                </a>
-                                <a href="https://www.qcc.com/web/search?key=${encodeURIComponent(bid.bid_corp_name)}" 
-                                   target="_blank" 
-                                   class="company-link" 
-                                   title="企业信息">
-                                    <i class="bi bi-search"></i>
-                                </a>
-                                <!-- 阳光房图标 -->
-                                <a href="http://yyjc.hnsdzjy.org:20005/sun/main?searchValue=${encodeURIComponent(bid.bid_corp_name)}&searchType=mainInfo" 
-                                   target="_blank" 
-                                   class="company-link" 
-                                   title="阳光房信息">
-                                    <i class="bi bi-sun"></i>
-                                </a>
-                                <!-- 公路图标 -->
-                                <a href="https://hwdms.mot.gov.cn/BMWebSite/company/indexSearch.do?text=${encodeURIComponent(bid.bid_corp_name)}" 
-                                   target="_blank" 
-                                   class="company-link" 
-                                   title="公路信息">
-                                    <i class="bi bi-truck"></i>
-                                </a>
-                                <!-- 新增建筑图标 -->
-                                <a href="https://jzsc.mohurd.gov.cn/data/company?complexname=${encodeURIComponent(bid.bid_corp_name)}" 
-                                   target="_blank" 
-                                   class="company-link" 
-                                   title="建筑信息">
-                                    <i class="bi bi-building"></i> <!-- 使用Bootstrap Icons中的建筑图标 -->
-                                </a>
-                            </td>
+<td>
+    <span class="company-type-indicator" style="background-color: ${colors[type]}"></span>
+    ${bid.bid_corp_name}
+    <span class="menu-trigger" data-company="${bid.bid_corp_name}">
+        <i class="bi bi-three-dots-vertical"></i>
+    </span>
+    <div class="icon-buttons">
+        <a href="javascript:void(0)" class="icon-button copy-name" title="复制企业名称" data-company="${bid.bid_corp_name}">
+            <i class="bi bi-clipboard"></i>
+        </a>
+        <a href="https://www.qcc.com/web/search?key=${encodeURIComponent(bid.bid_corp_name)}" 
+           target="_blank" class="icon-button" title="企业信息查询">
+            <i class="bi bi-search"></i>
+        </a>
+        <a href="http://yyjc.hnsdzjy.org:20005/sun/main?searchValue=${encodeURIComponent(bid.bid_corp_name)}&searchType=mainInfo" 
+           target="_blank" class="icon-button" title="阳光房信息">
+            <i class="bi bi-sun"></i>
+        </a>
+        <a href="https://hwdms.mot.gov.cn/BMWebSite/company/indexSearch.do?text=${encodeURIComponent(bid.bid_corp_name)}" 
+           target="_blank" class="icon-button" title="公路信息">
+            <i class="bi bi-truck"></i>
+        </a>
+        <a href="https://jzsc.mohurd.gov.cn/data/company?complexname=${encodeURIComponent(bid.bid_corp_name)}" 
+           target="_blank" class="icon-button" title="建筑信息">
+            <i class="bi bi-building"></i>
+        </a>
+        <a href="https://pages.liubeijs.com/traffic-credit.html?company_name=${encodeURIComponent(bid.bid_corp_name)}" 
+           target="_blank" class="icon-button" title="公路信用评价">
+            <i class="bi bi-award"></i>
+        </a>
+    </div>
+</td>
+
                             <td>${bid.bid_price.toLocaleString('zh-CN', {
                                 style: 'currency',
                                 currency: 'CNY'
@@ -484,6 +525,23 @@
             window.open(url, '_blank');
         });
 
+
+// 处理三点菜单的点击事件
+$(document).on('click', '.menu-trigger', function(e) {
+    e.stopPropagation(); // 阻止事件冒泡
+    const $buttons = $(this).next('.icon-buttons');
+    $('.icon-buttons').not($buttons).removeClass('show'); // 关闭其他打开的按钮组
+    $buttons.toggleClass('show');
+});
+
+// 点击页面其他地方时关闭按钮组
+$(document).on('click', function(e) {
+    if (!$(e.target).closest('.icon-buttons').length && !$(e.target).closest('.menu-trigger').length) {
+        $('.icon-buttons').removeClass('show');
+    }
+});
+        
+
         // 添加复制功能
         $(document).on('click', '.copy-name', function(e) {
             e.preventDefault();
@@ -508,6 +566,44 @@
                 $(this).attr('title', originalTitle);
             }, 1000);
         });
+
+
+            // 处理菜单显示和隐藏
+    $(document).on('mouseenter', '.menu-trigger', function(e) {
+        const $menu = $(this).next('.dropdown-menu');
+        const $trigger = $(this);
+        
+        // 获取触发器的位置和尺寸
+        const triggerPos = $trigger.offset();
+        const triggerHeight = $trigger.outerHeight();
+        
+        // 设置菜单位置
+        $menu.css({
+            top: triggerPos.top + triggerHeight,  // 紧贴触发器底部
+            left: triggerPos.left + $trigger.outerWidth() / 2  // 水平居中对齐
+        }).addClass('show');
+    });
+
+    // 鼠标离开菜单时隐藏
+    $(document).on('mouseleave', '.dropdown-menu', function() {
+        $(this).removeClass('show');
+    });
+
+    // 鼠标离开触发器但进入菜单时保持菜单显示
+    $(document).on('mouseleave', '.menu-trigger', function(e) {
+        const $menu = $(this).next('.dropdown-menu');
+        const menuPos = $menu.offset();
+        const menuWidth = $menu.width();
+        const menuHeight = $menu.height();
+        
+        if (!(e.pageX >= menuPos.left && 
+              e.pageX <= menuPos.left + menuWidth && 
+              e.pageY >= menuPos.top && 
+              e.pageY <= menuPos.top + menuHeight)) {
+            $menu.removeClass('show');
+        }
+    });
+
 
 
     </script>
