@@ -320,7 +320,7 @@
             // 统一的数据加载函数
             function loadProjectData() {
                 $.ajax({
-                    url: `http://sf.liubeijs.com/api/project/${projectId}`,
+                    url: `https://sf.liubeijs.com/api/project/${projectId}`,
                     method: 'GET',
                     success: function(response) {
                         const project = response.data[0];
