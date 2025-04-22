@@ -230,7 +230,7 @@
                 return '其他省外';
             }
 
-            function createScatterChart(bids) {
+            function createScatterChart(bids, maxPrice) {
                 const ctx = document.getElementById('scatterChart').getContext('2d');
                 const companyDatasets = {};
                 
@@ -292,7 +292,8 @@
                                         const point = context.raw;
                                         return [
                                             `单位: ${point.bid_corp_name}`,
-                                            `下浮率: ${(point.bid_down_ratio * 100).toFixed(2)}%`
+                                            `下浮率: ${(point.bid_down_ratio * 100).toFixed(2)}%`,
+                                            `基准值范围: ${baselineRange.min} - ${baselineRange.max}`
                                         ];
                                     }
                                 }
@@ -346,7 +347,7 @@
                             .sort((a, b) => b.bid_down_ratio - a.bid_down_ratio);
 
                         renderBidList(sortedBids);
-                        createScatterChart(sortedBids);
+                        createScatterChart(sortedBids, project.project_max_price);
                     },
                     error: function(xhr, status, error) {
                         let errorMessage = '加载失败';
@@ -384,11 +385,8 @@
                 renderBidList(sortedBids);
                 createScatterChart(sortedBids);
             });
-
-            // 删除表格中的排序按钮
             $('thead th:nth-child(2)').html('投标单位');
-
-            // 删除旧的省份排序相关代码
+            
             // 初始加载数据
             loadProjectData();
         });
