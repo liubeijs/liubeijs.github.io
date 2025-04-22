@@ -115,7 +115,7 @@
         .fixed-button {
             position: fixed;
             right: 20px;
-            bottom: 20px;
+            top: 20px; /* 将 bottom 改为 top */
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
@@ -331,6 +331,7 @@
             </div>
         </div>
         <button type="button" id="randomize-weights">随机生成权重</button>
+        <button type="button" id="set-abcdefg">设置abcdefg</button> <!-- 新增按钮 -->
         <small>(取值范围: 1.00 ≤ u<sub>i</sub> ≤ 9.00)</small>
         <div id="weights-display" style="margin-top: 15px;"></div>
     </div>
@@ -821,6 +822,60 @@
                 }
             });
         }
+    
+    
+document.getElementById('set-abcdefg').addEventListener('click', function() {
+    const input = prompt('请输入 a, b, c, d, e, f, g 的值，用逗号分隔:');
+    if (!input) return;
+
+    const values = input.split(',').map(v => parseFloat(v.trim()));
+    if (values.length !== 7 || values.some(isNaN)) {
+        alert('输入格式错误，请输入7个有效数字。');
+        return;
+    }
+
+    const [a, b, c, d, e, f, g] = values;
+
+    // 检查 a+b+c+d=1 和 e+f+g=1
+    if (Math.abs(a + b + c + d - 1) > 0.01 || Math.abs(e + f + g - 1) > 0.01) {
+        alert('a+b+c+d 必须等于 1，e+f+g 必须等于 1。');
+        return;
+    }
+
+    // 反推 u1-u7 的逻辑
+    try {
+        const s1 = a + b + c + d;
+        const s2 = e + f + g;
+
+        const u1 = (a / s1 * 10).toFixed(2);
+        const u2 = (b / s1 * 10).toFixed(2);
+        const u3 = (c / s1 * 10).toFixed(2);
+        const u4 = (d / s1 * 10).toFixed(2);
+        const u5 = (e / s2 * 10).toFixed(2);
+        const u6 = (f / s2 * 10).toFixed(2);
+        const u7 = (g / s2 * 10).toFixed(2);
+
+        // 检查 u1-u7 的合理取值范围
+        if ([u1, u2, u3, u4, u5, u6, u7].some(u => u < 1 || u > 9)) {
+            alert('反推的 u1-u7 值不在合理范围内 (1.00 ≤ u ≤ 9.00)。');
+            return;
+        }
+
+        document.getElementById('u1').value = u1;
+        document.getElementById('u2').value = u2;
+        document.getElementById('u3').value = u3;
+        document.getElementById('u4').value = u4;
+        document.getElementById('u5').value = u5;
+        document.getElementById('u6').value = u6;
+        document.getElementById('u7').value = u7;
+    } catch (error) {
+        alert('反推计算出错，请检查输入值。');
+    }
+});
+
     </script>
+
+    
 </body>
 </html>
+
