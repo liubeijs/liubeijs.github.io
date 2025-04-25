@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公路信用评价信息查询</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        .company-link {
+            color: #666;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        .company-link:hover {
+            color: #007bff;
+        }
+        .grade-input {
+            width: 80px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-4">公路信用评价信息查询</h2>
+        
+        <!-- 查询表单 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                查询条件
+            </div>
+            <div class="card-body">
+                <form id="searchForm">
+                    <div class="row g-3">
+                        <div class="col-2">
+                            <select class="form-select" id="area" name="area">
+                                <!-- 选项将通过 JavaScript 动态加载 -->
+                            </select>
+                        </div>
+                        <div class="col-2">
+                            <select class="form-select" id="type" name="type">
+                                <!-- 选项将通过 JavaScript 动态加载 -->
+                            </select>
+                        </div>
+                        <div class="col-2">
+                            <select class="form-select" id="y2021" name="y2021">
+                                <!-- 选项将通过 JavaScript 动态加载 -->
+                            </select>
+                        </div>
+                        <div class="col-2">
+                            <select class="form-select" id="y2022" name="y2022">
+                                <!-- 选项将通过 JavaScript 动态加载 -->
+                            </select>
+                        </div>
+                        <div class="col-2">
+                            <select class="form-select" id="y2023" name="y2023">
+                                <!-- 选项将通过 JavaScript 动态加载 -->
+                            </select>
+                        </div>
+                        <div class="col-2">
+                            <select class="form-select" id="y2024" name="y2024">
+                                <!-- 选项将通过 JavaScript 动态加载 -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> 查询
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 查询结果表格 -->
+        <div class="card">
+            <div class="card-header">
+                查询结果 <span id="resultCount" class="badge bg-secondary ms-2">0</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">序号</th>
+                            <th>企业名称</th>
+                            <th>评价区域</th>
+                            <th>评价类型</th>
+                            <th>2021年</th>
+                            <th>2022年</th>
+                            <th>2023年</th>
+                            <th>2024年</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultList">
+                        <!-- 数据将通过JavaScript动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // 定义选项数据
+            const options = {
+                areas: [
+                    { value: "", text: "评级地区" },
+                    { value: "全国", text: "全国" },
+                    { value: "北京市", text: "北京市" },
+                    { value: "天津市", text: "天津市" },
+                    { value: "河北省", text: "河北省" },
+                    { value: "山西省", text: "山西省" },
+                    { value: "内蒙古自治区", text: "内蒙古自治区" },
+                    { value: "辽宁省", text: "辽宁省" },
+                    { value: "吉林省", text: "吉林省" },
+                    { value: "黑龙江省", text: "黑龙江省" },
+                    { value: "上海市", text: "上海市" },
+                    { value: "江苏省", text: "江苏省" },
+                    { value: "浙江省", text: "浙江省" },
+                    { value: "安徽省", text: "安徽省" },
+                    { value: "福建省", text: "福建省" },
+                    { value: "江西省", text: "江西省" },
+                    { value: "山东省", text: "山东省" },
+                    { value: "河南省", text: "河南省" },
+                    { value: "湖北省", text: "湖北省" },
+                    { value: "湖南省", text: "湖南省" },
+                    { value: "广东省", text: "广东省" },
+                    { value: "广西壮族自治区", text: "广西壮族自治区" },
+                    { value: "海南省", text: "海南省" },
+                    { value: "重庆市", text: "重庆市" },
+                    { value: "四川省", text: "四川省" },
+                    { value: "贵州省", text: "贵州省" },
+                    { value: "云南省", text: "云南省" },
+                    { value: "西藏自治区", text: "西藏自治区" },
+                    { value: "陕西省", text: "陕西省" },
+                    { value: "甘肃省", text: "甘肃省" },
+                    { value: "青海省", text: "青海省" },
+                    { value: "宁夏回族自治区", text: "宁夏回族自治区" },
+                    { value: "新疆维吾尔自治区", text: "新疆维吾尔自治区" }
+                ],
+                types: [
+                    { value: "", text: "评级类别" },
+                    { value: "公路水运", text: "公路水运" },
+                    { value: "公路养护", text: "公路养护" },
+                    { value: "农村公路", text: "农村公路" }
+                ],
+                grades: [
+                    { value: "AA", text: "AA" },
+                    { value: "A", text: "A" },
+                    { value: "B", text: "B" }
+                ]
+            };
+    
+            // 动态加载下拉框选项
+            function loadSelectOptions() {
+                // 加载地区选项
+                const $area = $('#area');
+                $area.empty();
+                options.areas.forEach(option => {
+                    $area.append($('<option>', {
+                        value: option.value,
+                        text: option.text
+                    }));
+                });
+    
+                // 加载类别选项
+                const $type = $('#type');
+                $type.empty();
+                options.types.forEach(option => {
+                    $type.append($('<option>', {
+                        value: option.value,
+                        text: option.text
+                    }));
+                });
+    
+                // 加载年份评级选项
+                ['2021', '2022', '2023', '2024'].forEach(year => {
+                    const $yearSelect = $(`#y${year}`);
+                    $yearSelect.empty();
+                    $yearSelect.append($('<option>', {
+                            value: "",
+                            text: `${year}年 - `
+                    }));
+                    options.grades.forEach(option => {
+                        $yearSelect.append($('<option>', {
+                            value: option.value,
+                            text: `${year}年 - ${option.text}`
+                        }));
+                    });
+                });
+            }
+    
+            // 初始化下拉框
+            loadSelectOptions();
+        });
+    </script>
+
+
+<script>
+    $(document).ready(function() {
+        // 从URL参数中获取查询条件
+        const urlParams = new URLSearchParams(window.location.search);
+        const area = urlParams.get('area');
+        const type = urlParams.get('type');
+        const yv = urlParams.get('yv');
+
+        // 如果URL中有参数，填充到表单中
+        if (area) $('#area').val(decodeURIComponent(area));
+        if (type) $('#type').val(decodeURIComponent(type));
+        
+        // 处理年份评级参数
+        if (yv) {
+            const yearValues = decodeURIComponent(yv).split(',');
+            for (let i = 0; i < yearValues.length; i += 2) {
+                const year = yearValues[i];
+                const value = yearValues[i + 1];
+                $(`#y${year}`).val(value);
+            }
+        }
+
+        // 如果有参数，自动执行查询
+        if (area || type || yv) {
+            loadData();
+        }
+
+        // 表单提交处理
+        $('#searchForm').on('submit', function(e) {
+            e.preventDefault();
+            loadData();
+        });
+
+        // 数据加载函数
+        function loadData() {
+            const area = $('#area').val();
+            const type = $('#type').val();
+            
+            // 构建年份评级参数
+            let yvParts = [];
+            ['2021', '2022', '2023', '2024'].forEach(year => {
+                const value = $(`#y${year}`).val();
+                if (value) {
+                    yvParts.push(year, value);
+                }
+            });
+            
+            // 构建查询参数
+            const params = new URLSearchParams();
+            if (area) params.append('area', area);
+            if (type) params.append('type', type);
+            if (yvParts.length > 0) params.append('yv', yvParts.join(','));
+
+            // 添加加载状态提示
+            $('#resultList').html(`
+                <tr>
+                    <td colspan="7" class="text-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        数据加载中...
+                    </td>
+                </tr>
+            `);
+
+            // 发送请求
+            $.ajax({
+                url: `https://sf.liubeijs.com/api/traffic-credit2?${params.toString()}`,
+                method: 'GET',
+                success: function(response) {
+                    const $resultList = $('#resultList');
+                    $resultList.empty();
+
+                    if (!response.data || response.data.length === 0) {
+                        $('#resultCount').text('0');
+                        $resultList.html(`
+                            <tr>
+                                <td colspan="8" class="text-center">
+                                    <div class="text-muted">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        未找到相关信用评价信息
+                                    </div>
+                                </td>
+                            </tr>
+                        `);
+                        return;
+                    }
+
+                    // 更新结果数量
+                    $('#resultCount').text(response.data.length);
+
+                    // 渲染数据
+                    response.data.forEach((item, index) => {
+                        const row = `
+                            <tr>
+                                <td class="text-center">${index + 1}</td>
+                                <td>${item.corp_name}</td>
+                                <td>${item.aa_area}</td>
+                                <td>${item.aa_type}</td>
+                                <td>${item.y2021 || '-'}</td>
+                                <td>${item.y2022 || '-'}</td>
+                                <td>${item.y2023 || '-'}</td>
+                                <td>${item.y2024 || '-'}</td>
+                            </tr>
+                        `;
+                        $resultList.append(row);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    $('#resultCount').text('0');
+                    let errorMessage = '加载失败';
+                    if (xhr.status === 403) {
+                        errorMessage = '访问被拒绝，请检查访问权限';
+                    } else if (xhr.status === 0) {
+                        errorMessage = '无法连接到服务器，请检查网络连接';
+                    }
+                    
+                    $('#resultList').html(`
+                        <tr>
+                            <td colspan="8" class="text-center">
+                                <div class="text-danger">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                                </div>
+                            </td>
+                        </tr>
+                    `);
+                    console.error('加载数据失败：', {status: xhr.status, error: error});
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

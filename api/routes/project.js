@@ -62,7 +62,7 @@ router.get('/traffic-credit/:companyName', async (req, res) => {
     const requestData = {
       app_id: "67fb6672450241050858e140",
       entry_id: "67fac730ed9a63fef41ccdd3",
-      fields: ["corp_name", "aa_area", "aa_type", "y2022", "y2023", "y2024"],
+      fields: ["corp_name", "aa_area", "aa_type", "y2021", "y2022", "y2023", "y2024"],
       filter: {
         rel: "and",
         cond: [{
@@ -73,6 +73,85 @@ router.get('/traffic-credit/:companyName', async (req, res) => {
         }]
       },
       limit: 20
+    };
+
+    // 发送请求到简道云API
+    const response = await axios({
+      method: 'post',
+      url: `${API_CONFIG.baseURL}/app/entry/data/list`,
+      headers: {
+        'Authorization': `Bearer ${API_CONFIG.token}`,
+        'Content-Type': 'application/json'
+      },
+      data: requestData
+    });
+
+    // 返回结果
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error fetching traffic credit data:', error);
+    res.status(500).json({
+      error: '获取公路信用评价失败',
+      message: error.message
+    });
+  }
+});
+
+// 获取公路信用评价2
+router.get('/traffic-credit2', async (req, res) => {
+  try {
+    const { area, type, yv } = req.query;
+    
+    // 初始化条件数组
+    const cond = [];
+    
+    // 只有在参数存在时才添加对应的条件
+    if (area) {
+      cond.push({
+        field: "aa_area",
+        type: "text",
+        method: "eq",
+        value: area
+      });
+    }
+    
+    if (type) {
+      cond.push({
+        field: "aa_type",
+        type: "text",
+        method: "eq",
+        value: type
+      });
+    }
+    
+    // 只有在 yv 参数存在时才处理年份和评价值对
+    if (yv) {
+      const yearValues = yv.split(',');
+      for (let i = 0; i < yearValues.length; i += 2) {
+        const year = yearValues[i];
+        const value = yearValues[i + 1];
+        if (year && value) {
+          cond.push({
+            field: `y${year}`,
+            type: "text",
+            method: "eq",
+            value: value
+          });
+        }
+      }
+    }
+
+    // 构建请求参数
+    const requestData = {
+      app_id: "67fb6672450241050858e140",
+      entry_id: "67fac730ed9a63fef41ccdd3",
+      fields: ["corp_name", "aa_area", "aa_type", "y2021", "y2022", "y2023", "y2024"],
+      filter: {
+        rel: "and",
+        cond: cond
+      },
+      limit: 500
     };
 
     // 发送请求到简道云API
