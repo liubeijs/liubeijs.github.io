@@ -90,6 +90,9 @@
             margin-right: 5px;
             width: 30px;
         }
+        .weight-input span {
+            margin-left: 2px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -170,46 +173,52 @@
     
     <div class="form-group">
         <label for="r">下浮系数 (r):</label>
-        <input type="number" id="r" value="0.05" min="0.02" max="0.1" step="0.001">
+        <input type="number" id="r" value="5" min="2" max="10" step="0.1">
         <span class="error" id="r-error"></span>
         <small>(工程施工类默认: 2% ≤ r ≤ 10%)</small>
     </div>
     
     <div class="form-group">
-        <label>随机权重 (u<sub>1</sub>-u<sub>7</sub>):</label>
+        <label>权重系数:</label>
         <div class="random-weights">
             <div class="weight-input">
-                <label>u<sub>1</sub>:</label>
-                <input type="number" class="u-value" id="u1" min="1" max="9" step="0.01" value="4.0">
+                <label>a:</label>
+                <input type="number" id="a" min="0" max="100" step="1" value="40">
+                <span>%</span>
             </div>
             <div class="weight-input">
-                <label>u<sub>2</sub>:</label>
-                <input type="number" class="u-value" id="u2" min="1" max="9" step="0.01" value="1.5">
+                <label>b:</label>
+                <input type="number" id="b" min="0" max="100" step="1" value="15">
+                <span>%</span>
             </div>
             <div class="weight-input">
-                <label>u<sub>3</sub>:</label>
-                <input type="number" class="u-value" id="u3" min="1" max="9" step="0.01" value="1.5">
+                <label>c:</label>
+                <input type="number" id="c" min="0" max="100" step="1" value="15">
+                <span>%</span>
             </div>
             <div class="weight-input">
-                <label>u<sub>4</sub>:</label>
-                <input type="number" class="u-value" id="u4" min="1" max="9" step="0.01" value="3.0">
+                <label>d:</label>
+                <input type="number" id="d" min="0" max="100" step="1" value="30">
+                <span>%</span>
             </div>
             <div class="weight-input">
-                <label>u<sub>5</sub>:</label>
-                <input type="number" class="u-value" id="u5" min="1" max="9" step="0.01" value="2.0">
+                <label>e:</label>
+                <input type="number" id="e" min="0" max="100" step="1" value="35">
+                <span>%</span>
             </div>
             <div class="weight-input">
-                <label>u<sub>6</sub>:</label>
-                <input type="number" class="u-value" id="u6" min="1" max="9" step="0.01" value="1.0">
+                <label>f:</label>
+                <input type="number" id="f" min="0" max="100" step="1" value="30">
+                <span>%</span>
             </div>
             <div class="weight-input">
-                <label>u<sub>7</sub>:</label>
-                <input type="number" class="u-value" id="u7" min="1" max="9" step="0.01" value="3.0">
+                <label>g:</label>
+                <input type="number" id="g" min="0" max="100" step="1" value="35">
+                <span>%</span>
             </div>
         </div>
         <button type="button" id="randomize-weights">随机生成权重</button>
-        <button type="button" id="set-abcdefg">设置abcdefg</button> <!-- 新增按钮 -->
-        <small>(取值范围: 1.00 ≤ u<sub>i</sub> ≤ 9.00)</small>
+        <small>(约束条件: a + b + c + d = 100%, e + f + g = 100%)</small>
         <div id="weights-display" style="margin-top: 15px;"></div>
     </div>
     
@@ -268,8 +277,8 @@
             document.getElementById('r').addEventListener('change', function() {
                 const r = parseFloat(this.value);
                 const errorElement = document.getElementById('r-error');
-                if (r < 0.02 || r > 0.1) {
-                    errorElement.textContent = '下浮系数必须在0.02到0.1之间';
+                if (r < 2 || r > 10) {
+                    errorElement.textContent = '下浮系数必须在2%到10%之间';
                 } else {
                     errorElement.textContent = '';
                 }
@@ -277,59 +286,30 @@
         });
         
         function randomizeWeights() {
-            // 生成符合约束条件的随机权重
-            const u1 = (Math.random() * 3.5 + 1.2).toFixed(2); // a: 30%-45%
-            const u2 = (Math.random() * 1.5 + 0.5).toFixed(2); // b: 5%-20%
-            const u3 = (Math.random() * 1.5 + 0.5).toFixed(2); // c: 5%-20%
-            const u4 = (Math.random() * 3.5 + 1.2).toFixed(2); // d: 30%-45%
+            // 生成符合约束条件的随机权重（百分比形式）
+            const a = Math.round(Math.random() * 15 + 30); // 30%-45%
+            const b = Math.round(Math.random() * 15 + 5);  // 5%-20%
+            const c = Math.round(Math.random() * 15 + 5);  // 5%-20%
+            const d = 100 - a - b - c;  // 剩余部分
             
-            // 确保 a+b+c+d=1
-            const s1 = parseFloat(u1) + parseFloat(u2) + parseFloat(u3) + parseFloat(u4);
-            const scaledU1 = (parseFloat(u1) / s1 * 10).toFixed(2);
-            const scaledU2 = (parseFloat(u2) / s1 * 10).toFixed(2);
-            const scaledU3 = (parseFloat(u3) / s1 * 10).toFixed(2);
-            const scaledU4 = (parseFloat(u4) / s1 * 10).toFixed(2);
-            
-            // 生成e,f,g的随机数
-            const u5 = (Math.random() * 4 + 1.5).toFixed(2); // e: 35%-50%
-            const u6 = (Math.random() * 2.5 + 0.5).toFixed(2); // f: 5%-30%
-            const u7 = (Math.random() * 4 + 1.5).toFixed(2); // g: 35%-50%
-            
-            // 确保 e+f+g=1
-            const s2 = parseFloat(u5) + parseFloat(u6) + parseFloat(u7);
-            const scaledU5 = (parseFloat(u5) / s2 * 10).toFixed(2);
-            const scaledU6 = (parseFloat(u6) / s2 * 10).toFixed(2);
-            const scaledU7 = (parseFloat(u7) / s2 * 10).toFixed(2);
+            const e = Math.round(Math.random() * 15 + 35); // 35%-50%
+            const f = Math.round(Math.random() * 25 + 5);  // 5%-30%
+            const g = 100 - e - f;  // 剩余部分
             
             // 设置输入框的值
-            document.getElementById('u1').value = scaledU1;
-            document.getElementById('u2').value = scaledU2;
-            document.getElementById('u3').value = scaledU3;
-            document.getElementById('u4').value = scaledU4;
-            document.getElementById('u5').value = scaledU5;
-            document.getElementById('u6').value = scaledU6;
-            document.getElementById('u7').value = scaledU7;
-
-            // 计算并展示 a, b, c, d, e, f, g
-            const a = (scaledU1 / 10).toFixed(2);
-            const b = (scaledU2 / 10).toFixed(2);
-            const c = (scaledU3 / 10).toFixed(2);
-            const d = (scaledU4 / 10).toFixed(2);
-            const e = (scaledU5 / 10).toFixed(2);
-            const f = (scaledU6 / 10).toFixed(2);
-            const g = (scaledU7 / 10).toFixed(2);
-
-            // 在页面上展示 a, b, c, d, e, f, g
-            document.getElementById('weights-display').innerHTML = `
-                a: ${a}, b: ${b}, c: ${c}, d: ${d}, e: ${e}, f: ${f}, g: ${g}
-            `;
+            document.getElementById('a').value = a;
+            document.getElementById('b').value = b;
+            document.getElementById('c').value = c;
+            document.getElementById('d').value = d;
+            document.getElementById('e').value = e;
+            document.getElementById('f').value = f;
+            document.getElementById('g').value = g;
         }
 
         function calculate() {
             // 获取输入值
             const maxPrice = parseFloat(document.getElementById('max-price').value);
             const c1 = parseFloat(document.getElementById('c1').value);
-            const r = parseFloat(document.getElementById('r').value);
             
             // 获取所有报价
             const bidsText = document.getElementById('bids-input').value;
@@ -350,15 +330,32 @@
                 alert('请输入至少一个有效报价');
                 return;
             }
+                        
+            // 获取权重值（需要转换为小数）
+            const a = parseFloat(document.getElementById('a').value) / 100;
+            const b = parseFloat(document.getElementById('b').value) / 100;
+            const c = parseFloat(document.getElementById('c').value) / 100;
+            const d = parseFloat(document.getElementById('d').value) / 100;
+            const e = parseFloat(document.getElementById('e').value) / 100;
+            const f = parseFloat(document.getElementById('f').value) / 100;
+            const g = parseFloat(document.getElementById('g').value) / 100;
             
-            // 获取随机权重
-            const u1 = parseFloat(document.getElementById('u1').value);
-            const u2 = parseFloat(document.getElementById('u2').value);
-            const u3 = parseFloat(document.getElementById('u3').value);
-            const u4 = parseFloat(document.getElementById('u4').value);
-            const u5 = parseFloat(document.getElementById('u5').value);
-            const u6 = parseFloat(document.getElementById('u6').value);
-            const u7 = parseFloat(document.getElementById('u7').value);
+            // 获取下浮系数（需要转换为小数）
+            const r = parseFloat(document.getElementById('r').value) / 100;
+            
+            // 验证约束条件
+            const sum1 = Math.round((a + b + c + d) * 100);
+            const sum2 = Math.round((e + f + g) * 100);
+            
+            if (sum1 !== 100) {
+                alert('错误：a + b + c + d 的和必须等于100%');
+                return;
+            }
+            
+            if (sum2 !== 100) {
+                alert('错误：e + f + g 的和必须等于100%');
+                return;
+            }
             
             // 计算步骤
             let steps = "=== 评标基准值计算过程 ===\n\n";
@@ -449,23 +446,14 @@
             const logSum = sortedBids.reduce((sum, bid) => sum + Math.log(bid), 0);
             const G = Math.exp(logSum / sortedBids.length);
             steps += `- 几何平均数 (G): ${G.toFixed(2)}\n`;
-            
-            // 计算权重
-            let a, b, c, d, e, f, g;
+
             if (bidsForCalculation.length >= 5) {
-                const s1 = u1 + u2 + u3 + u4;
-                a = u1 / s1;
-                b = u2 / s1;
-                c = u3 / s1;
-                d = u4 / s1;
-                
-                steps += "\n- 随机权重计算 (N ≥ 5):\n";
-                steps += `  u₁ = ${u1}, u₂ = ${u2}, u₃ = ${u3}, u₄ = ${u4}\n`;
-                steps += `  s₁ = u₁ + u₂ + u₃ + u₄ = ${s1.toFixed(2)}\n`;
-                steps += `  a = u₁/s₁ = ${a.toFixed(4)}\n`;
-                steps += `  b = u₂/s₁ = ${b.toFixed(4)}\n`;
-                steps += `  c = u₃/s₁ = ${c.toFixed(4)}\n`;
-                steps += `  d = u₄/s₁ = ${d.toFixed(4)}\n`;
+
+                steps += "\n- 获取权重参数 (N >= 5):\n";
+                steps += `  a = ${a.toFixed(4)}\n`;
+                steps += `  b = ${b.toFixed(4)}\n`;
+                steps += `  c = ${c.toFixed(4)}\n`;
+                steps += `  d = ${d.toFixed(4)}\n`;
                 
                 // 计算C
                 const C = a * μ + b * M + c * (Q1 + Q3) / 2 + d * G;
@@ -474,17 +462,11 @@
                 steps += `            = ${(a * μ).toFixed(2)} + ${(b * M).toFixed(2)} + ${(c * (Q1 + Q3) / 2).toFixed(2)} + ${(d * G).toFixed(2)}\n`;
                 steps += `            = ${C.toFixed(2)}\n`;
             } else {
-                const s2 = u5 + u6 + u7;
-                e = u5 / s2;
-                f = u6 / s2;
-                g = u7 / s2;
                 
-                steps += "\n- 随机权重计算 (N < 5):\n";
-                steps += `  u₅ = ${u5}, u₆ = ${u6}, u₇ = ${u7}\n`;
-                steps += `  s₂ = u₅ + u₆ + u₇ = ${s2.toFixed(2)}\n`;
-                steps += `  e = u₅/s₂ = ${e.toFixed(4)}\n`;
-                steps += `  f = u₆/s₂ = ${f.toFixed(4)}\n`;
-                steps += `  g = u₇/s₂ = ${g.toFixed(4)}\n`;
+                steps += "\n- 获取权重参数 (N < 5):\n";
+                steps += `  e = ${e.toFixed(4)}\n`;
+                steps += `  f = ${f.toFixed(4)}\n`;
+                steps += `  g = ${g.toFixed(4)}\n`;
                 
                 // 计算C
                 const C = e * μ + f * M + g * G;
@@ -699,56 +681,6 @@
                 }
             });
         }
-    
-    
-document.getElementById('set-abcdefg').addEventListener('click', function() {
-    const input = prompt('请输入 a, b, c, d, e, f, g 的值，用逗号分隔:');
-    if (!input) return;
-
-    const values = input.split(',').map(v => parseFloat(v.trim()));
-    if (values.length !== 7 || values.some(isNaN)) {
-        alert('输入格式错误，请输入7个有效数字。');
-        return;
-    }
-
-    const [a, b, c, d, e, f, g] = values;
-
-    // 检查 a+b+c+d=1 和 e+f+g=1
-    if (Math.abs(a + b + c + d - 1) > 0.01 || Math.abs(e + f + g - 1) > 0.01) {
-        alert('a+b+c+d 必须等于 1，e+f+g 必须等于 1。');
-        return;
-    }
-
-    // 反推 u1-u7 的逻辑
-    try {
-        const s1 = a + b + c + d;
-        const s2 = e + f + g;
-
-        const u1 = (a / s1 * 10).toFixed(2);
-        const u2 = (b / s1 * 10).toFixed(2);
-        const u3 = (c / s1 * 10).toFixed(2);
-        const u4 = (d / s1 * 10).toFixed(2);
-        const u5 = (e / s2 * 10).toFixed(2);
-        const u6 = (f / s2 * 10).toFixed(2);
-        const u7 = (g / s2 * 10).toFixed(2);
-
-        // 检查 u1-u7 的合理取值范围
-        if ([u1, u2, u3, u4, u5, u6, u7].some(u => u < 1 || u > 9)) {
-            alert('反推的 u1-u7 值不在合理范围内 (1.00 ≤ u ≤ 9.00)。');
-            return;
-        }
-
-        document.getElementById('u1').value = u1;
-        document.getElementById('u2').value = u2;
-        document.getElementById('u3').value = u3;
-        document.getElementById('u4').value = u4;
-        document.getElementById('u5').value = u5;
-        document.getElementById('u6').value = u6;
-        document.getElementById('u7').value = u7;
-    } catch (error) {
-        alert('反推计算出错，请检查输入值。');
-    }
-});
 
     </script>
 
