@@ -44,12 +44,13 @@
                 </div>
             </div>
             <div class="card-body">
-                <table class="table table-striped table-hover">
+                <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>企业名称</th>
                             <th>评价区域</th>
                             <th>评价类型</th>
+                            <th>2021年</th>
                             <th>2022年</th>
                             <th>2023年</th>
                             <th>2024年</th>
@@ -84,7 +85,7 @@
                 // 添加加载状态提示
                 $('#creditList').html(`
                     <tr>
-                        <td colspan="6" class="text-center">
+                        <td colspan="7" class="text-center">
                             <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                             数据加载中...
                         </td>
@@ -134,18 +135,22 @@
     
                         // 获取最高评级
                         function getBestGrade(grades) {
+                            if (!grades || grades.length === 0) return '-';
                             return grades.reduce((best, current) => {
                                 if (!best || !current) return best || current;
                                 return compareGrade(best, current) <= 0 ? best : current;
-                            });
+                            }, grades[0]); // Add initial value
                         }
     
                         // 渲染每个评价类型的数据
                         Object.entries(groupedByType).forEach(([type, typeCredits]) => {
-                            // 渲染该类型的所有行
+                            // 先添加该类型的所有数据行
                             typeCredits.forEach((credit) => {
                                 const isHunanGrade = credit.aa_area === '湖南省';
                                 
+                                const y2021 = isHunanGrade ? 
+                                    `<span class="hunan-grade">${credit.y2021 || '-'}</span>` : 
+                                    (credit.y2021 || '-');
                                 const y2022 = isHunanGrade ? 
                                     `<span class="hunan-grade">${credit.y2022 || '-'}</span>` : 
                                     (credit.y2022 || '-');
@@ -156,11 +161,26 @@
                                     `<span class="hunan-grade">${credit.y2024 || '-'}</span>` : 
                                     (credit.y2024 || '-');
                                 
+                                // 根据评价类型添加不同的背景色
+                                let bgColorClass = '';
+                                switch (type) {
+                                    case '公路水运':
+                                        bgColorClass = 'bg-info bg-opacity-25';
+                                        break;
+                                    case '公路养护':
+                                        bgColorClass = 'bg-success bg-opacity-25';
+                                        break;
+                                    case '农村公路':
+                                        bgColorClass = 'bg-warning bg-opacity-25';
+                                        break;
+                                }
+                                
                                 const row = `
-                                    <tr>
+                                    <tr class="${bgColorClass}">
                                         <td>${credit.corp_name}</td>
                                         <td>${credit.aa_area}</td>
                                         <td>${credit.aa_type}</td>
+                                        <td>${y2021}</td>
                                         <td>${y2022}</td>
                                         <td>${y2023}</td>
                                         <td>${y2024}</td>
@@ -168,28 +188,32 @@
                                 `;
                                 $creditList.append(row);
                             });
-    
+                        });
+
+                        // 在所有数据渲染完成后，添加统计行
+                        Object.entries(groupedByType).forEach(([type, typeCredits]) => {
                             // 添加统计行
-                            const hunanCredit = typeCredits.find(c => c.aa_area === '湖南省');
+                            const provinceCredit = typeCredits.find(c => c.aa_area === '湖南省');
                             const otherCredits = typeCredits.filter(c => c.aa_area !== '湖南省');
     
                             // 获取每年的最终评级
                             const finalGrades = {
-                                y2022: hunanCredit?.y2022 || getBestGrade(otherCredits.map(c => c.y2022).filter(Boolean)),
-                                y2023: hunanCredit?.y2023 || getBestGrade(otherCredits.map(c => c.y2023).filter(Boolean)),
-                                y2024: hunanCredit?.y2024 || getBestGrade(otherCredits.map(c => c.y2024).filter(Boolean))
+                                y2021: provinceCredit?.y2021 || getBestGrade(otherCredits.map(c => c.y2021).filter(Boolean)),
+                                y2022: provinceCredit?.y2022 || getBestGrade(otherCredits.map(c => c.y2022).filter(Boolean)),
+                                y2023: provinceCredit?.y2023 || getBestGrade(otherCredits.map(c => c.y2023).filter(Boolean)),
+                                y2024: provinceCredit?.y2024 || getBestGrade(otherCredits.map(c => c.y2024).filter(Boolean))
                             };
     
-                            // 修改统计行的渲染代码
+                            // 修改统计行的渲染代码，添加评价类型信息
                             const summaryRow = `
                                 <tr class="table-light">
-                                    <td colspan="3" class="text-end"><strong></strong></td>
+                                    <td colspan="3" class="text-end"><strong>${type}评价统计</strong></td>
+                                    <td><span class="summary-grade">${finalGrades.y2021 || '-'}</span></td>
                                     <td><span class="summary-grade">${finalGrades.y2022 || '-'}</span></td>
                                     <td><span class="summary-grade">${finalGrades.y2023 || '-'}</span></td>
                                     <td><span class="summary-grade">${finalGrades.y2024 || '-'}</span></td>
                                 </tr>
                             `;
-                            
                             $creditList.append(summaryRow);
                         });
                     },
@@ -217,34 +241,31 @@
 
             // 初始加载数据
             loadCreditData();
+
+            // 搜索按钮点击事件
+            $('#searchButton').click(function() {
+                const searchCompany = $('#searchCompany').val().trim();
+                if (!searchCompany) {
+                    alert('请输入企业名称！');
+                    return;
+                }
+                // 重新加载页面，带上新的企业名称参数
+                window.location.href = `${window.location.pathname}?company_name=${encodeURIComponent(searchCompany)}`;
+            });
+
+            // 回车键触发搜索
+            $('#searchCompany').keypress(function(e) {
+                if (e.which === 13) {
+                    $('#searchButton').click();
+                }
+            });
+
+            // 如果URL中有company_name参数，将其填入搜索框
+            if (companyName) {
+                $('#searchCompany').val(decodeURIComponent(companyName));
+            }
+
         });
     </script>
 </body>
 </html>
-
-<script>
-    $(document).ready(function() {
-        // 搜索按钮点击事件
-        $('#searchButton').click(function() {
-            const searchCompany = $('#searchCompany').val().trim();
-            if (!searchCompany) {
-                alert('请输入企业名称！');
-                return;
-            }
-            // 重新加载页面，带上新的企业名称参数
-            window.location.href = `${window.location.pathname}?company_name=${encodeURIComponent(searchCompany)}`;
-        });
-
-        // 回车键触发搜索
-        $('#searchCompany').keypress(function(e) {
-            if (e.which === 13) {
-                $('#searchButton').click();
-            }
-        });
-
-        // 如果URL中有company_name参数，将其填入搜索框
-        if (companyName) {
-            $('#searchCompany').val(decodeURIComponent(companyName));
-        }
-    });
-</script>
