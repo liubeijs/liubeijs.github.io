@@ -17,7 +17,7 @@ router.get('/project/:projectId', async (req, res) => {
     const requestData = {
       app_id: "63324ce70ae4b40008f38909",
       entry_id: "64979d25210a5200083fbf9d",
-      fields: ["project_id", "project_name", "project_max_price", "project_bids"],
+      fields: ["project_id", "project_name", "project_max_price", "bid_6param", "project_bids"],
       filter: {
         rel: "and",
         cond: [{

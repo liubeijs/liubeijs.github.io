@@ -167,6 +167,56 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
     <script>
+
+// 添加解析六参数的函数
+function parse6Params(paramStr) {
+    if (!paramStr) return null;
+    
+    const result = {};
+    const lines = paramStr.split('\n');
+    
+    const paramMap = {
+        '算术平均数随机权重a': 'a',
+        '中位数随机权重b': 'b',
+        '四分位数随机权重c': 'c',
+        '几何平均数随机权重d': 'd',
+        '算数平均数随机权重e': 'e',
+        '中位数随机权重f': 'f',
+        '几何平均数随机权重g': 'g',
+        '比例系数C1': 'C1',
+        '下浮系数r': 'r'
+    };
+    
+    lines.forEach(line => {
+        const trimmedLine = line.trim();  // 添加这行，去除首尾空格
+        for (const [key, value] of Object.entries(paramMap)) {
+            if (trimmedLine.startsWith(key)) {
+                const numStr = trimmedLine.split('：')[1];
+                result[value] = parseFloat(numStr);
+                break;
+            }
+        }
+    });
+    
+    return result;
+}
+
+// 使用示例：
+// const params = parse6Params(window.bid_6param);
+// console.log(params);
+// 返回结果类似：
+// {
+//     a: 39,
+//     b: 11,
+//     c: 16,
+//     d: 34,
+//     e: 48,
+//     f: 15,
+//     g: 37,
+//     C1: 0.41,
+//     r: 8.9
+// }
+
         $(document).ready(function() {
             let sortedBids = [];
             let scatterChart = null;
@@ -429,8 +479,14 @@
                 const bids = sortedBids.map(bid => bid.bid_price).join(',');
                 const stats = sortedBids.map(bid => bid.bid_stat || '').join(',');
 
-                // 构建跳转URL
-                const url = `https://pages.liubeijs.com/cal65.html?maxPrice=${maxPrice}&bids=${bids}&stats=${encodeURIComponent(stats)}`;
+                // 解析六参数
+                const params = parse6Params(window.bid_6param) || {};
+                const {a, b, c, d, e, f, g, C1, r} = params;
+
+                // 构建跳转URL，添加六参数
+                const url = `https://pages.liubeijs.com/cal65.html?maxPrice=${maxPrice}&bids=${bids}&stats=${encodeURIComponent(stats)}`
+                    + `&a=${a || ''}&b=${b || ''}&c=${c || ''}&d=${d || ''}&e=${e || ''}&f=${f || ''}&g=${g || ''}`
+                    + `&C1=${C1 || ''}&r=${r || ''}`;
                 
                 // 跳转到新页面
                 window.open(url, '_blank');
@@ -458,7 +514,10 @@
                             style: 'currency',
                             currency: 'CNY'
                         }));
-
+                        
+                        // 保存六参数到全局变量
+                        window.bid_6param = project.bid_6param;
+                        
                         // 对投标数据按下浮率排序（从高到低）
                         sortedBids = project.project_bids
                             .filter(bid => bid.bid_price !== null)
@@ -609,3 +668,5 @@ $(document).on('click', function(e) {
     </script>
 </body>
 </html>
+
+
