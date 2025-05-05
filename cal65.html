@@ -256,6 +256,27 @@
                 document.getElementById('bids-input').value = bids.join('\n');
             }
 
+            // 设置权重参数 a-g
+            const weightParams = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+            weightParams.forEach(param => {
+                const value = urlParams.get(param);
+                if (value) {
+                    document.getElementById(param).value = value;
+                }
+            });
+
+            // 设置比例系数 C1
+            const c1Param = urlParams.get('C1');
+            if (c1Param) {
+                document.getElementById('c1').value = c1Param;
+            }
+
+            // 设置下浮系数 r
+            const rParam = urlParams.get('r');
+            if (rParam) {
+                document.getElementById('r').value = rParam;
+            }
+
             // 随机生成权重按钮
             document.getElementById('randomize-weights').addEventListener('click', randomizeWeights);
             
