@@ -101,6 +101,7 @@
                 <div class="button-group">
                     <button id="sunshineRoomButton" class="btn btn-primary">省中心阳光房</button>
                     <button id="analysisButton" class="btn btn-primary">六随机基准值分析</button>
+                    <button id="pubButton" class="btn btn-primary">招标公示</button>
                 </div>
             </div>
             <div class="card-body">
@@ -473,6 +474,14 @@ function parse6Params(paramStr) {
             }
 
             // 绑定按钮点击事件
+            $('#pubButton').click(function() {
+                const pubUrl = window.project_pub_url;
+                if (pubUrl) {
+                    window.open(pubUrl, '_blank');
+                } else {
+                    alert('未找到招标公示链接');
+                }
+            });
             $('#analysisButton').click(function() {
                 // 获取ajax返回的数据
                 const maxPrice = $('#maxPrice').text().replace(/[^0-9.]/g, '');
@@ -515,9 +524,10 @@ function parse6Params(paramStr) {
                             currency: 'CNY'
                         }));
                         
-                        // 保存六参数到全局变量
+                        // 保存六参数/招标公示到全局变量
                         window.bid_6param = project.bid_6param;
-                        
+                        window.project_pub_url = project.project_pub_url;
+
                         // 对投标数据按下浮率排序（从高到低）
                         sortedBids = project.project_bids
                             .filter(bid => bid.bid_price !== null)
