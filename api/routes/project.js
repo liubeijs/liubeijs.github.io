@@ -177,4 +177,55 @@ router.get('/traffic-credit2', async (req, res) => {
   }
 });
 
+// 获取多家企业信息
+router.get('/corps', async (req, res) => {
+  try {
+    const companyNames = req.query.names ? req.query.names.split(',') : [];
+    
+    if (!companyNames.length) {
+      return res.status(400).json({
+        error: '请提供企业名称',
+        message: '使用 names 参数传入企业名称，多个企业名称用逗号分隔'
+      });
+    }
+
+    // 构建请求参数
+    const requestData = {
+      app_id: "67fb6672450241050858e140",
+      entry_id: "680a510711e47823ae1f678f",
+      fields: ["corp_eid", "corp_name", "credit_code", "corp_addr", "corp_province", "corp_type", "comment"],
+      filter: {
+        rel: "and",
+        cond: [{
+          field: "corp_name",
+          method: "eq",
+          value: companyNames
+        }]
+      },
+      limit: 100
+    };
+
+    // 发送请求到简道云API
+    const response = await axios({
+      method: 'post',
+      url: `${API_CONFIG.baseURL}/app/entry/data/list`,
+      headers: {
+        'Authorization': `Bearer ${API_CONFIG.token}`,
+        'Content-Type': 'application/json'
+      },
+      data: requestData
+    });
+
+    // 返回结果
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error fetching companies data:', error);
+    res.status(500).json({
+      error: '获取企业信息失败',
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;

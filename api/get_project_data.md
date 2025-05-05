@@ -3,7 +3,7 @@
 curl --location 'https://api.jiandaoyun.com/api/v5/app/entry/data/list' \
 --header 'Authorization: Bearer q1Lzhl8iknug9WFoQR2ijO1bHxZ6bwPI' \
 --header 'Content-Type: application/json' \
---data '{"app_id":"63324ce70ae4b40008f38909","entry_id":"64979d25210a5200083fbf9d","fields":["project_id","project_name","project_max_price","project_bids"],"filter":{"rel":"and","cond":[{"field":"project_id","type":"text","method":"eq","value":"01923"}]},"limit":1}'
+--data '{"app_id":"63324ce70ae4b40008f38909","entry_id":"64979d25210a5200083fbf9d","fields":["project_id","project_name", "project_pub_url", "project_max_price", "bid_6param", "project_bids"],"filter":{"rel":"and","cond":[{"field":"project_id","type":"text","method":"eq","value":"01923"}]},"limit":1}'
 
 
 # 返回结果
