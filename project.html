@@ -317,7 +317,12 @@ function parse6Params(paramStr) {
                             ${type}：${count}
                         </span>
                     `)
-                    .join('');
+                    .join('') + `
+                        <span class="me-3">
+                            <span class="company-type-indicator" style="background-color: rgba(108, 117, 125, 0.6)"></span>
+                            总计：${bids.length}
+                        </span>
+                    `;
                 
                 $('#companyStats').html(statsHtml);
             }
