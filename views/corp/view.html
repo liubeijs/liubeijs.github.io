@@ -68,7 +68,7 @@
 
         if (!companyName) {
             alert('请提供公司名称！');
-            window.location.href = 'create_corp.html';
+            window.location.href = 'create.html';
         }
 
         // 跳转到编辑页面
@@ -85,7 +85,7 @@
                     detail: companyData.corp_addr?.detail || '',
                     comment: companyData.comment || ''
                 });
-                window.location.href = `edit-corp.html?${params.toString()}`;
+                window.location.href = `edit.html?${params.toString()}`;
             }
         }
 
@@ -123,7 +123,7 @@
                     document.getElementById('companyInfo').style.display = 'block';
                 } else {
                     // 如果没有找到公司信息，跳转到创建页面
-                    window.location.href = `create_corp.html?name=${encodeURIComponent(companyName)}`;
+                    window.location.href = `create.html?name=${encodeURIComponent(companyName)}`;
                 }
             } catch (error) {
                 console.error('Error:', error);
