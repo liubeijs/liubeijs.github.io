@@ -6,17 +6,7 @@
     <title>查看公司信息</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .edit-btn {
-            /* 移除原有的absolute定位相关样式 */
-            margin-left: auto;
-        }
-    </style>
+    <link href="../common.css" rel="stylesheet">
 </head>
 <body>
     <div class="container mt-4">
@@ -47,7 +37,9 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-3 fw-bold">企业类型</div>
-                        <div class="col-md-9" id="corp_type"></div>
+                        <div class="col-md-9">
+                            <span class="corp-type-display" id="corp_type"></span>
+                        </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-3 fw-bold">企业地址</div>

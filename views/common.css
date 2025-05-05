@@ -1,0 +1,30 @@
+/* 公共样式 */
+.form-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.edit-btn {
+    margin-left: auto;
+}
+
+/* corp_type 样式 */
+#corp_type {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.corp-type-display {
+    color: #2c3e50;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: #e4f29f;
+}
