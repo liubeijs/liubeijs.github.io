@@ -7,10 +7,14 @@
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         .edit-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+            /* 移除原有的absolute定位相关样式 */
+            margin-left: auto;
         }
     </style>
 </head>
