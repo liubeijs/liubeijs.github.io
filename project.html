@@ -570,9 +570,9 @@ function parse6Params(paramStr) {
                     if (typeA === '中标人') return -1;
                     if (typeB === '中标人') return 1;
                 
-                    // 如果类型相同，按企业名称排序
+                    // 如果类型相同，按投标报价从低到高排序
                     if (typeA === typeB) {
-                        return a.bid_corp_name.localeCompare(b.bid_corp_name);
+                        return a.bid_price - b.bid_price;
                     }
                 
                     return typeA.localeCompare(typeB);
