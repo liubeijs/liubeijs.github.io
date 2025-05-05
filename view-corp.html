@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查看公司信息</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .edit-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="card position-relative">
+            <div class="card-header">
+                <h5 class="card-title mb-0">公司信息</h5>
+                <div id="editButton" style="display: none;" class="edit-btn">
+                    <button class="btn btn-primary btn-sm" onclick="goToEdit()">
+                        <i class="bi bi-pencil"></i> 编辑
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="loadingSpinner" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p class="mt-2">正在加载公司信息...</p>
+                </div>
+                <div id="companyInfo" style="display: none;">
+                    <div class="row mb-3">
+                        <div class="col-md-3 fw-bold">公司名称</div>
+                        <div class="col-md-9" id="corp_name"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 fw-bold">统一社会信用代码</div>
+                        <div class="col-md-9" id="credit_code"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 fw-bold">企业类型</div>
+                        <div class="col-md-9" id="corp_type"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 fw-bold">企业地址</div>
+                        <div class="col-md-9" id="corp_addr"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 fw-bold">备注</div>
+                        <div class="col-md-9" id="comment"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 获取URL参数中的公司名称
+        const urlParams = new URLSearchParams(window.location.search);
+        const companyName = urlParams.get('name');
+        let companyData = null;
+
+        if (!companyName) {
+            alert('请提供公司名称！');
+            window.location.href = 'create_corp.html';
+        }
+
+        // 跳转到编辑页面
+        function goToEdit() {
+            if (companyData && companyData._id) {
+                const params = new URLSearchParams({
+                    dataId: companyData._id,
+                    corp_name: companyData.corp_name || '',
+                    credit_code: companyData.credit_code || '',
+                    corp_type: companyData.corp_type || '',
+                    province: companyData.corp_addr?.province || '',
+                    city: companyData.corp_addr?.city || '',
+                    district: companyData.corp_addr?.district || '',
+                    detail: companyData.corp_addr?.detail || '',
+                    comment: companyData.comment || ''
+                });
+                window.location.href = `edit-corp.html?${params.toString()}`;
+            }
+        }
+
+        // 加载公司信息
+        async function loadCompanyInfo() {
+            try {
+                const response = await fetch(`http://sf.liubeijs.com/api/corps?names=${encodeURIComponent(companyName)}`);
+                const result = await response.json();
+
+                if (response.ok && result.data && result.data.length > 0) {
+                    companyData = result.data[0];
+                    
+                    // 显示编辑按钮
+                    document.getElementById('editButton').style.display = 'block';
+                    
+                    // 填充数据
+                    document.getElementById('corp_name').textContent = companyData.corp_name || '-';
+                    document.getElementById('credit_code').textContent = companyData.credit_code || '-';
+                    document.getElementById('corp_type').textContent = companyData.corp_type || '-';
+                    
+                    // 处理地址信息
+                    const addr = companyData.corp_addr || {};
+                    const fullAddr = [
+                        addr.province || '',
+                        addr.city || '',
+                        addr.district || '',
+                        addr.detail || ''
+                    ].filter(Boolean).join(' ');
+                    document.getElementById('corp_addr').textContent = fullAddr || '-';
+                    
+                    document.getElementById('comment').textContent = companyData.comment || '-';
+                    
+                    // 显示信息区域
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    document.getElementById('companyInfo').style.display = 'block';
+                } else {
+                    // 如果没有找到公司信息，跳转到创建页面
+                    window.location.href = `create_corp.html?name=${encodeURIComponent(companyName)}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('加载公司信息失败，请稍后重试');
+            }
+        }
+
+        // 页面加载完成后执行
+        $(document).ready(function() {
+            loadCompanyInfo();
+        });
+    </script>
+</body>
+</html>

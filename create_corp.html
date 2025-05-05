@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建公司信息</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container form-container">
+        <h2 class="mb-4">创建公司信息</h2>
+        <form id="companyForm">
+            <div class="mb-3">
+                <label for="corp_name" class="form-label">公司名称 *</label>
+                <input type="text" class="form-control" id="corp_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="credit_code" class="form-label">统一社会信用代码</label>
+                <input type="text" class="form-control" id="credit_code">
+            </div>
+            <div class="mb-3">
+                <label for="corp_type" class="form-label">企业类型</label>
+                <select class="form-select" id="corp_type">
+                    <option value="民企">民企</option>
+                    <option value="国企">国企</option>
+                    <option value="央企">央企</option>
+                    <option value="其它">其它</option>
+                </select>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="province" class="form-label">省份</label>
+                    <input type="text" class="form-control" id="province">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="city" class="form-label">城市</label>
+                    <input type="text" class="form-control" id="city">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="district" class="form-label">区县</label>
+                    <input type="text" class="form-control" id="district">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="detail" class="form-label">详细地址</label>
+                    <input type="text" class="form-control" id="detail">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="comment" class="form-label">备注</label>
+                <textarea class="form-control" id="comment" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">提交</button>
+        </form>
+        
+        <!-- 提示框 -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="resultToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto" id="toastTitle">提示</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入Bootstrap和其他必要的JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('companyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // 收集表单数据
+            const formData = {
+                corp_name: document.getElementById('corp_name').value,
+                credit_code: document.getElementById('credit_code').value,
+                corp_type: document.getElementById('corp_type').value,
+                province: document.getElementById('province').value,
+                city: document.getElementById('city').value,
+                district: document.getElementById('district').value,
+                detail: document.getElementById('detail').value,
+                comment: document.getElementById('comment').value
+            };
+
+            // 移除空值
+            Object.keys(formData).forEach(key => {
+                if (!formData[key]) {
+                    delete formData[key];
+                }
+            });
+
+            try {
+                const response = await fetch('http://sf.liubeijs.com/api/corps', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                // 显示结果提示
+                const toast = new bootstrap.Toast(document.getElementById('resultToast'));
+                if (response.ok) {
+                    document.getElementById('toastTitle').textContent = '成功';
+                    document.getElementById('toastMessage').textContent = '公司信息创建成功！';
+                    document.getElementById('companyForm').reset();
+                } else {
+                    document.getElementById('toastTitle').textContent = '错误';
+                    document.getElementById('toastMessage').textContent = result.message || '创建失败，请重试';
+                }
+                toast.show();
+
+            } catch (error) {
+                console.error('Error:', error);
+                const toast = new bootstrap.Toast(document.getElementById('resultToast'));
+                document.getElementById('toastTitle').textContent = '错误';
+                document.getElementById('toastMessage').textContent = '网络错误，请稍后重试';
+                toast.show();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -228,4 +228,99 @@ router.get('/corps', async (req, res) => {
   }
 });
 
+// 创建公司信息
+router.post('/corps', async (req, res) => {
+  try {
+    const requestData = {
+      app_id: "67fb6672450241050858e140",
+      entry_id: "680a510711e47823ae1f678f",
+      data: {
+        corp_name: { value: req.body.corp_name },
+        credit_code: { value: req.body.credit_code || '' },
+        corp_type: { value: req.body.corp_type || '民企' },
+        comment: { value: req.body.comment || '' },
+        corp_addr: {
+          value: {
+            province: req.body.province || '',
+            city: req.body.city || '',
+            district: req.body.district || '',
+            detail: req.body.detail || ''
+          }
+        }
+      }
+    };
+
+    // 发送请求到简道云API
+    const response = await axios({
+      method: 'post',
+      url: `${API_CONFIG.baseURL}/app/entry/data/create`,
+      headers: {
+        'Authorization': `Bearer ${API_CONFIG.token}`,
+        'Content-Type': 'application/json'
+      },
+      data: requestData
+    });
+
+    // 返回结果
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error creating company data:', error);
+    res.status(500).json({
+      error: '创建公司信息失败',
+      message: error.message
+    });
+  }
+});
+
+// 更新公司信息
+router.put('/corps/:dataId', async (req, res) => {
+  try {
+    const dataId = req.params.dataId;
+    
+    const requestData = {
+      app_id: "67fb6672450241050858e140",
+      entry_id: "680a510711e47823ae1f678f",
+      data_id: dataId,
+      data: {
+        ...(req.body.corp_name && { corp_name: { value: req.body.corp_name } }),
+        ...(req.body.credit_code && { credit_code: { value: req.body.credit_code } }),
+        ...(req.body.corp_type && { corp_type: { value: req.body.corp_type } }),
+        ...(req.body.comment && { comment: { value: req.body.comment } }),
+        ...((req.body.province || req.body.city || req.body.district || req.body.detail) && {
+          corp_addr: {
+            value: {
+              ...(req.body.province && { province: req.body.province }),
+              ...(req.body.city && { city: req.body.city }),
+              ...(req.body.district && { district: req.body.district }),
+              ...(req.body.detail && { detail: req.body.detail })
+            }
+          }
+        })
+      }
+    };
+
+    // 发送请求到简道云API
+    const response = await axios({
+      method: 'post',
+      url: `${API_CONFIG.baseURL}/app/entry/data/update`,
+      headers: {
+        'Authorization': `Bearer ${API_CONFIG.token}`,
+        'Content-Type': 'application/json'
+      },
+      data: requestData
+    });
+
+    // 返回结果
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error updating company data:', error);
+    res.status(500).json({
+      error: '更新公司信息失败',
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;

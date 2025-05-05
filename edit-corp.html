@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑公司信息</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">编辑公司信息</h5>
+            </div>
+            <div class="card-body">
+                <form id="editCorpForm">
+                    <div class="mb-3">
+                        <label for="corp_name" class="form-label">公司名称</label>
+                        <input type="text" class="form-control" id="corp_name" name="corp_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="credit_code" class="form-label">统一社会信用代码</label>
+                        <input type="text" class="form-control" id="credit_code" name="credit_code">
+                    </div>
+                    <div class="mb-3">
+                        <label for="corp_type" class="form-label">企业类型</label>
+                        <select class="form-select" id="corp_type" name="corp_type">
+                            <option value="">请选择企业类型</option>
+                            <option value="国企">国企</option>
+                            <option value="民企">民企</option>
+                            <option value="外企">外企</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">企业地址</label>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="province" name="province" placeholder="省份">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="city" name="city" placeholder="城市">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="district" name="district" placeholder="区县">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="detail" name="detail" placeholder="详细地址">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="comment" class="form-label">备注</label>
+                        <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> 保存
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                            <i class="bi bi-arrow-left"></i> 返回
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 获取URL参数中的dataId
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataId = urlParams.get('dataId');
+
+            if (!dataId) {
+                alert('请提供公司ID！');
+                return;
+            }
+
+            // 填充表单数据
+            $('#corp_name').val(urlParams.get('corp_name') || '');
+            $('#credit_code').val(urlParams.get('credit_code') || '');
+            $('#corp_type').val(urlParams.get('corp_type') || '');
+            $('#province').val(urlParams.get('province') || '');
+            $('#city').val(urlParams.get('city') || '');
+            $('#district').val(urlParams.get('district') || '');
+            $('#detail').val(urlParams.get('detail') || '');
+            $('#comment').val(urlParams.get('comment') || '');
+
+            // 表单提交处理
+            $('#editCorpForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                // 构建请求数据
+                const formData = {
+                    corp_name: $('#corp_name').val(),
+                    credit_code: $('#credit_code').val(),
+                    corp_type: $('#corp_type').val(),
+                    province: $('#province').val(),
+                    city: $('#city').val(),
+                    district: $('#district').val(),
+                    detail: $('#detail').val(),
+                    comment: $('#comment').val()
+                };
+
+                // 发送更新请求
+                $.ajax({
+                    url: `http://sf.liubeijs.com/api/corps/${dataId}`,
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        alert('保存成功！');
+                        window.history.back();
+                    },
+                    error: function(xhr, status, error) {
+                        let errorMessage = '保存失败';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        alert(`保存失败：${errorMessage}`);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
