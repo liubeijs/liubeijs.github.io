@@ -92,7 +92,7 @@
         // 加载公司信息
         async function loadCompanyInfo() {
             try {
-                const response = await fetch(`http://sf.liubeijs.com/api/corps?names=${encodeURIComponent(companyName)}`);
+                const response = await fetch(`https://sf.liubeijs.com/api/corps?names=${encodeURIComponent(companyName)}`);
                 const result = await response.json();
 
                 if (response.ok && result.data && result.data.length > 0) {
