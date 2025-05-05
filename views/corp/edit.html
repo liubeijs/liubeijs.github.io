@@ -38,13 +38,19 @@
                         <label class="form-label">企业地址</label>
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <input type="text" class="form-control" id="province" name="province" placeholder="省份">
+                                <select class="form-select" id="province" name="province">
+                                    <option value="">请选择省份</option>
+                                </select>
                             </div>
                             <div class="col-md-3">
-                                <input type="text" class="form-control" id="city" name="city" placeholder="城市">
+                                <select class="form-select" id="city" name="city" disabled>
+                                    <option value="">请选择城市</option>
+                                </select>
                             </div>
                             <div class="col-md-3">
-                                <input type="text" class="form-control" id="district" name="district" placeholder="区县">
+                                <select class="form-select" id="district" name="district" disabled>
+                                    <option value="">请选择区县</option>
+                                </select>
                             </div>
                             <div class="col-md-3">
                                 <input type="text" class="form-control" id="detail" name="detail" placeholder="详细地址">
@@ -70,6 +76,7 @@
 
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+    <script src="area.js"></script>
     <script>
         $(document).ready(function() {
             // 获取URL参数中的dataId
@@ -129,6 +136,88 @@
                 });
             });
         });
+    
+    async function loadAreaData() {
+        try {
+            // 初始化省份选择
+            const provinceSelect = document.getElementById('province');
+            Object.keys(areaData).forEach(province => {
+                const option = new Option(province, province);
+                provinceSelect.add(option);
+            });
+
+            // 设置已选择的值
+            const selectedProvince = urlParams.get('province');
+            const selectedCity = urlParams.get('city');
+            const selectedDistrict = urlParams.get('district');
+
+            if (selectedProvince) {
+                provinceSelect.value = selectedProvince;
+                provinceSelect.dispatchEvent(new Event('change'));
+
+                if (selectedCity) {
+                    const citySelect = document.getElementById('city');
+                    citySelect.value = selectedCity;
+                    citySelect.dispatchEvent(new Event('change'));
+
+                    if (selectedDistrict) {
+                        const districtSelect = document.getElementById('district');
+                        districtSelect.value = selectedDistrict;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('加载行政区划数据失败:', error);
+        }
+    }
+
+    // 省份选择变化时更新城市
+    document.getElementById('province').addEventListener('change', function() {
+        const citySelect = document.getElementById('city');
+        const districtSelect = document.getElementById('district');
+        
+        citySelect.innerHTML = '<option value="">请选择城市</option>';
+        districtSelect.innerHTML = '<option value="">请选择区县</option>';
+        
+        if (this.value) {
+            const cities = Object.keys(areaData[this.value]);
+            cities.forEach(city => {
+                const option = new Option(city, city);
+                citySelect.add(option);
+            });
+            citySelect.disabled = false;
+            districtSelect.disabled = true;
+        } else {
+            citySelect.disabled = true;
+            districtSelect.disabled = true;
+        }
+    });
+
+    // 城市选择变化时更新区县
+    document.getElementById('city').addEventListener('change', function() {
+        const districtSelect = document.getElementById('district');
+        const province = document.getElementById('province').value;
+        
+        districtSelect.innerHTML = '<option value="">请选择区县</option>';
+        
+        if (this.value && province) {
+            const districts = Object.keys(areaData[province][this.value]);
+            districts.forEach(district => {
+                const option = new Option(district, district);
+                districtSelect.add(option);
+            });
+            districtSelect.disabled = false;
+        } else {
+            districtSelect.disabled = true;
+        }
+    });
+
+    // 页面加载完成后执行
+    $(document).ready(function() {
+        loadAreaData();
+        // ... existing code ...
+    });
+
     </script>
 </body>
 </html>

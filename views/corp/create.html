@@ -39,15 +39,21 @@
             <div class="row">
                 <div class="col-md-3 mb-3">
                     <label for="province" class="form-label">省份</label>
-                    <input type="text" class="form-control" id="province">
+                    <select class="form-select" id="province">
+                        <option value="">请选择省份</option>
+                    </select>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="city" class="form-label">城市</label>
-                    <input type="text" class="form-control" id="city">
+                    <select class="form-select" id="city" disabled>
+                        <option value="">请选择城市</option>
+                    </select>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="district" class="form-label">区县</label>
-                    <input type="text" class="form-control" id="district">
+                    <select class="form-select" id="district" disabled>
+                        <option value="">请选择区县</option>
+                    </select>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="detail" class="form-label">详细地址</label>
@@ -75,15 +81,8 @@
 
     <!-- 引入Bootstrap和其他必要的JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="area.js"></script>
     <script>
-        // 页面加载时读取URL参数
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const companyName = urlParams.get('name');
-            if (companyName) {
-                document.getElementById('corp_name').value = decodeURIComponent(companyName);
-            }
-        });
 
         document.getElementById('companyForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -140,6 +139,72 @@
                 toast.show();
             }
         });
-    </script>
+    
+    async function loadAreaData() {
+        try {
+            // 初始化省份选择
+            const provinceSelect = document.getElementById('province');
+            Object.keys(areaData).forEach(province => {
+                const option = new Option(province, province);
+                provinceSelect.add(option);
+            });
+        } catch (error) {
+            console.error('加载行政区划数据失败:', error);
+        }
+    }
+
+    // 省份选择变化时更新城市
+    document.getElementById('province').addEventListener('change', function() {
+        const citySelect = document.getElementById('city');
+        const districtSelect = document.getElementById('district');
+        
+        citySelect.innerHTML = '<option value="">请选择城市</option>';
+        districtSelect.innerHTML = '<option value="">请选择区县</option>';
+        
+        if (this.value) {
+            const cities = Object.keys(areaData[this.value]);
+            cities.forEach(city => {
+                const option = new Option(city, city);
+                citySelect.add(option);
+            });
+            citySelect.disabled = false;
+            districtSelect.disabled = true;
+        } else {
+            citySelect.disabled = true;
+            districtSelect.disabled = true;
+        }
+    });
+
+    // 城市选择变化时更新区县
+    document.getElementById('city').addEventListener('change', function() {
+        const districtSelect = document.getElementById('district');
+        const province = document.getElementById('province').value;
+        
+        districtSelect.innerHTML = '<option value="">请选择区县</option>';
+        
+        if (this.value && province) {
+            const districts = Object.keys(areaData[province][this.value]);
+            districts.forEach(district => {
+                const option = new Option(district, district);
+                districtSelect.add(option);
+            });
+            districtSelect.disabled = false;
+        } else {
+            districtSelect.disabled = true;
+        }
+    });
+
+            // 页面加载时读取URL参数
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const companyName = urlParams.get('name');
+            if (companyName) {
+                document.getElementById('corp_name').value = decodeURIComponent(companyName);
+            }
+            loadAreaData();
+        });
+
+</script>
+
 </body>
 </html>
