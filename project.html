@@ -7,6 +7,7 @@
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="map/china.js"></script>
     <style>
         .company-link {
             color: #666;
@@ -169,10 +170,23 @@
                 </div>
             </div>
         </div>
+
+        <!-- 添加地图容器 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                投标单位区域分布
+            </div>
+            <div class="card-body">
+                <div id="chinaMap" style="height: 600px;"></div>
+            </div>
+        </div>
+
     </div>
 
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json"></script>
     <script>
 
 // 添加解析六参数的函数
@@ -379,6 +393,72 @@ function parse6Params(paramStr) {
 
                     // 重新渲染表格
                     renderBidList(sortedBids);
+
+                    // 统计各省份投标单位数量
+                    const provinceData = {};
+                    sortedBids.forEach(bid => {
+                        const province = bid.corp_addr?.province;
+                        if (province) {
+                            provinceData[province] = (provinceData[province] || 0) + 1;
+                        }
+                    });
+
+                    // 转换数据格式为 ECharts 所需的格式
+                    const mapData = Object.entries(provinceData).map(([name, value]) => ({
+                        name,
+                        value
+                    }));
+
+                    // 初始化地图之前先注册地图数据
+
+                        echarts.registerMap('china', chinaJson);
+                        
+                        // 初始化地图
+                        const mapChart = echarts.init(document.getElementById('chinaMap'));
+                        
+                        // 配置地图选项
+                        const option = {
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: function(params) {
+                                const province = params.name;
+                                const count = params.value || 0;
+                                
+                                // 获取该省份的所有投标单位
+                                const companies = sortedBids
+                                    .filter(bid => bid.corp_addr?.province === province)
+                                    .map(bid => bid.bid_corp_name);
+                                
+                                return `${province}<br/>投标单位数量：${count}<br/>投标单位：<br/>${companies.join('<br/>')}`;
+                            }
+                        },
+                        visualMap: {
+                            min: 0,
+                            max: Math.max(...Object.values(provinceData)),
+                            left: 'left',
+                            top: 'bottom',
+                            text: ['高', '低'],
+                            calculable: true,
+                            inRange: {
+                                color: ['#e0f3f8', '#2a5674']
+                            }
+                        },
+                        series: [{
+                            name: '投标单位分布',
+                            type: 'map',
+                            map: 'china',
+                            roam: true,
+                            emphasis: {
+                                label: {
+                                    show: true
+                                }
+                            },
+                            data: mapData
+                        }]};
+                    
+                    // 渲染地图
+                    mapChart.setOption(option);
+
                 }
             } catch (error) {
                 console.error('区域分析失败：', error);
@@ -769,5 +849,4 @@ $(document).on('click', function(e) {
     </script>
 </body>
 </html>
-
 
