@@ -102,6 +102,9 @@
                                 <p class="project-name mb-2">项目名称：-</p>
                                 <p class="project-url mb-2">项目链接：-</p>
                                 <p class="project-price mb-0">最高限价：-</p>
+                                <p class="project-analysis mb-0">
+                                    <a href="#" class="analysis-link" target="_blank">报价分析</a>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -112,6 +115,9 @@
                                 <p class="project-name mb-2">项目名称：-</p>
                                 <p class="project-url mb-2">项目链接：-</p>
                                 <p class="project-price mb-0">最高限价：-</p>
+                                <p class="project-analysis mb-0">
+                                    <a href="#" class="analysis-link" target="_blank">报价分析</a>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -122,6 +128,9 @@
                                 <p class="project-name mb-2">项目名称：-</p>
                                 <p class="project-url mb-2">项目链接：-</p>
                                 <p class="project-price mb-0">最高限价：-</p>
+                                <p class="project-analysis mb-0">
+                                    <a href="#" class="analysis-link" target="_blank">报价分析</a>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -132,6 +141,9 @@
                                 <p class="project-name mb-2">项目名称：-</p>
                                 <p class="project-url mb-2">项目链接：-</p>
                                 <p class="project-price mb-0">最高限价：-</p>
+                                <p class="project-analysis mb-0">
+                                    <a href="#" class="analysis-link" target="_blank">报价分析</a>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -195,6 +207,7 @@
                         style: 'currency',
                         currency: 'CNY'
                     }).format(projectInfo.project_max_price)}`;
+                    infoCard.querySelector('.analysis-link').href = `http://pages.liubeijs.com/project.html?project_id=${projectId}`;
                     
                     // 更新投标单位数量
                     document.getElementById(`count${index}`).textContent = projectData[index].length;
