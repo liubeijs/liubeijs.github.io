@@ -346,8 +346,16 @@ function parse6Params(paramStr) {
                 // 获取所有投标单位名称
                 const companyNames = sortedBids.map(bid => bid.bid_corp_name);
                 
-                // 调用API获取公司信息
-                const response = await fetch(`https://sf.liubeijs.com/api/corps?names=${encodeURIComponent(companyNames.join(','))}`);
+                // 调用API获取公司信息（使用POST方法）
+                const response = await fetch('https://sf.liubeijs.com/api/corps/batch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        names: companyNames
+                    })
+                });
                 const result = await response.json();
 
                 if (response.ok && result.data) {
