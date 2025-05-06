@@ -5,12 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>项目投标单位对比</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
         .highlight {
             background-color: #e3f2fd;
         }
         .project-column {
             min-width: 300px;
+        }
+        /* 添加菜单样式 */
+        .menu-trigger {
+            cursor: pointer;
+            color: #666;
+            margin-left: 5px;
+        }
+        .menu-trigger:hover {
+            color: #007bff;
+        }
+        .icon-buttons {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 5px;
+            z-index: 1000;
+            margin-left: 5px;
+        }
+        .icon-buttons.show {
+            display: inline-flex;
+            gap: 8px;
+        }
+        .icon-button {
+            color: #666;
+            padding: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .icon-button:hover {
+            color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .icon-button i {
+            font-size: 1em;
         }
     </style>
 </head>
@@ -102,6 +141,8 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
+                                <th style="width: 40px;">No.</th>
+                                <th style="width: 40px;"></th>
                                 <th>项目1投标单位 (<span id="count1">0</span>家)</th>
                                 <th>项目2投标单位 (<span id="count2">0</span>家)</th>
                                 <th>项目3投标单位 (<span id="count3">0</span>家)</th>
@@ -185,6 +226,47 @@
             // 填充表格
             for (let i = 0; i < maxLength; i++) {
                 const row = `<tr>
+                    <td class="text-center">${i + 1}</td>
+                    <td>
+                        ${projectData[1][i] ? `
+                            <span class="menu-trigger" data-company="${projectData[1][i]}">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </span>
+                            <div class="icon-buttons">
+                                <a href="javascript:void(0)" class="icon-button copy-name" title="复制企业名称" data-company="${projectData[1][i]}">
+                                    <i class="bi bi-clipboard"></i>
+                                </a>
+                                <a href="https://www.qcc.com/web/search?key=${encodeURIComponent(projectData[1][i])}" 
+                                   target="_blank" class="icon-button" title="企业信息查询">
+                                    <i class="bi bi-search"></i>
+                                </a>
+                                <a href="https://pages.liubeijs.com/views/corp/view.html?name=${encodeURIComponent(projectData[1][i])}" 
+                                   target="_blank" class="icon-button" title="企业内部信息查询">
+                                    <i class="bi bi-database"></i>
+                                </a>
+                                <a href="https://jst.cbi360.net/company/?companyname=${encodeURIComponent(projectData[1][i])}" 
+                                   target="_blank" class="icon-button" title="建设通查询">
+                                    <i class="bi bi-building-gear"></i>
+                                </a>
+                                <a href="http://yyjc.hnsdzjy.org:20005/sun/main?searchValue=${encodeURIComponent(projectData[1][i])}&searchType=mainInfo" 
+                                   target="_blank" class="icon-button" title="阳光房信息">
+                                    <i class="bi bi-sun"></i>
+                                </a>
+                                <a href="https://hwdms.mot.gov.cn/BMWebSite/company/indexSearch.do?text=${encodeURIComponent(projectData[1][i])}" 
+                                   target="_blank" class="icon-button" title="公路信息">
+                                    <i class="bi bi-truck"></i>
+                                </a>
+                                <a href="https://jzsc.mohurd.gov.cn/data/company?complexname=${encodeURIComponent(projectData[1][i])}" 
+                                   target="_blank" class="icon-button" title="建筑信息">
+                                    <i class="bi bi-building"></i>
+                                </a>
+                                <a href="https://pages.liubeijs.com/traffic-credit.html?company_name=${encodeURIComponent(projectData[1][i])}" 
+                                   target="_blank" class="icon-button" title="公路信用评价">
+                                    <i class="bi bi-award"></i>
+                                </a>
+                            </div>
+                        ` : ''}
+                    </td>
                     <td class="project-column">${projectData[1][i] || ''}</td>
                     <td class="project-column">${projectData[2][i] || ''}</td>
                     <td class="project-column">${projectData[3][i] || ''}</td>
@@ -194,7 +276,7 @@
             }
         }
 
-        // 对比项目
+        // 对比项目函数也需要修改
         function compareProjects() {
             const $table = $('#compareTable');
             $table.empty();
@@ -224,8 +306,56 @@
             });
 
             // 填充表格
-            sortedCompanies.forEach(company => {
+            sortedCompanies.forEach((company, index) => {
                 const row = document.createElement('tr');
+                
+                // 添加序号列
+                const indexCell = document.createElement('td');
+                indexCell.className = 'text-center';
+                indexCell.textContent = index + 1;
+                row.appendChild(indexCell);
+                
+                // 添加操作列
+                const operationCell = document.createElement('td');
+                operationCell.innerHTML = `
+                    <span class="menu-trigger" data-company="${company}">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </span>
+                    <div class="icon-buttons">
+                        <a href="javascript:void(0)" class="icon-button copy-name" title="复制企业名称" data-company="${company}">
+                            <i class="bi bi-clipboard"></i>
+                        </a>
+                        <a href="https://www.qcc.com/web/search?key=${encodeURIComponent(company)}" 
+                           target="_blank" class="icon-button" title="企业信息查询">
+                            <i class="bi bi-search"></i>
+                        </a>
+                        <a href="https://pages.liubeijs.com/views/corp/view.html?name=${encodeURIComponent(company)}" 
+                           target="_blank" class="icon-button" title="企业内部信息查询">
+                            <i class="bi bi-database"></i>
+                        </a>
+                        <a href="https://jst.cbi360.net/company/?companyname=${encodeURIComponent(company)}" 
+                           target="_blank" class="icon-button" title="建设通查询">
+                            <i class="bi bi-building-gear"></i>
+                        </a>
+                        <a href="http://yyjc.hnsdzjy.org:20005/sun/main?searchValue=${encodeURIComponent(company)}&searchType=mainInfo" 
+                           target="_blank" class="icon-button" title="阳光房信息">
+                            <i class="bi bi-sun"></i>
+                        </a>
+                        <a href="https://hwdms.mot.gov.cn/BMWebSite/company/indexSearch.do?text=${encodeURIComponent(company)}" 
+                           target="_blank" class="icon-button" title="公路信息">
+                            <i class="bi bi-truck"></i>
+                        </a>
+                        <a href="https://jzsc.mohurd.gov.cn/data/company?complexname=${encodeURIComponent(company)}" 
+                           target="_blank" class="icon-button" title="建筑信息">
+                            <i class="bi bi-building"></i>
+                        </a>
+                        <a href="https://pages.liubeijs.com/traffic-credit.html?company_name=${encodeURIComponent(company)}" 
+                           target="_blank" class="icon-button" title="公路信用评价">
+                            <i class="bi bi-award"></i>
+                        </a>
+                    </div>
+                `;
+                row.appendChild(operationCell);
                 
                 // 如果公司在多个项目中出现，添加高亮样式
                 const highlight = companyCount[company] > 1 ? 'highlight' : '';
@@ -241,6 +371,40 @@
                 $table.append(row);
             });
         }
+
+            // 处理三点菜单的点击事件
+    $(document).on('click', '.menu-trigger', function(e) {
+        e.stopPropagation(); // 阻止事件冒泡
+        const $buttons = $(this).next('.icon-buttons');
+        $('.icon-buttons').not($buttons).removeClass('show'); // 关闭其他打开的按钮组
+        $buttons.toggleClass('show');
+    });
+
+    // 点击页面其他地方时关闭按钮组
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.icon-buttons').length && !$(e.target).closest('.menu-trigger').length) {
+            $('.icon-buttons').removeClass('show');
+        }
+    });
+
+    // 添加复制功能
+    $(document).on('click', '.copy-name', function(e) {
+        e.preventDefault();
+        const companyName = $(this).data('company');
+        
+        // 创建临时文本区域
+        const textarea = document.createElement('textarea');
+        textarea.value = companyName;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        // 提示复制成功
+        alert('企业名称已复制到剪贴板');
+    });
     </script>
+
+
 </body>
 </html>
