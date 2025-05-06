@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目投标单位对比</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .highlight {
+            background-color: #e3f2fd;
+        }
+        .project-column {
+            min-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-4">项目投标单位对比</h2>
+        
+        <!-- 输入区域 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                项目信息输入
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="projectId1" placeholder="请输入项目编号1" value="01951">
+                        <button class="btn btn-primary mt-2" onclick="loadProject(1)">加载</button>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="projectId2" placeholder="请输入项目编号2" value="02001">
+                        <button class="btn btn-primary mt-2" onclick="loadProject(2)">加载</button>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="projectId3" placeholder="请输入项目编号3" value="02097">
+                        <button class="btn btn-primary mt-2" onclick="loadProject(3)">加载</button>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="projectId4" placeholder="请输入项目编号4" value="02096">
+                        <button class="btn btn-primary mt-2" onclick="loadProject(4)">加载</button>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-success" onclick="compareProjects()">对比</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 对比结果表格 -->
+        <div class="card">
+            <div class="card-header">
+                对比结果
+            </div>
+            <div class="card-body">
+                <!-- 添加项目信息展示区域 -->
+                <div class="row mb-4" id="projectInfoArea">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-header">项目1信息</div>
+                            <div class="card-body" id="projectInfo1">
+                                <p class="project-name mb-2">项目名称：-</p>
+                                <p class="project-url mb-2">项目链接：-</p>
+                                <p class="project-price mb-0">最高限价：-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-header">项目2信息</div>
+                            <div class="card-body" id="projectInfo2">
+                                <p class="project-name mb-2">项目名称：-</p>
+                                <p class="project-url mb-2">项目链接：-</p>
+                                <p class="project-price mb-0">最高限价：-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-header">项目3信息</div>
+                            <div class="card-body" id="projectInfo3">
+                                <p class="project-name mb-2">项目名称：-</p>
+                                <p class="project-url mb-2">项目链接：-</p>
+                                <p class="project-price mb-0">最高限价：-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-header">项目4信息</div>
+                            <div class="card-body" id="projectInfo4">
+                                <p class="project-name mb-2">项目名称：-</p>
+                                <p class="project-url mb-2">项目链接：-</p>
+                                <p class="project-price mb-0">最高限价：-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>项目1投标单位 (<span id="count1">0</span>家)</th>
+                                <th>项目2投标单位 (<span id="count2">0</span>家)</th>
+                                <th>项目3投标单位 (<span id="count3">0</span>家)</th>
+                                <th>项目4投标单位 (<span id="count4">0</span>家)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compareTable">
+                            <!-- 数据将通过JavaScript动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        // 存储每个项目的投标单位数据
+        const projectData = {
+            1: [],
+            2: [],
+            3: [],
+            4: []
+        };
+
+        // 加载项目数据
+        async function loadProject(index) {
+            const projectId = document.getElementById(`projectId${index}`).value;
+            if (!projectId) {
+                alert('请输入项目编号');
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://sf.liubeijs.com/api/project/${projectId}`);
+                const result = await response.json();
+                
+                if (response.ok && result.data) {
+                    const projectInfo = result.data[0];
+                    // 提取投标单位名称，过滤掉投标价格为空或0的记录
+                    projectData[index] = projectInfo.project_bids
+                        .filter(bid => bid.bid_price && bid.bid_price > 0)
+                        .map(bid => bid.bid_corp_name);
+                    
+                    // 更新项目信息
+                    const infoCard = document.getElementById(`projectInfo${index}`);
+                    infoCard.querySelector('.project-name').textContent = `项目名称：${projectInfo.project_name}`;
+                    infoCard.querySelector('.project-url').innerHTML = `项目链接：<a href="${projectInfo.project_pub_url}" target="_blank">查看</a>`;
+                    infoCard.querySelector('.project-price').textContent = `最高限价：${new Intl.NumberFormat('zh-CN', {
+                        style: 'currency',
+                        currency: 'CNY'
+                    }).format(projectInfo.project_max_price)}`;
+                    
+                    // 更新投标单位数量
+                    document.getElementById(`count${index}`).textContent = projectData[index].length;
+                    
+                    // 更新表格
+                    updateTable();
+                } else {
+                    alert('加载项目数据失败');
+                }
+            } catch (error) {
+                console.error('加载失败：', error);
+                alert('加载项目数据失败，请稍后重试');
+            }
+        }
+
+        // 更新表格显示
+        function updateTable() {
+            const $table = $('#compareTable');
+            $table.empty();
+
+            // 找出最大长度
+            const maxLength = Math.max(
+                projectData[1].length,
+                projectData[2].length,
+                projectData[3].length,
+                projectData[4].length
+            );
+
+            // 填充表格
+            for (let i = 0; i < maxLength; i++) {
+                const row = `<tr>
+                    <td class="project-column">${projectData[1][i] || ''}</td>
+                    <td class="project-column">${projectData[2][i] || ''}</td>
+                    <td class="project-column">${projectData[3][i] || ''}</td>
+                    <td class="project-column">${projectData[4][i] || ''}</td>
+                </tr>`;
+                $table.append(row);
+            }
+        }
+
+        // 对比项目
+        function compareProjects() {
+            const $table = $('#compareTable');
+            $table.empty();
+
+            // 获取所有投标单位
+            const allCompanies = new Set([
+                ...projectData[1],
+                ...projectData[2],
+                ...projectData[3],
+                ...projectData[4]
+            ]);
+
+            // 创建公司出现次数的映射
+            const companyCount = {};
+            allCompanies.forEach(company => {
+                if (!company) return;
+                companyCount[company] = 0;
+                if (projectData[1].includes(company)) companyCount[company]++;
+                if (projectData[2].includes(company)) companyCount[company]++;
+                if (projectData[3].includes(company)) companyCount[company]++;
+                if (projectData[4].includes(company)) companyCount[company]++;
+            });
+
+            // 按出现次数排序
+            const sortedCompanies = Array.from(allCompanies).sort((a, b) => {
+                return companyCount[b] - companyCount[a];
+            });
+
+            // 填充表格
+            sortedCompanies.forEach(company => {
+                const row = document.createElement('tr');
+                
+                // 如果公司在多个项目中出现，添加高亮样式
+                const highlight = companyCount[company] > 1 ? 'highlight' : '';
+                
+                // 为每个项目创建单元格
+                [1, 2, 3, 4].forEach(index => {
+                    const cell = document.createElement('td');
+                    cell.className = `project-column ${highlight}`;
+                    cell.textContent = projectData[index].includes(company) ? company : '';
+                    row.appendChild(cell);
+                });
+
+                $table.append(row);
+            });
+        }
+    </script>
+</body>
+</html>
