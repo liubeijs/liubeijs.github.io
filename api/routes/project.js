@@ -193,7 +193,7 @@ router.get('/corps', async (req, res) => {
     const requestData = {
       app_id: "67fb6672450241050858e140",
       entry_id: "680a510711e47823ae1f678f",
-      fields: ["corp_eid", "corp_name", "credit_code", "corp_addr", "corp_province", "corp_type", "comment"],
+      fields: ["corp_eid", "corp_name", "credit_code", "corp_addr", "corp_type", "comment"],
       filter: {
         rel: "and",
         cond: [{
@@ -244,7 +244,7 @@ router.post('/corps/batch', async (req, res) => {
     const requestData = {
       app_id: "67fb6672450241050858e140",
       entry_id: "680a510711e47823ae1f678f",
-      fields: ["corp_eid", "corp_name", "credit_code", "corp_addr", "corp_province", "corp_type", "comment"],
+      fields: ["corp_eid", "corp_name", "credit_code", "corp_addr", "corp_type", "comment"],
       filter: {
         rel: "and",
         cond: [{
