@@ -429,7 +429,7 @@ function parse6Params(paramStr) {
                                     .filter(bid => bid.corp_addr?.province === province)
                                     .map(bid => bid.bid_corp_name);
                                 
-                                return `${province}<br/>投标单位数量：${count}<br/>投标单位：<br/>${companies.join('<br/>')}`;
+                                return `${province} (${count}家)<br/>${companies.join('<br/>')}`;
                             }
                         },
                         visualMap: {
