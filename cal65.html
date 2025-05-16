@@ -434,7 +434,8 @@
             
             // 计算统计量
             const μ = bidsForCalculation.reduce((sum, bid) => sum + bid, 0) / bidsForCalculation.length;
-            steps += `- 算术平均数 (μ): ${μ.toFixed(2)}\n`;
+            const μRatio = (1-μ/maxPrice)*100;
+            steps += `- 算术平均数 (μ): ${μ.toFixed(2)} [${μRatio.toFixed(2)}%]\n`;
             
             // 中位数
             const sortedBids = [...bidsForCalculation].sort((a, b) => a - b);
