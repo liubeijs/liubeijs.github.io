@@ -160,6 +160,8 @@
             background: #f5f5f5;
             color: #333333;
         }
+
+        
         #data-viewer .viewer-content {
             flex: 1;
             overflow: auto;
