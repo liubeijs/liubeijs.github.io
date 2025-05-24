@@ -374,4 +374,51 @@ router.put('/corps/:dataId', async (req, res) => {
   }
 });
 
+
+
+// 获取公司清单
+router.get('/corp-list/:name', async (req, res) => {
+  try {
+    const name = req.params.name;
+    
+    // 构建请求参数
+    const requestData = {
+      app_id: "67fb6672450241050858e140",
+      entry_id: "6819f2ad1775fc1eaa0173e7",
+      fields: ["name", "corp_list", "comment"],
+      filter: {
+        rel: "and",
+        cond: [{
+          field: "name",
+          method: "eq",
+          value: name
+        }]
+      },
+      limit: 1
+    };
+
+    // 发送请求到简道云API
+    const response = await axios({
+      method: 'post',
+      url: `${API_CONFIG.baseURL}/app/entry/data/list`,
+      headers: {
+        'Authorization': `Bearer ${API_CONFIG.token}`,
+        'Content-Type': 'application/json'
+      },
+      data: requestData
+    });
+
+    // 返回结果
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error fetching corp list:', error);
+    res.status(500).json({
+      error: '获取公司清单失败',
+      message: error.message
+    });
+  }
+});
+
+
 module.exports = router;
