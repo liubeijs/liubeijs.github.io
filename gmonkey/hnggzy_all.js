@@ -7,7 +7,12 @@
 // @match        https://www.hnsggzy.com/*
 // @grant        GM_addStyle
 // @grant        GM_notification
+// @grant        GM_addElement
+// @grant        GM_getResourceText
 // @run-at       document-start
+// @require      https://cdn.bootcdn.net/ajax/libs/jsoneditor/10.1.3/jsoneditor.min.js
+// @resource     JSONEDITOR_CSS https://cdn.bootcdn.net/ajax/libs/jsoneditor/10.1.3/jsoneditor.min.css
+// @resource     JSONEDITOR_ICONS https://cdn.bootcdn.net/ajax/libs/jsoneditor/10.1.3/img/jsoneditor-icons.svg
 // ==/UserScript==
 
 (function() {
@@ -59,6 +64,9 @@
         }
     ];
 
+    // 添加 jsoneditor 样式
+    GM_addStyle(GM_getResourceText('JSONEDITOR_CSS'));
+
     // 添加样式
     GM_addStyle(`
         #api-buttons {
@@ -89,47 +97,89 @@
         .api-button.enabled:hover {
             background: #1976D2;
         }
+
         #data-viewer {
             position: fixed;
-            top: 10px;
-            right: 200px;
-            width: 600px;
-            max-height: 80vh;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            overflow: auto;
+            top: 20px;
+            right: 220px;
+            width: 800px;
+            height: 80vh;
+            background: #ffffff;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             display: none;
+            flex-direction: column;
             z-index: 9998;
+            overflow: hidden;
         }
         #data-viewer .viewer-header {
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e8e8e8;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+        }
+        #data-viewer .viewer-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a1a;
         }
         #data-viewer .action-buttons {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
         #data-viewer .action-buttons button {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
+            padding: 6px 12px;
+            border: 1px solid #e0e0e0;
             border-radius: 4px;
-            background: #fff;
+            background: #ffffff;
+            color: #333333;
             cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
         }
         #data-viewer .action-buttons button:hover {
-            background: #f0f0f0;
+            background: #f5f5f5;
+            border-color: #d0d0d0;
         }
-        #data-viewer pre {
-            margin: 0;
-            padding: 10px;
-            max-height: calc(100% - 50px);
+        #data-viewer .action-buttons .copy-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+        }
+        #data-viewer .action-buttons .copy-btn:hover {
+            background: #1976D2;
+        }
+        #data-viewer .action-buttons .close-btn {
+            background: #ffffff;
+            color: #666666;
+        }
+        #data-viewer .action-buttons .close-btn:hover {
+            background: #f5f5f5;
+            color: #333333;
+        }
+        #data-viewer .viewer-content {
+            flex: 1;
             overflow: auto;
+            padding: 16px;
+            background: #ffffff;
         }
+
+        .jsoneditor {
+            border: none !important;
+            height: 100% !important;
+        }
+
+        .jsoneditor-menu>button {
+            background-image: url('https://cdn.bootcdn.net/ajax/libs/jsoneditor/10.1.3/img/jsoneditor-icons.svg');
+        }
+        
+        div.jsoneditor-tree button.jsoneditor-button {
+            background-image: url('https://cdn.bootcdn.net/ajax/libs/jsoneditor/10.1.3/img/jsoneditor-icons.svg');        
+        }
+
         #reset-button {
             margin-top: 10px;
             padding: 8px 15px;
@@ -147,6 +197,8 @@
         }
     `);
 
+    let editor = null;
+
     // 创建UI元素
     function createUI() {
         const body = document.body;
@@ -159,13 +211,14 @@
         const dataViewer = document.createElement('div');
         dataViewer.id = 'data-viewer';
         dataViewer.innerHTML = `
-            <div class="viewer-header">
-                <div class="action-buttons">
-                    <button class="copy-btn">复制数据</button>
-                    <button class="close-btn">关闭</button>
-                </div>
+        <div class="viewer-header">
+            <div class="viewer-title"></div>
+            <div class="action-buttons">
+                <button class="copy-btn">复制数据</button>
+                <button class="close-btn">关闭</button>
             </div>
-            <pre></pre>
+        </div>
+        <div class="viewer-content"></div>
         `;
 
         // 添加关闭按钮事件
@@ -175,14 +228,22 @@
 
         // 添加复制按钮事件
         dataViewer.querySelector('.copy-btn').addEventListener('click', () => {
-            const pre = dataViewer.querySelector('pre');
-            navigator.clipboard.writeText(pre.textContent)
+            const jsonData = editor.get();
+            navigator.clipboard.writeText(JSON.stringify(jsonData, null, 2))
                 .then(() => {
-                    alert('数据已复制到剪贴板');
+                    GM_notification({
+                        title: '复制成功',
+                        text: '数据已复制到剪贴板',
+                        timeout: 2000
+                    });
                 })
                 .catch(err => {
                     console.error('复制失败:', err);
-                    alert('复制失败，请手动复制');
+                    GM_notification({
+                        title: '复制失败',
+                        text: '请手动复制数据',
+                        timeout: 2000
+                    });
                 });
         });
 
@@ -241,9 +302,30 @@
     // 显示数据
     function showData(data, title) {
         const viewer = document.getElementById('data-viewer');
-        const pre = viewer.querySelector('pre');
-        pre.textContent = JSON.stringify(data, null, 2);
-        viewer.style.display = 'block';
+        const titleElement = viewer.querySelector('.viewer-title');
+        const contentElement = viewer.querySelector('.viewer-content');
+
+        titleElement.textContent = title;
+
+        // 如果编辑器已存在，销毁它
+        if (editor) {
+            editor.destroy();
+        }
+
+        // 创建新的编辑器实例
+        const options = {
+            mode: 'view',
+            modes: ['view', 'form', 'code', 'tree'],
+            onModeChange: function(newMode, oldMode) {
+                contentElement.style.overflow = newMode === 'code' ? 'hidden' : 'auto';
+            },
+            onError: function(error) {
+                console.error('JSON编辑器错误:', error);
+            }
+        };
+
+        editor = new JSONEditor(contentElement, options, data);
+        viewer.style.display = 'flex';
     }
 
     // 更新按钮状态
