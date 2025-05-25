@@ -249,7 +249,8 @@
         };
     }
 
-    // JianDaoYun的接口
+
+    // 创建 JianDaoYun 数据
     function safePostToJianDaoYun(requestBody, apiIndex) {
 
         // 禁用发送按钮
@@ -311,6 +312,15 @@
     }
 
     // Helper
+
+    // 从URL中获取bidSectionId
+    function getBidSectionIdFromUrl() {
+        const url = window.location.href;
+        const urlParams = new URLSearchParams(url.split('?')[1]);
+        CUR_PROJECT_BID_ID = urlParams.get('bidSectionId') || '';
+        return CUR_PROJECT_BID_ID;
+    }
+
     function parseAmount(amountStr) {
         // 移除所有空格
         amountStr = amountStr.replace(/\s+/g, '');
@@ -395,6 +405,10 @@
         
         return result;
     }
+
+    // 定义全局变量, 当前简道云对应的项目
+    let CUR_PROJECTS = {}
+    let CUR_PROJECT_BID_ID = '';
 
     // 定义接口配置
     const API_CONFIG = [
@@ -661,6 +675,16 @@
         }
     `);
 
+    // 更新项目信息展示条
+    function updateProjectInfo() {
+        const projectIdElement = document.getElementById('project-id');
+        const projectNameElement = document.getElementById('project-name');
+        if (projectIdElement && projectNameElement) {
+            projectIdElement.textContent = CUR_PROJECT_BID_ID || '未获取';
+            projectNameElement.textContent = CUR_PROJECTS[CUR_PROJECT_BID_ID]?.project_name || '未获取';
+        }
+    }
+
     let editor = null;
 
     // 创建UI元素
@@ -668,9 +692,19 @@
 
         const body = document.body;
 
+        // 创建项目信息展示条
+        const projectInfoBar = document.createElement('div');
+        projectInfoBar.id = 'project-info-bar';
+        projectInfoBar.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; background:rgb(220, 241, 163); padding: 6px; border-bottom: 1px solid #ddd; z-index: 9998; display: flex; justify-content: flex-start; align-items: center; font-size: 14px;';
+        projectInfoBar.innerHTML = `
+            <span style="margin-right: 20px;">【简道云】项目ID：<span id="project-id"></span></span>
+            <span>项目名称：<span id="project-name"></span></span>
+        `;
+        
         // 创建按钮容器
         const buttonContainer = document.createElement('div');
         buttonContainer.id = 'api-buttons';
+        buttonContainer.style.top = '40px'; // 调整按钮容器位置，避免被项目信息条遮挡
 
         // 创建数据查看器
         const dataViewer = document.createElement('div');
@@ -701,7 +735,6 @@
         // 添加关闭按钮事件
         dataViewer.querySelector('.close-btn').addEventListener('click', () => {
             dataViewer.style.display = 'none';
-            setPostButtonState(true);  
         });
 
         // 添加复制按钮事件
@@ -724,8 +757,7 @@
             button.textContent = api.name;
             button.addEventListener('click', () => {
                 if (api.enabled) {
-                    showData(api.data, api.name);
-                    setPostButtonState(typeof api.postJianDaoYun === 'function');    
+                    showData(api);
                 }
             });
             buttonContainer.appendChild(button);
@@ -738,12 +770,22 @@
         resetButton.addEventListener('click', resetAllData);
         buttonContainer.appendChild(resetButton);
 
+        body.appendChild(projectInfoBar);
         body.appendChild(buttonContainer);
         body.appendChild(dataViewer);
+
+        // 初始更新项目信息
+        updateProjectInfo();
     }
 
     // 重置所有数据
     function resetAllData() {
+
+        // 重置当前项目信息
+        CUR_PROJECT_BID_ID = null;
+        CUR_PROJECTS = {}
+        updateProjectInfo();
+
         // 重置API配置
         API_CONFIG.forEach(api => {
             api.data = null;
@@ -764,16 +806,16 @@
         }
 
         // 显示重置成功提示
-        showNotification('重置成功','所有接口数据已清空');
+        //showNotification('重置成功','所有接口数据已清空');
     }
 
     // 显示数据
-    function showData(data, title) {
+    function showData(api) {
         const viewer = document.getElementById('data-viewer');
         const titleElement = viewer.querySelector('.viewer-title');
         const contentElement = viewer.querySelector('.viewer-content');
 
-        titleElement.textContent = title;
+        titleElement.textContent = api.name;
 
         // 如果编辑器已存在，销毁它
         if (editor) {
@@ -792,8 +834,16 @@
             }
         };
 
-        editor = new JSONEditor(contentElement, options, data);
+        editor = new JSONEditor(contentElement, options, api.data);
         viewer.style.display = 'flex';
+
+        console.log('current title', api.name);
+        if (api.name == '项目信息') {
+            const disableSendButton = CUR_PROJECT_BID_ID && CUR_PROJECTS[CUR_PROJECT_BID_ID];
+            setPostButtonState(!disableSendButton);
+        } else {
+            setPostButtonState(typeof api.postJianDaoYun === 'function');
+        }
     }
 
     // 更新按钮状态
@@ -885,6 +935,94 @@
         };
     }
 
+    function loadCurrentJianDaoYunProject() {
+        const baseUrl = "https://api.jiandaoyun.com/api/v5/app/entry/data/list"
+        const bidSectionId = getBidSectionIdFromUrl();
+
+        // 构建请求参数
+        const requestBody = {
+            app_id: "63324ce70ae4b40008f38909",
+            entry_id: "64979d25210a5200083fbf9d",
+            fields: ["project_id", "project_name", "hnggzy_id"],
+            filter: {
+                rel: "and",
+                cond: [{
+                    field: "hnggzy_id",
+                    type: "text",
+                    method: "eq",
+                    value: bidSectionId
+                }]
+            },
+            limit: 1
+        };
+  
+        GM_xmlhttpRequest({
+            method: "POST",
+            url: baseUrl,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer q1Lzhl8iknug9WFoQR2ijO1bHxZ6bwPI", // 替换为实际token
+                "X-Custom-Header": "Tampermonkey Request"     // 自定义头
+            },
+            data: JSON.stringify(requestBody),
+            onload: function(response) {
+                try {
+                    const data = JSON.parse(response.responseText);
+                    if (response.status >= 200 && response.status < 300) {
+                        if (data.data.length > 0) {
+                            CUR_PROJECTS[bidSectionId] = data.data[0];
+                            console.log('当前项目已加载:', CUR_PROJECTS[bidSectionId]);
+                            updateProjectInfo();
+                        }
+                        showNotification("请求成功",'loadCurrentJianDaoYunProject');
+                    } else {
+                        throw new Error(data.message || "未知错误");
+                    }
+                } catch (e) {
+                    console.error("响应解析失败:", e);
+                    showNotification("请求异常",`状态码: ${response.status}`,'a');
+                }
+            },
+            onerror: function(error) {
+                console.error("网络错误:", error);
+                showNotification("请求失败","请检查网络连接",'a');
+            },
+            timeout: 5000 // 5秒超时
+        });
+
+    }
+
+    // 监听 URL 变化并更新项目信息
+    function setupUrlChangeListener() {
+        // 监听浏览器的前进后退
+        window.addEventListener('popstate', updateProjectInfoFromUrl);
+        
+        // 监听通过 history.pushState 和 history.replaceState 修改的 URL
+        const originalPushState = history.pushState;
+        const originalReplaceState = history.replaceState;
+        
+        history.pushState = function() {
+            originalPushState.apply(this, arguments);
+            updateProjectInfoFromUrl();
+        };
+        
+        history.replaceState = function() {
+            originalReplaceState.apply(this, arguments);
+            updateProjectInfoFromUrl();
+        };
+    }
+
+    // 更新项目信息的函数
+    function updateProjectInfoFromUrl() {
+        console.log('URL 变化，更新项目信息');
+        resetAllData();
+
+        if (getBidSectionIdFromUrl()) {
+            // 加载当前项目信息
+            loadCurrentJianDaoYunProject();
+        }
+    }
+
     // 初始化
     function init() {
         interceptXHR();
@@ -895,6 +1033,9 @@
         } else {
             createUI();
         }
+
+        // 初始化URL监听器
+        setupUrlChangeListener();
     }
 
     init();
