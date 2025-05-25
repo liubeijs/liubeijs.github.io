@@ -265,42 +265,71 @@
         return amount;
     }
 
+    // 解析时间字符串为标准日期
+    function parseDateTime(dateTimeStr) {
+        console.log('dateTimeStr:',dateTimeStr);
+
+        if (!dateTimeStr) return '';
+        
+        // 移除多余的空格
+        dateTimeStr = dateTimeStr.trim();
+        
+        // 处理中文日期格式（例如：2025年6月24日）
+        dateTimeStr = dateTimeStr.replace(/年|月|日/g, (match) => {
+            switch (match) {
+                case '年': return '-';
+                case '月': return '-';
+                case '日': return '';
+            }
+        });
+        
+        // 处理斜杠日期格式（例如：2025/6/23）
+        dateTimeStr = dateTimeStr.replace(/\//g, '-');
+        
+        // 解析日期部分
+        let date = dateTimeStr.split(' ')[0];
+        let time = dateTimeStr.split(' ')[1] || '00:00';
+        
+        // 处理日期部分
+        let [year, month, day] = date.split('-');
+        
+        // 确保月和日是两位数
+        month = month ? month.padStart(2, '0') : '01';
+        day = day ? day.padStart(2, '0') : '01';
+        
+        // 处理时间部分
+        let [hour, minute] = time.split(':');
+        hour = (hour || '00').padStart(2, '0');
+        minute = (minute || '00').padStart(2, '0');
+        
+        // 返回格式化的日期时间字符串
+        return `${year}-${month}-${day} ${hour}:${minute}`;
+    }
+
     // 解析【招标计划】HTML为 json
     function parseNoticeContent(htmlContent) {
-        // 创建一个临时的DOM元素来解析HTML
+        // 创建临时DOM元素解析HTML
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
         
-        // 获取所有表格行
-        const rows = tempDiv.getElementsByTagName('tr');
+        // 获取tbody中的所有行
+        const tbody = tempDiv.querySelector('tbody');
+        if (!tbody) return {};
         
-        // 创建结果对象
-        const result = {
-            projectName: tempDiv.querySelector('h1')?.textContent?.trim() || '',
-            publishDate: tempDiv.querySelector('div[style*="padding-left: 550px"]')?.textContent?.replace(/发布日期:|\s+/g, '').trim() || '',
-            details: {}
-        };
+        const rows = tbody.getElementsByTagName('tr');
+        const result = {};
         
-        // 遍历表格行提取数据
+        // 遍历每行，只取前两个单元格
         Array.from(rows).forEach(row => {
-            const titleCell = row.querySelector('td div[align="center"] b');
-            const contentCell = row.querySelector('td[colspan="3"] div[align="center"]');
-            
-            if (titleCell && contentCell) {
-                const title = titleCell.textContent.replace(/\s+/g, '');
-                const content = contentCell.textContent.trim();
-                result.details[title] = content;
-            } else {
-                // 处理投资估算和资金来源这样的特殊行
-                const cells = row.getElementsByTagName('td');
-                if (cells.length === 4) {
-                    const title1 = cells[0].querySelector('b')?.textContent.replace(/\s+/g, '');
-                    const content1 = cells[1].querySelector('div')?.textContent.trim();
-                    const title2 = cells[2].querySelector('b')?.textContent.replace(/\s+/g, '');
-                    const content2 = cells[3].querySelector('div')?.textContent.trim();
-                    
-                    if (title1 && content1) result.details[title1] = content1;
-                    if (title2 && content2) result.details[title2] = content2;
+            const cells = row.getElementsByTagName('td');
+            if (cells.length >= 2) {
+                // 第一个单元格作为key（删除所有空白字符）
+                const key = cells[0].textContent.replace(/\s+/g, '');
+                // 第二个单元格作为value（仅删除头尾空白字符）
+                const value = cells[1].textContent.trim();
+                
+                if (key && value) {
+                    result[key] = value;
                 }
             }
         });
@@ -333,15 +362,15 @@
                             "hnggzy_id":{"value": this.data.data.id},
                             "project_name":{"value": this.data.data.projectName},
                             "plan_pub_time":{"value": this.data.data.noticeSendDate},
-                            "project_owner":{"value": this.data.data.noticeContent.details['招标人名称']},
-                            "project_invest_price":{"value": parseAmount(this.data.data.noticeContent.details['投资估算'])},
-                            "fund_source":{"value": this.data.data.noticeContent.details['资金来源']},
-                            "bid_openning_time":{"value": this.data.data.noticeContent.details['计划招标时间']},
+                            "project_owner":{"value": this.data.data.noticeContent['招标人名称']},
+                            "project_invest_price":{"value": parseAmount(this.data.data.noticeContent['投资估算'] || this.data.data.noticeContent['投资估算(万元)'])},
+                            "fund_source":{"value": this.data.data.noticeContent['资金来源']},
+                            "bid_openning_time":{"value": parseDateTime(this.data.data.noticeContent['计划招标时间'])},
                             "plan_pub_url":{"value": window.location.href},
-                            "project_info":{"value": this.data.data.noticeContent.details['项目概况']},
-                            "project_work":{"value": this.data.data.noticeContent.details['招标范围']},
-                            "other":{"value": this.data.data.noticeContent.details['其他']},
-                            "comment":{"value": this.data.data.noticeContent.details['备注']},
+                            "project_info":{"value": this.data.data.noticeContent['项目概况'] || this.data.data.noticeContent['招标内容']},
+                            "project_work":{"value": this.data.data.noticeContent['招标范围']},
+                            "other":{"value": this.data.data.noticeContent['其他']},
+                            "comment":{"value": this.data.data.noticeContent['备注']},
                             "region_code":{"value": this.data.data.regionCode},
                             "project_location":{"value": getHunanAreaByCode(this.data.data.regionCode)},
                         } // 实际数据
@@ -640,6 +669,7 @@
             button.addEventListener('click', () => {
                 if (api.enabled) {
                     showData(api.data, api.name);
+                    setPostButtonState(typeof api.postJianDaoYun === 'function');    
                 }
             });
             buttonContainer.appendChild(button);
