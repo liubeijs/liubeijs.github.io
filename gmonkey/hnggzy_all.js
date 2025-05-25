@@ -186,7 +186,67 @@
             '433130': '龙山县'
         };
     
+        // 如果是区县级代码（后两位不是00），需要特殊处理
+        if (!code.endsWith('00')) {
+            // 获取所属地级市代码（将后两位替换为00）
+            const cityCode = code.slice(0, 4) + '00';
+            const cityName = areaMap[cityCode];
+            const areaName = areaMap[code];
+
+            // 如果能找到对应的地级市和区县名称，返回组合后的结果
+            if (cityName && areaName) {
+                return `${cityName}·${areaName}`;
+            }
+        }
+
+        // 如果是地级市代码或者特殊处理失败，返回原有结果
         return areaMap[code] || '';
+    }
+
+    function getJianDaoYunAreaJsonByCodeOrString(areaStr) {
+        // 如果是行政区划代码，先转换为地区名称
+        if (/^\d{6}$/.test(areaStr)) {
+            areaStr = getHunanAreaByCode(areaStr);
+            if (!areaStr) return null;
+            areaStr = `湖南省·${areaStr}`;
+        }
+        
+        // 处理地区字符串
+        if (!areaStr || typeof areaStr !== 'string') return null;
+        
+        // 移除所有空格
+        areaStr = areaStr.trim();
+        
+        // 分割地区字符串（支持点号、中点号和其他常见分隔符）
+        const parts = areaStr.split(/[·.-。\s]+/);
+        
+        // 确保至少有省市区三级
+        if (parts.length < 2) return null;
+        
+        // 处理省份名称（确保以"省"结尾）
+        let province = parts[0];
+        if (!province.endsWith('省')) province += '省';
+        
+        // 处理城市名称（确保以"市"结尾）
+        let city = parts[1];
+        if (!city.endsWith('市') && !city.endsWith('自治州')) city += '市';
+        
+        // 处理区县名称（确保以"区"、"市"、"县"或"自治县"结尾）
+        let district = "";
+        if (parts.length > 2) {
+            district = parts[2];
+            if (!district.endsWith('区') &&!district.endsWith('市') &&
+              !district.endsWith('县') &&!district.endsWith('自治县')) {
+                district += '县';
+            }
+        }
+        
+        // 返回标准格式的地区信息
+        return {
+            "province": province,
+            "city": city,
+            "district": district
+        };
     }
 
     // JianDaoYun的接口
@@ -261,7 +321,6 @@
         
         // 转换为数字并乘以10000（万元转元）
         const amount = parseFloat(match[1]) * 10000;
-        
         return amount;
     }
 
@@ -372,7 +431,7 @@
                             "other":{"value": this.data.data.noticeContent['其他']},
                             "comment":{"value": this.data.data.noticeContent['备注']},
                             "region_code":{"value": this.data.data.regionCode},
-                            "project_location":{"value": getHunanAreaByCode(this.data.data.regionCode)},
+                            "project_place":{"value": getJianDaoYunAreaJsonByCodeOrString(this.data.data.regionCode)},
                         } // 实际数据
                     },
                     0
@@ -390,26 +449,23 @@
             },
             postJianDaoYun() {
                 console.log('招标项目发布');
+                console.log('this.data.data:',this.data.data.constructionSectionList[0]);
+
                 safePostToJianDaoYun(
                     {
                         "app_id": "63324ce70ae4b40008f38909",
                         "entry_id": "64979d25210a5200083fbf9d",
                         "data": {
-                            "hnggzy_id":{"value": this.data.data.id},
-                            "project_name":{"value": this.data.data.projectName},
-                            "plan_pub_time":{"value": this.data.data.noticeSendDate},
-                            "project_owner":{"value": this.data.data.noticeContent.details['招标人名称']},
-                            "project_invest_price":{"value": parseAmount(this.data.data.noticeContent.details['投资估算'])},
-                            "fund_source":{"value": this.data.data.noticeContent.details['资金来源']},
-                            "bid_openning_time":{"value": this.data.data.noticeContent.details['计划招标时间']},
-                            "plan_pub_url":{"value": window.location.href},
-                            "project_info":{"value": this.data.data.noticeContent.details['项目概况']},
-                            "project_work":{"value": this.data.data.noticeContent.details['招标范围']},
-                            "other":{"value": this.data.data.noticeContent.details['其他']},
-                            "comment":{"value": this.data.data.noticeContent.details['备注']},
-                            "region_code":{"value": this.data.data.regionCode},
-                            "project_location":{"value": getHunanAreaByCode(this.data.data.regionCode)},
-                        } // 实际数据
+                            "hnggzy_id":{"value": this.data.data.constructionSectionList[0].id},
+                            "project_name":{"value": this.data.data.constructionTender.tenderProjectName},
+                            "project_pub_url":{"value": window.location.href},
+                            "hnggzy_type":{"value": this.data.data.constructionTender.tenderProjectType},
+                            "project_owner":{"value": this.data.data.constructionTender.tendererName},
+                            "project_proxy":{"value": this.data.data.constructionTender.tenderAgencyName},
+                            "project_info":{"value": this.data.data.constructionTender.tenderContent},
+                            "project_place":{"value": getJianDaoYunAreaJsonByCodeOrString(this.data.data.constructionProject.regionCode)},
+                            "project_max_price":{"value": this.data.data.constructionSectionList[0].tenderControlPrice*10000},
+                        }
                     }
                 );
             }
