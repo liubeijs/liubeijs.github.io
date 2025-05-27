@@ -194,7 +194,7 @@
         },
         {
             index: 5,
-            name: '中标候选人',
+            name: '中标候选',
             pattern: '/tradeApi/constructionNotice/selectWinningBidNotice',
             data: null,
             enabled: false,
@@ -221,9 +221,6 @@
     // 创建 JianDaoYun 数据
     function safePostToJianDaoYun(method, url, requestBody, apiIndex) {
 
-        // 禁用发送按钮
-        setPostButtonState(false, API_CONFIG[apiIndex].btn_title);
-
         GM_xmlhttpRequest({
             method: method,
             url: url,
@@ -248,15 +245,11 @@
                 } catch (e) {
                     console.error("响应解析失败:", e);
                     showNotification("请求异常",`状态码: ${response.status}`,'a');
-                    // 请求失败时重新启用发送按钮
-                    setPostButtonState(true, API_CONFIG[apiIndex].btn_title);
                 }
             },
             onerror: function(error) {
                 console.error("网络错误:", error);
                 showNotification("请求失败","请检查网络连接",'a');
-                // 请求失败时重新启用发送按钮
-                setPostButtonState(true, API_CONFIG[apiIndex].btn_title);                
             },
             timeout: 15000 // 15秒超时
         });
@@ -497,15 +490,6 @@
             background: #f5f5f5;
             color: #333333;
         }
-
-        #data-viewer .action-buttons .post-btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-        }
-        #data-viewer .action-buttons .post-btn:hover {
-            background: #388E3C;
-        }
         
         #data-viewer .viewer-content {
             flex: 1;
@@ -542,7 +526,85 @@
         #reset-button:hover {
             background: #d32f2f;
         }
+
+        .icon-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            background: #f5f5f5;
+            transition: all 0.2s;
+        }
+        .icon-button:hover {
+            background: #e0e0e0;
+        }
+        .icon-button.primary {
+            background: #2196F3;
+            color: white;
+        }
+        .icon-button.primary:hover {
+            background: #1976D2;
+        }
+
     `);
+
+    // 创建API按钮和菜单
+    function createApiButton(api) {
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.position = 'relative';
+        buttonContainer.style.display = 'flex'; // 添加flex布局
+        buttonContainer.style.alignItems = 'center'; // 垂直居中对齐
+        buttonContainer.style.gap = '8px'; // 按钮之间的间距
+
+        const showButton = document.createElement('button');
+        showButton.className = 'icon-button primary';
+        showButton.innerHTML = `
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path fill="currentColor" d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+            </svg>
+        `;
+        buttonContainer.appendChild(showButton);
+        // 菜单按钮点击事件
+        showButton.addEventListener('click', (e) => {
+            showData(api);
+        });
+
+        const button = document.createElement('button');
+        button.className = 'api-button';
+        button.textContent = api.name;
+        buttonContainer.appendChild(button);
+        // 按钮点击事件
+        button.addEventListener('click', () => {
+            console.log('current title', api.name);
+            if (api && api.enabled) {
+                if (typeof api.postJianDaoYun === 'function') {
+                    if (confirm(`确定在简道云${api.btn_title}<${api.name}>吗？`)) {
+                        api.postJianDaoYun();
+                    }
+                } else {
+                    showNotification('发送失败','当前接口不支持发送数据','a');
+                }
+            }
+        });
+
+        return buttonContainer;
+    }
+
+    // 复制API数据
+    function copyApiData(api, event) {
+        if (api.data) {
+            navigator.clipboard.writeText(JSON.stringify(api.data, null, 2))
+                .then(() => showTempHint('数据已复制', event))
+                .catch(() => showTempHint('复制失败', event));
+        } else {
+            showTempHint('暂无数据', event);
+        }
+    }
 
     // 创建UI元素
     function createUI() {
@@ -566,6 +628,9 @@
         const buttonContainer = document.createElement('div');
         buttonContainer.id = 'api-buttons';
         buttonContainer.style.top = '40px'; // 调整按钮容器位置，避免被项目信息条遮挡
+        API_CONFIG.forEach(api => {
+            buttonContainer.appendChild(createApiButton(api));
+        });
 
         // 创建数据查看器
         const dataViewer = document.createElement('div');
@@ -574,24 +639,12 @@
         <div class="viewer-header">
             <div class="viewer-title"></div>
             <div class="action-buttons">
-                <button class="post-btn">发送</button>
                 <button class="copy-btn">复制数据</button>
                 <button class="close-btn">关闭</button>
             </div>
         </div>
         <div class="viewer-content"></div>
         `;
-
-        // 添加发送按钮事件
-        dataViewer.querySelector('.post-btn').addEventListener('click', () => {
-            const titleElement = dataViewer.querySelector('.viewer-title');
-            const currentApi = API_CONFIG.find(api => api.name === titleElement.textContent);
-            if (currentApi && typeof currentApi.postJianDaoYun === 'function') {
-                currentApi.postJianDaoYun();
-            } else {
-                showNotification('发送失败','当前接口不支持发送数据','a');
-            }
-        });
 
         // 添加关闭按钮事件
         dataViewer.querySelector('.close-btn').addEventListener('click', () => {
@@ -609,19 +662,6 @@
                     console.error('复制失败:', err);
                     showNotification('复制失败','请手动复制数据');
                 });
-        });
-
-        // 创建接口按钮
-        API_CONFIG.forEach((api, index) => {
-            const button = document.createElement('button');
-            button.className = 'api-button';
-            button.textContent = api.name;
-            button.addEventListener('click', () => {
-                if (api.enabled) {
-                    showData(api);
-                }
-            });
-            buttonContainer.appendChild(button);
         });
 
         // 创建重置按钮
@@ -663,7 +703,7 @@
             
             if (isCandidate || isResult) {
                 const apiIndex = API_CONFIG.findIndex(api => 
-                    api.name === (isCandidate ? '中标候选人' : '中标结果')
+                    api.name === (isCandidate ? '中标候选' : '中标结果')
                 );
                 
                 if (apiIndex !== -1) {
@@ -732,28 +772,6 @@
 
         editor = new JSONEditor(contentElement, options, api.data);
         viewer.style.display = 'flex';
-
-        console.log('current title', api.name);
-        const loadedCurProject = CUR_PROJECT_BID_ID && CUR_PROJECTS[CUR_PROJECT_BID_ID];
-        if (api.name == '项目信息') {
-            setPostButtonState(!loadedCurProject, api.btn_title);
-        } else if (api.name == '开标信息' || api.name == '开标参数') {
-            setPostButtonState(loadedCurProject, api.btn_title);
-        } else {
-            setPostButtonState(typeof api.postJianDaoYun === 'function', api.btn_title);
-        }
-    }
-
-    // 设置发送按钮状态
-    function setPostButtonState(enabled, title) {
-
-        const postBtn = document.querySelector('#data-viewer .action-buttons .post-btn');
-        if (postBtn) {
-            postBtn.disabled = !enabled;
-            postBtn.style.backgroundColor = enabled ? '#4CAF50' : '#ccc';
-            postBtn.style.cursor = enabled ? 'pointer' : 'not-allowed';
-            postBtn.textContent = title;
-        }
     }
 
     // Utils
