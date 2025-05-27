@@ -331,7 +331,7 @@
             const bids_url = CUR_PROJECTS[CUR_PROJECT_BID_ID]?.bids_url;
             projectIdElement.textContent = CUR_PROJECT_BID_ID || '?';
             projectNameElement.textContent = CUR_PROJECTS[CUR_PROJECT_BID_ID]?.project_name || '?';
-            infoElement.textContent = `[投标数量:${CUR_PROJECTS[CUR_PROJECT_BID_ID]?.bids_count} | 基准价:${CUR_PROJECTS[CUR_PROJECT_BID_ID]?.project_base_price}]`;
+            infoElement.textContent = `投标数量：${CUR_PROJECTS[CUR_PROJECT_BID_ID]?.bids_count} 基准价：${CUR_PROJECTS[CUR_PROJECT_BID_ID]?.project_base_price}`;
             linkElement.href = bids_url;
         }
     }
@@ -554,12 +554,12 @@
         projectInfoBar.id = 'project-info-bar';
         projectInfoBar.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; background:rgb(220, 241, 163); padding: 6px; border-bottom: 1px solid #ddd; z-index: 9998; display: flex; justify-content: flex-start; align-items: center; font-size: 14px;';
         projectInfoBar.innerHTML = `
-            <span style="margin-right: 20px;">
-            【简道云】项目ID：<span id="project-id"></span>
-            项目名称：<span id="project-name"></span>
-            <span id="bar-other-info"></span>
-            <a href="#" id="bids-url" target="_blank">报价分析</a>
-            </span>
+        <span style="margin-right: 20px;">
+        【简道云】<b>项目ID</b>：<span id="project-id"></span>
+        <b>项目名称</b>：<span id="project-name"></span>
+        <span id="bar-other-info"></span>
+        <a href="#" id="bids-url" target="_blank">报价分析</a>
+        </span>
         `;
         
         // 创建按钮容器
@@ -637,6 +637,20 @@
 
         // 初始更新项目信息
         updateProjectInfo();
+
+        // 添加点击复制项目ID事件
+        ['project-id', 'project-name'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.style.cursor = 'pointer';
+                element.title = '点击复制';
+                element.addEventListener('click', function(event) {
+                    navigator.clipboard.writeText(element.textContent);
+                    showTempHint('已复制', event);
+                });
+            }
+        });    
+
     }
 
     // 更新按钮状态
@@ -750,6 +764,35 @@
         } else {
             alert(`${title} - ${text}`);
         }
+    }
+
+    function showTempHint(text, event) {
+        const hint = document.createElement('div');
+        hint.textContent = text;
+        hint.style.cssText = `
+            position: fixed;
+            left: ${event.clientX + 10}px;
+            top: ${event.clientY - 20}px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            z-index: 10000;
+        `;
+        document.body.appendChild(hint);
+        
+        // 触发淡出动画
+        setTimeout(() => {
+            hint.style.opacity = '0';
+        }, 10);
+        
+        // 移除元素
+        setTimeout(() => {
+            document.body.removeChild(hint);
+        }, 500);
     }
 
     // 拦截XMLHttpRequest
