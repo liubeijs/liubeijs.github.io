@@ -23,9 +23,15 @@
 
     // 1. 全局变量
 
+    let tRows = [];
     let editor = null;
 
     // 定义全局变量, 当前简道云对应的项目
+const JIANDAOYUN_APP_ID = "63324ce70ae4b40008f38909";
+const JIANDAOYUN_ENTRY_PROJECT_ID = "64979d25210a5200083fbf9d";
+const JIANDAOYUN_ENTRY_PLAN_ID = "683292c9a6a4af8b452e12cf";
+const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_max_price", "project_base_price", "bids_url", "hnggzy_id"];
+
     let CUR_PROJECTS = {}
     let CUR_PROJECT_BID_ID = '';
 
@@ -51,8 +57,8 @@
                     "POST",
                     "https://api.jiandaoyun.com/api/v5/app/entry/data/create",
                     {
-                        "app_id": "63324ce70ae4b40008f38909",
-                        "entry_id": "683292c9a6a4af8b452e12cf",
+                        "app_id": JIANDAOYUN_APP_ID,
+                        "entry_id": JIANDAOYUN_ENTRY_PLAN_ID,
                         "data": {
                             "hnggzy_id":{"value": this.data.data.id},
                             "project_name":{"value": this.data.data.projectName},
@@ -93,8 +99,9 @@
                     "POST",
                     "https://api.jiandaoyun.com/api/v5/app/entry/data/create",
                     {
-                        "app_id": "63324ce70ae4b40008f38909",
-                        "entry_id": "64979d25210a5200083fbf9d",
+                        "app_id": JIANDAOYUN_APP_ID,
+                        "entry_id": JIANDAOYUN_ENTRY_PROJECT_ID,
+                        "fields": JIANDAOYUN_FIELDS,
                         "data": {
                             "hnggzy_id":{"value": this.data.data.constructionSectionList[0].id},
                             "project_name":{"value": this.data.data.constructionTender.tenderProjectName},
@@ -135,12 +142,17 @@
             },
             postJianDaoYun() {
                 console.log('更新项目开标参数');
+                if (this.data.data.length === 0) {
+                    alert('未获取到开标参数');
+                    return;
+                }
+
                 safePostToJianDaoYun(
                     "POST",
                     "https://api.jiandaoyun.com/api/v5/app/entry/data/update",
                     {
-                        "app_id": "63324ce70ae4b40008f38909",
-                        "entry_id": "64979d25210a5200083fbf9d",
+                        "app_id": JIANDAOYUN_APP_ID,
+                        "entry_id": JIANDAOYUN_ENTRY_PROJECT_ID,
                         "data_id": CUR_PROJECTS[CUR_PROJECT_BID_ID]?._id,
                         "data": {
                             "project_base_price": {
@@ -164,7 +176,77 @@
             enabled: false,
             btn_title: '更新',
             updateData() {
-                console.log('开标信息数据更新');
+                console.log('开标信息数据更新TABLE!!!');
+                const bids = convertBidData(this.data.data.constructionBid, true);
+
+                // 添加报价按钮到 projectInfoBar
+                if (!document.querySelector('#bid-price-btn')) {
+                    const projectInfoBar = document.querySelector('#project-info-bar');
+                    if (!projectInfoBar) return;
+
+                    const btn = document.createElement('button');
+                    btn.id = 'bid-price-btn';
+                    btn.textContent = '报价';
+                    btn.style.cssText = 'margin-left: auto; padding: 4px 12px; background: #409EFF; color: white; border: none; border-radius: 4px; cursor: pointer;';
+                    projectInfoBar.appendChild(btn);
+
+                    // 创建弹窗容器
+                    const modal = document.createElement('div');
+                    modal.id = 'bid-price-modal';
+                    modal.style.cssText = 'display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); z-index: 10000; max-width: 90vw; max-height: 90vh; overflow: auto;';
+                    
+                    // 添加关闭按钮
+                    const closeBtn = document.createElement('button');
+                    closeBtn.textContent = '×';
+                    closeBtn.style.cssText = 'position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 20px; cursor: pointer; color: #666;';
+                    modal.appendChild(closeBtn);
+
+                    // 创建表格
+                    const table = document.createElement('table');
+                    table.style.cssText = 'width: 100%; border-collapse: collapse; margin-top: 20px;';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">序号</th>
+                                <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标人名称</th>
+                                <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标人代码</th>
+                                <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标价格</th>
+                                <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">下浮率</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${bids.map((bid, index) => `
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${bid.bid_id.value}</td>
+                                    <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_name.value}</td>
+                                    <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_code.value}</td>
+                                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_price.value}</td>
+                                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${(bid.bid_down_ratio.value * 100).toFixed(2)}%</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    `;
+                    modal.appendChild(table);
+                    document.body.appendChild(modal);
+
+                    // 添加事件监听
+                    btn.addEventListener('click', () => {
+                        modal.style.display = 'block';
+                    });
+
+                    closeBtn.addEventListener('click', () => {
+                        modal.style.display = 'none';
+                    });
+
+                    // 点击弹窗外部关闭
+                    window.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.style.display = 'none';
+                        }
+                    });
+                }
+
+
             },
             postJianDaoYun() {
                 console.log('更新项目开标报价信息');
@@ -173,8 +255,8 @@
                     "POST",
                     "https://api.jiandaoyun.com/api/v5/app/entry/data/update",
                     {
-                        "app_id": "63324ce70ae4b40008f38909",
-                        "entry_id": "64979d25210a5200083fbf9d",
+                        "app_id": JIANDAOYUN_APP_ID,
+                        "entry_id": JIANDAOYUN_ENTRY_PROJECT_ID,
                         "data_id": CUR_PROJECTS[CUR_PROJECT_BID_ID]?._id,
                         "data": {
                             "bids_count": {
@@ -233,12 +315,18 @@
             onload: function(response) {
                 try {
                     const data = JSON.parse(response.responseText);
-                    console.log('XXX 响应数据:', data);
+                    //console.log('XXX 响应数据:', data);
                     if (response.status >= 200 && response.status < 300) {
                         if (apiIndex >= 0 && apiIndex < API_CONFIG.length) {
-                            API_CONFIG[apiIndex].hnggzy_id = data.id;
+
+                            // 创建或更新数据后，更新全局简道云数据
+                            const bidId = getBidSectionIdFromUrl();
+                            CUR_PROJECTS[bidId] = data.data;
+                            console.log('CUR_PROJECT:', CUR_PROJECTS[bidId]);
+                            updateProjectInfo();
+
                         }
-                        showNotification("请求成功",'','a');
+                        showNotification("请求成功",`${data.data._id}`,'a');
                     } else {
                         throw new Error(data.message || "未知错误");
                     }
@@ -261,9 +349,9 @@
 
         // 构建请求参数
         const requestBody = {
-            app_id: "63324ce70ae4b40008f38909",
-            entry_id: "64979d25210a5200083fbf9d",
-            fields: ["project_id", "project_name", "bids_count", "project_max_price", "project_base_price", "bids_url", "hnggzy_id"],
+            app_id: JIANDAOYUN_APP_ID,
+            entry_id: JIANDAOYUN_ENTRY_PROJECT_ID,
+            fields: JIANDAOYUN_FIELDS,
             filter: {
                 rel: "and",
                 cond: [{
@@ -290,8 +378,9 @@
                     const data = JSON.parse(response.responseText);
                     if (response.status >= 200 && response.status < 300) {
                         if (data.data.length > 0) {
-                            CUR_PROJECTS[bidSectionId] = data.data[0];
-                            console.log('当前项目已加载:', CUR_PROJECTS[bidSectionId]);
+                            const bidId = getBidSectionIdFromUrl();
+                            CUR_PROJECTS[bidId] = data.data[0];
+                            console.log('当前项目已加载:', CUR_PROJECTS[bidId]);
                             updateProjectInfo();
                         }
                         showNotification("请求成功",'loadCurrentJianDaoYunProject');
@@ -319,23 +408,21 @@
         const projectIdElement = document.getElementById('project-id');
         const projectNameElement = document.getElementById('project-name');
         const infoElement = document.getElementById('bar-other-info');
-        const linkElement = document.getElementById('bids-url');
-        if (projectIdElement && projectNameElement && infoElement && linkElement) {
-            const bids_url = CUR_PROJECTS[CUR_PROJECT_BID_ID]?.bids_url;
+
+        if (projectIdElement && projectNameElement && infoElement) {
             projectIdElement.textContent = CUR_PROJECT_BID_ID || '?';
             projectNameElement.textContent = CUR_PROJECTS[CUR_PROJECT_BID_ID]?.project_name || '?';
             infoElement.textContent = `投标数量：${CUR_PROJECTS[CUR_PROJECT_BID_ID]?.bids_count} 基准价：${CUR_PROJECTS[CUR_PROJECT_BID_ID]?.project_base_price}`;
-            linkElement.href = bids_url;
         }
     }
 
     // 将投标报价信息转换成简道云数据格式
-    function convertBidData(constructionBid) {
+    function convertBidData(constructionBid, sorted=false) {
         if (!Array.isArray(constructionBid)) {
             return [];
         }
     
-        return constructionBid
+        const bids =  constructionBid
             .filter(bid => bid.bidPrice !== null)
             .map((bid, index) => ({
                 bid_id: { value: index + 1 },
@@ -346,6 +433,12 @@
                 bid_stat: { value: "" },
                 bid_comment: { value: "" }
             }));
+        if (!sorted) {
+            return bids;
+        }
+        return bids
+            .sort((a, b) => b.bid_down_ratio.value - a.bid_down_ratio.value) // 按下浮率从高到低排序
+            .map((bid, index) => ({ ...bid, bid_id: { value: index + 1 } })); // 重新编号
     }
 
     // 将开标参数json数据转成字符串
@@ -583,8 +676,12 @@
             console.log('current title', api.name);
             if (api && api.enabled) {
                 if (typeof api.postJianDaoYun === 'function') {
-                    if (confirm(`确定在简道云${api.btn_title}<${api.name}>吗？`)) {
-                        api.postJianDaoYun();
+                    if (api.name === '项目信息' && CUR_PROJECTS[CUR_PROJECT_BID_ID]) {
+                        alert('当前项目已存在简道云，无需重复创建!');
+                    } else {
+                        if (confirm(`确定在简道云${api.btn_title}<${api.name}>${CUR_PROJECTS[CUR_PROJECT_BID_ID]?.project_name || '?'}吗？`)) {
+                            api.postJianDaoYun();
+                        }
                     }
                 } else {
                     showNotification('发送失败','当前接口不支持发送数据','a');
@@ -620,7 +717,7 @@
         【简道云】<b>项目ID</b>：<span id="project-id"></span>
         <b>项目名称</b>：<span id="project-name"></span>
         <span id="bar-other-info"></span>
-        <a href="#" id="bids-url" target="_blank">报价分析</a>
+        <button id="jiandaoyun-project-btn" style="margin-left: auto; padding: 4px 12px; background: #409EFF; color: white; border: none; border-radius: 4px; cursor: pointer;">简道云</button>
         </span>
         `;
         
@@ -691,10 +788,24 @@
             }
         });    
 
+        // 添加项目链接按钮点击事件
+        const linkButton = projectInfoBar.querySelector('#jiandaoyun-project-btn');
+        if (linkButton) {
+            linkButton.addEventListener('click', function() {
+                const jian_p_url = `https://www.jiandaoyun.com/dashboard/app/${JIANDAOYUN_APP_ID}/form/${JIANDAOYUN_ENTRY_PROJECT_ID}/data/${CUR_PROJECTS[CUR_PROJECT_BID_ID]?._id}/qr_link`;
+                if (jian_p_url) {
+                    window.open(jian_p_url, '_blank');
+                } else {
+                    showNotification('打开失败', '项目链接不存在');
+                }
+            });
+        }
+
+
     }
 
     // 更新按钮状态
-    function updateButton(url, data) {
+    function updateUIAfterApiLoaded(url, data) {
 
         // 处理中标候选人和中标结果的特殊情况
         if (url.includes('/tradeApi/constructionNotice/selectWinningBidNotice/')) {
@@ -732,7 +843,8 @@
 
             showNotification(`${API_CONFIG[apiIndex].name}数据已获取`,'点击按钮查看详细信息');
         }
-    }    
+
+    }
 
     // 更新项目信息的函数
     function updateProjectInfoFromUrl() {
@@ -740,7 +852,6 @@
         resetAllData();
 
         if (getBidSectionIdFromUrl()) {
-            // 加载当前项目信息
             loadCurrentJianDaoYunProject();
         }
     }
@@ -831,7 +942,7 @@
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
                         const data = JSON.parse(xhr.responseText);
-                        updateButton(xhr._url, data);
+                        updateUIAfterApiLoaded(xhr._url, data);
                     } catch (e) {
                         console.error('解析响应失败:', e);
                     }
@@ -854,7 +965,7 @@
             const url = typeof input === 'string' ? input : input.url;
 
             response.clone().json().then(data => {
-                updateButton(url, data);
+                updateUIAfterApiLoaded(url, data);
             }).catch(() => {});
 
             return response;
@@ -888,6 +999,7 @@
         const url = window.location.href;
         const urlParams = new URLSearchParams(url.split('?')[1]);
         CUR_PROJECT_BID_ID = urlParams.get('bidSectionId') || '';
+        console.log('CUR_PROJECT_BID_ID:',CUR_PROJECT_BID_ID);
         return CUR_PROJECT_BID_ID;
     }
 
@@ -1217,6 +1329,8 @@
 
         // 初始化URL监听器
         setupUrlChangeListener();
+
+        updateProjectInfoFromUrl();
     }
 
     init();
