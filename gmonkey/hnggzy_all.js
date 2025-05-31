@@ -177,75 +177,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             updateData() {
                 console.log('开标信息数据更新TABLE!!!');
                 const bids = convertBidData(this.data.data.constructionBid, true);
-
-                // 添加报价按钮到 projectInfoBar
-                if (!document.querySelector('#bid-price-btn')) {
-                    const projectInfoBar = document.querySelector('#project-info-bar');
-                    if (!projectInfoBar) return;
-
-                    const btn = document.createElement('button');
-                    btn.id = 'bid-price-btn';
-                    btn.textContent = '报价';
-                    btn.style.cssText = 'margin-left: auto; padding: 4px 12px; background: #409EFF; color: white; border: none; border-radius: 4px; cursor: pointer;';
-                    projectInfoBar.appendChild(btn);
-
-                    // 创建弹窗容器
-                    const modal = document.createElement('div');
-                    modal.id = 'bid-price-modal';
-                    modal.style.cssText = 'display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); z-index: 10000; max-width: 90vw; max-height: 90vh; overflow: auto;';
-                    
-                    // 添加关闭按钮
-                    const closeBtn = document.createElement('button');
-                    closeBtn.textContent = '×';
-                    closeBtn.style.cssText = 'position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 20px; cursor: pointer; color: #666;';
-                    modal.appendChild(closeBtn);
-
-                    // 创建表格
-                    const table = document.createElement('table');
-                    table.style.cssText = 'width: 100%; border-collapse: collapse; margin-top: 20px;';
-                    table.innerHTML = `
-                        <thead>
-                            <tr>
-                                <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">序号</th>
-                                <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标人名称</th>
-                                <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标人代码</th>
-                                <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标价格</th>
-                                <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">下浮率</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${bids.map((bid, index) => `
-                                <tr>
-                                    <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${bid.bid_id.value}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_name.value}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_code.value}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_price.value}</td>
-                                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${(bid.bid_down_ratio.value * 100).toFixed(2)}%</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    `;
-                    modal.appendChild(table);
-                    document.body.appendChild(modal);
-
-                    // 添加事件监听
-                    btn.addEventListener('click', () => {
-                        modal.style.display = 'block';
-                    });
-
-                    closeBtn.addEventListener('click', () => {
-                        modal.style.display = 'none';
-                    });
-
-                    // 点击弹窗外部关闭
-                    window.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            modal.style.display = 'none';
-                        }
-                    });
-                }
-
-
+                //console.log('bids:', bids);
             },
             postJianDaoYun() {
                 console.log('更新项目开标报价信息');
@@ -475,6 +407,48 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             return `${key}：${value}`;
         }).join('\n');
     }
+
+    /**
+     * 从开标参数JSON数据中提取topPrice和各个参数
+     * @param {Array} data - 包含项目数据的数组
+     * @returns {Object} 提取的参数对象
+     */
+    function extractPriceAndParams(data) {
+        const result = {
+            topPrice: null,
+            params: {}
+        };
+        
+        // 参数映射表
+        const paramMapping = {
+            '算术平均数随机权重a': 'a',
+            '中位数随机权重b': 'b', 
+            '四分位数随机权重c': 'c',
+            '几何平均数随机权重d': 'd',
+            '算数平均数随机权重e': 'e',
+            '中位数随机权重f': 'f',
+            '几何平均数随机权重g': 'g',
+            '比例系数C1': 'C1',
+            '下浮系数r': 'r'
+        };
+        
+        // 遍历数据数组
+        data.forEach(item => {
+            // 提取topPrice（所有项目的topPrice应该相同）
+            if (item.topPrice && !result.topPrice) {
+                result.topPrice = parseFloat(item.topPrice);
+            }
+            
+            // 根据key提取对应参数
+            if (item.key && paramMapping[item.key]) {
+                const paramName = paramMapping[item.key];
+                result.params[paramName] = parseFloat(item.value);
+            }
+        });
+        
+        return result;
+    }
+
 
     // 重置所有数据
     function resetAllData() {
@@ -734,14 +708,18 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         // 创建项目信息展示条
         const projectInfoBar = document.createElement('div');
         projectInfoBar.id = 'project-info-bar';
-        projectInfoBar.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; background:rgb(220, 241, 163); padding: 6px; border-bottom: 1px solid #ddd; z-index: 9998; display: flex; justify-content: flex-start; align-items: center; font-size: 14px;';
+        projectInfoBar.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; background:rgb(220, 241, 163); padding: 6px; border-bottom: 1px solid #ddd; z-index: 9998; display: flex; justify-content: space-between; align-items: center; font-size: 14px;';
         projectInfoBar.innerHTML = `
-        <span style="margin-right: 20px;">
-        【简道云】<b>项目ID</b>：<span id="project-id"></span>
-        <b>项目名称</b>：<span id="project-name"></span>
-        <span id="bar-other-info"></span>
-        <button id="jiandaoyun-project-btn" style="margin-left: auto; padding: 4px 12px; background: #409EFF; color: white; border: none; border-radius: 4px; cursor: pointer;">简道云</button>
-        </span>
+            <div style="display: flex; align-items: center;">
+                【简道云】<b>项目ID</b>：<span id="project-id"></span>
+                <b style="margin-left: 20px;">项目名称</b>：<span id="project-name"></span>
+                <span id="bar-other-info"></span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button id="analyze-btn" style="padding: 4px 12px; background: #67C23A; color: white; border: none; border-radius: 4px; cursor: pointer;">分析</button>
+                <button id="bid-list-btn" style="padding: 4px 12px; background:rgb(198, 185, 43); color: white; border: none; border-radius: 4px; cursor: pointer;">报价</button>
+                <button id="jiandaoyun-project-btn" style="padding: 4px 12px; background: #409EFF; color: white; border: none; border-radius: 4px; cursor: pointer;">简道云</button>
+            </div>
         `;
         
         // 创建按钮容器
@@ -827,8 +805,133 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             });
         }
 
+        // 添加报价按钮点击事件
+        const bidListButton = projectInfoBar.querySelector('#bid-list-btn');
+        if (bidListButton) {
+            bidListButton.addEventListener('click', function() {
+                // 检查是否有投标数据
+                if (API_CONFIG[4].data && API_CONFIG[4].data.data.constructionBid) {
+                    const bids = convertBidData(API_CONFIG[4].data.data.constructionBid, true);
+                    if (bids && bids.length > 0) {
+                        createBidPriceModal(bids);
+                    } else {
+                        showNotification('暂无数据', '当前页面没有投标报价数据', 'a');
+                    }
+                } else {
+                    showNotification('暂无数据', '请先加载[开标信息]', 'a');
+                }
+            });
+        }
+
+        // 添加分析按钮点击事件
+        const analyzeButton = projectInfoBar.querySelector('#analyze-btn');
+        if (analyzeButton) {
+            analyzeButton.addEventListener('click', function() {
+
+                if (API_CONFIG[3].data && API_CONFIG[3].data.data && API_CONFIG[4].data && API_CONFIG[4].data.data) {
+                    const sortedBids = convertBidData(API_CONFIG[4].data.data.constructionBid, true);
+                    const pp = extractPriceAndParams(API_CONFIG[3].data.data);
+    
+                    const bids = sortedBids.map(bid => bid.bid_price.value).join(',');
+                    const stats = "";
+    
+                    // 构建跳转URL，添加六参数
+                    const url = `https://pages.liubeijs.com/cal65.html?maxPrice=${pp.topPrice}&bids=${bids}&stats=${encodeURIComponent(stats)}`
+                        + `&a=${pp.params.a || ''}&b=${pp.params.b || ''}&c=${pp.params.c || ''}&d=${pp.params.d || ''}&e=${pp.params.e || ''}&f=${pp.params.f || ''}&g=${pp.params.g || ''}`
+                        + `&C1=${pp.params.C1 || ''}&r=${pp.params.r || ''}`;
+                    
+                    console.log('url', url);
+                    // 跳转到新页面
+                    window.open(url, '_blank');                                        
+                } else {
+                    showNotification('暂无数据', '请先加载[开标参数][开标信息]', 'a');
+                }
+
+            });
+        }
 
     }
+
+    /**
+     * 获取当前API数据
+     * @returns {Object|null} 当前API数据
+     */
+    function getCurrentApiData() {
+        // 从当前页面或全局变量中获取API数据
+        // 这里需要根据你的实际数据结构来实现
+        
+        return window.currentApiData || null;
+    }
+
+    /**
+     * 创建投标报价弹窗
+     * @param {Array} bids - 投标数据数组
+     */
+    function createBidPriceModal(bids) {
+        // 检查是否已存在弹窗
+        let existingModal = document.querySelector('#bid-price-modal');
+        if (existingModal) {
+            existingModal.style.display = 'block';
+            return;
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'bid-price-modal';
+        modal.style.cssText = 'display: block; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); z-index: 10000; max-width: 90vw; max-height: 90vh; overflow: auto;';
+        
+        // 添加标题
+        const title = document.createElement('h3');
+        title.textContent = '投标报价信息';
+        title.style.cssText = 'margin: 0 0 15px 0; color: #333;';
+        modal.appendChild(title);
+        
+        // 添加关闭按钮
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '×';
+        closeBtn.style.cssText = 'position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 20px; cursor: pointer; color: #666;';
+        modal.appendChild(closeBtn);
+
+        // 创建表格
+        const table = document.createElement('table');
+        table.style.cssText = 'width: 100%; border-collapse: collapse; margin-top: 10px;';
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">序号</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标人名称</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标人代码</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标价格</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">下浮率</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${bids.map((bid, index) => `
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${bid.bid_id?.value || index + 1}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_name?.value || ''}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_code?.value || ''}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_price?.value || ''}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_down_ratio?.value ? (bid.bid_down_ratio.value * 100).toFixed(2) + '%' : ''}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        modal.appendChild(table);
+        document.body.appendChild(modal);
+
+        // 绑定关闭事件
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // 点击弹窗外部关闭
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
 
     // 更新按钮状态
     function updateUIAfterApiLoaded(url, data) {
