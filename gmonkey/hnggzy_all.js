@@ -933,7 +933,12 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
 
         const modal = document.createElement('div');
         modal.id = 'bid-price-modal';
-        modal.style.cssText = 'display: block; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); z-index: 10000; max-width: 90vw; max-height: 90vh; overflow: auto;';
+        modal.style.cssText = 'display: block; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); z-index: 10000; max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;';
+        
+        // 创建固定的标题区域
+        const headerArea = document.createElement('div');
+        headerArea.style.cssText = 'padding: 20px 20px 0 20px; flex-shrink: 0;';
+        modal.appendChild(headerArea);
         
         // 添加标题
         const title = document.createElement('h3');
@@ -943,7 +948,63 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         }
         title.textContent = `投标报价信息 [基准价:${pp?.benchmarkPrice || '/'}] [最高价:${pp?.topPrice || '/'}] ${baseDownRatio.toFixed(3)}% `;
         title.style.cssText = 'margin: 0 0 15px 0; color: #333;';
-        modal.appendChild(title);
+        headerArea.appendChild(title);
+        
+        // 添加下浮率区间统计区域
+        const statsContainer = document.createElement('div');
+        statsContainer.style.cssText = 'margin-bottom: 15px; padding: 10px; background-color: #f5f7fa; border-radius: 5px; border: 1px solid #ddd;';
+        
+        // 计算各区间的单位数量
+        const intervalStats = {};
+        const minDownRatio = Math.floor(Math.min(...bids.map(bid => bid.bid_down_ratio?.value * 100 || 0)));
+        const maxDownRatio = Math.ceil(Math.max(...bids.map(bid => bid.bid_down_ratio?.value * 100 || 0)));
+        
+        // 初始化区间统计
+        for (let i = minDownRatio; i < maxDownRatio; i++) {
+            intervalStats[`${i}%-${i+1}%`] = 0;
+        }
+        
+        // 统计各区间的单位数量
+        bids.forEach(bid => {
+            if (bid.bid_down_ratio?.value) {
+                const downRatioPercent = bid.bid_down_ratio.value * 100;
+                const interval = `${Math.floor(downRatioPercent)}%-${Math.floor(downRatioPercent)+1}%`;
+                if (intervalStats[interval] !== undefined) {
+                    intervalStats[interval]++;
+                }
+            }
+        });
+        
+        // 创建统计标题
+        const statsTitle = document.createElement('h4');
+        statsTitle.textContent = '下浮率区间统计';
+        statsTitle.style.cssText = 'margin: 0 0 10px 0; color: #333;';
+        statsContainer.appendChild(statsTitle);
+        
+        // 创建统计内容
+        const statsContent = document.createElement('div');
+        statsContent.style.cssText = 'display: flex; flex-wrap: wrap; gap: 10px;';
+        
+        // 将区间按单位数量排序，找出前5个最多的区间
+        const sortedIntervals = Object.entries(intervalStats)
+            .filter(([_, count]) => count > 0) // 只保留有单位的区间
+            .sort((a, b) => b[1] - a[1]); // 按单位数量从多到少排序
+        
+        const top5Intervals = new Set(sortedIntervals.slice(0, 5).map(item => item[0]));
+        
+        Object.entries(intervalStats).forEach(([interval, count]) => {
+            if (count > 0) { // 只显示有单位的区间
+                const statItem = document.createElement('div');
+                // 如果是单位数量最多的5个区间，使用淡橙色背景
+                const isTop5 = top5Intervals.has(interval);
+                statItem.style.cssText = `background-color: ${isTop5 ? '#ffe7ba' : '#e6f7ff'}; padding: 5px 10px; border-radius: 3px; border: 1px solid ${isTop5 ? '#ffc069' : '#91d5ff'};`;
+                statItem.textContent = `${interval}: ${count}家`;
+                statsContent.appendChild(statItem);
+            }
+        });
+        
+        statsContainer.appendChild(statsContent);
+        headerArea.appendChild(statsContainer);
         
         // 添加关闭按钮
         const closeBtn = document.createElement('button');
@@ -951,23 +1012,28 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         closeBtn.style.cssText = 'position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 20px; cursor: pointer; color: #666;';
         modal.appendChild(closeBtn);
 
+        // 创建可滚动的表格区域
+        const tableContainer = document.createElement('div');
+        tableContainer.style.cssText = 'padding: 0 20px 20px 20px; overflow-y: auto; flex-grow: 1;';
+        modal.appendChild(tableContainer);
+        
         // 创建表格
         const table = document.createElement('table');
         table.style.cssText = 'width: 100%; border-collapse: collapse; margin-top: 10px;';
         table.innerHTML = `
             <thead>
                 <tr>
-                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">序号</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标人名称</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标人代码</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标价格</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">下浮率</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">报价得分</th>
+                    <th style="position: sticky; top: 0; padding: 10px; border: 1px solid #ddd; background: #f5f7fa; z-index: 1;">序号</th>
+                    <th style="position: sticky; top: 0; padding: 10px; border: 1px solid #ddd; background: #f5f7fa; z-index: 1;">投标人名称</th>
+                    <th style="position: sticky; top: 0; padding: 10px; border: 1px solid #ddd; background: #f5f7fa; z-index: 1;">投标人代码</th>
+                    <th style="position: sticky; top: 0; padding: 10px; border: 1px solid #ddd; background: #f5f7fa; z-index: 1;">投标价格</th>
+                    <th style="position: sticky; top: 0; padding: 10px; border: 1px solid #ddd; background: #f5f7fa; z-index: 1;">下浮率</th>
+                    <th style="position: sticky; top: 0; padding: 10px; border: 1px solid #ddd; background: #f5f7fa; z-index: 1;">报价得分</th>
                 </tr>
             </thead>
             <tbody>
                 ${bids.map((bid, index) => `
-                <tr style="background-color: ${bid.rank?.value === 1 ? 'red' : (bid.rank?.value >= 2 && bid.rank?.value <= 5 ? 'orange' : 'transparent')};">
+                <tr style="background-color: ${bid.rank?.value === 1 ? 'red' : (bid.rank?.value >= 2 && bid.rank?.value <= 5 ? 'orange' : 'transparent')}">
                     <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${bid.bid_id?.value || index + 1}</td>
                     <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_name?.value || ''}</td>
                     <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_code?.value || ''}</td>
@@ -978,7 +1044,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 `).join('')}
             </tbody>
         `;
-        modal.appendChild(table);
+        tableContainer.appendChild(table);
         document.body.appendChild(modal);
 
         // 绑定关闭事件
@@ -992,8 +1058,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 modal.style.display = 'none';
             }
         });
-    }
-
+    }    
 
     // 更新按钮状态
     function updateUIAfterApiLoaded(url, data) {
