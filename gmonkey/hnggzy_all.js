@@ -390,6 +390,13 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 bid_stat: { value: "" },
                 bid_comment: { value: "" }
             }));
+
+        // 根据 bid_price_score 从大到小排序，并增加 rank 字段
+        bids.sort((a, b) => b.bid_price_score.value - a.bid_price_score.value)
+            .forEach((bid, index) => {
+                bid.rank = { value: index + 1 };
+            });            
+
         if (!sorted) {
             return bids;
         }
@@ -960,14 +967,14 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             </thead>
             <tbody>
                 ${bids.map((bid, index) => `
-                    <tr>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${bid.bid_id?.value || index + 1}</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_name?.value || ''}</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_code?.value || ''}</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_price?.value || ''}</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_down_ratio?.value ? (bid.bid_down_ratio.value * 100).toFixed(2) + '%' : ''}</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_price_score?.value ? bid.bid_price_score.value.toFixed(3) : ''}</td>
-                    </tr>
+                <tr style="background-color: ${bid.rank?.value === 1 ? 'red' : (bid.rank?.value >= 2 && bid.rank?.value <= 5 ? 'orange' : 'transparent')};">
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${bid.bid_id?.value || index + 1}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_name?.value || ''}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_code?.value || ''}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_price?.value || ''}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_down_ratio?.value ? (bid.bid_down_ratio.value * 100).toFixed(2) + '%' : ''}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_price_score?.value ? bid.bid_price_score.value.toFixed(3) : ''}</td>
+                </tr>
                 `).join('')}
             </tbody>
         `;
