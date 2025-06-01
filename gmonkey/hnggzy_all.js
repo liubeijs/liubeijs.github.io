@@ -371,7 +371,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     }
 
     // 将投标报价信息转换成简道云数据格式
-    function convertBidData(constructionBid, sorted=false) {
+    function convertBidData(constructionBid, sorted=false, benchmarkPrice=1.0) {
         if (!Array.isArray(constructionBid)) {
             return [];
         }
@@ -384,6 +384,9 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 bid_corp_code: { value: bid.bidderCode },
                 bid_price: { value: bid.bidPrice },
                 bid_down_ratio: { value: 1.0-parseFloat(bid.bidPrice)/(parseFloat(bid.controlPrice)*10000.0) },
+                bid_benchmark_price: { value: benchmarkPrice },
+                bid_max_price: { value: parseFloat(bid.controlPrice)*10000.0 },
+                bid_price_score: { value: calculateBidScore(benchmarkPrice, bid.bidPrice) },
                 bid_stat: { value: "" },
                 bid_comment: { value: "" }
             }));
@@ -416,6 +419,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     function extractPriceAndParams(data) {
         const result = {
             topPrice: null,
+            benchmarkPrice: null,
             params: {}
         };
         
@@ -438,6 +442,9 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             if (item.topPrice && !result.topPrice) {
                 result.topPrice = parseFloat(item.topPrice);
             }
+            if (item.benchmarkPrice && !result.benchmarkPrice) {
+                result.benchmarkPrice = parseFloat(item.benchmarkPrice);
+            }
             
             // 根据key提取对应参数
             if (item.key && paramMapping[item.key]) {
@@ -449,6 +456,42 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         return result;
     }
 
+    /**
+     * 计算六随机五区间报价得分
+     * @param {number} benchmarkPrice - 基准价
+     * @param {number} bidPrice - 投标报价
+     * @returns {number} - 报价得分
+     */
+    function calculateBidScore(benchmarkPrice, bidPrice) {
+        // 计算偏差率 Di = (Pi - T)/T × 100%
+        // Pi 为第 i 家公司的报价，T 为基准价
+
+        if (benchmarkPrice <= 1.0) {
+            return 0.0;
+        }
+
+        const deviation = 1.0 * (bidPrice - benchmarkPrice) / benchmarkPrice;
+        
+        // 根据偏差率计算得分
+        let score;
+        
+        if (deviation < -0.1) {
+            score = 80.0 - 1.0 * (Math.abs(deviation) - 0.1) * 100;
+        } else if (deviation >= -0.1 && deviation < 0.0) {
+            score = 100.0 - 2.0 * Math.abs(deviation) * 100;
+        } else if (deviation >= 0.0 && deviation <= 0.05) {
+            score = 100.0 - 4.0 * Math.abs(deviation) * 100;
+        } else if (deviation > 0.05 && deviation <= 0.1) {
+            score = 80.0 - 3.0 * (Math.abs(deviation) - 0.05) * 100;
+        } else if (deviation > 0.1) {
+            score = 65.0 - 2.0 * (Math.abs(deviation) - 0.1) * 100;
+        } else {
+            score = 100.0;
+        }
+
+        //四舍五入到3位小数
+        return Math.round(score * 995) / 1000.0;
+    }
 
     // 重置所有数据
     function resetAllData() {
@@ -811,9 +854,15 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             bidListButton.addEventListener('click', function() {
                 // 检查是否有投标数据
                 if (API_CONFIG[4].data && API_CONFIG[4].data.data.constructionBid) {
-                    const bids = convertBidData(API_CONFIG[4].data.data.constructionBid, true);
+                    let bPrice = 1.0;
+                    const pp = extractPriceAndParams(API_CONFIG[3].data.data);
+                    if (API_CONFIG[3].data && API_CONFIG[3].data.data) {
+                        bPrice = pp.benchmarkPrice;
+                    }
+                    console.log('基准价 bPrice', bPrice);
+                    const bids = convertBidData(API_CONFIG[4].data.data.constructionBid, true, bPrice);
                     if (bids && bids.length > 0) {
-                        createBidPriceModal(bids);
+                        createBidPriceModal(bids, pp);
                     } else {
                         showNotification('暂无数据', '当前页面没有投标报价数据', 'a');
                     }
@@ -867,12 +916,12 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
      * 创建投标报价弹窗
      * @param {Array} bids - 投标数据数组
      */
-    function createBidPriceModal(bids) {
+    function createBidPriceModal(bids, pp=null) {
         // 检查是否已存在弹窗
         let existingModal = document.querySelector('#bid-price-modal');
         if (existingModal) {
-            existingModal.style.display = 'block';
-            return;
+            // 从DOM中移除已存在的弹窗
+            existingModal.parentNode.removeChild(existingModal);
         }
 
         const modal = document.createElement('div');
@@ -881,7 +930,11 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         
         // 添加标题
         const title = document.createElement('h3');
-        title.textContent = '投标报价信息';
+        let baseDownRatio = 0.0;
+        if (pp) {
+            baseDownRatio = (1 - pp.benchmarkPrice / pp.topPrice) * 100;
+        }
+        title.textContent = `投标报价信息 [基准价:${pp?.benchmarkPrice || '/'}] [最高价:${pp?.topPrice || '/'}] ${baseDownRatio.toFixed(3)}% `;
         title.style.cssText = 'margin: 0 0 15px 0; color: #333;';
         modal.appendChild(title);
         
@@ -902,6 +955,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                     <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标人代码</th>
                     <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">投标价格</th>
                     <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">下浮率</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; background: #f5f7fa;">报价得分</th>
                 </tr>
             </thead>
             <tbody>
@@ -912,6 +966,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                         <td style="padding: 10px; border: 1px solid #ddd;">${bid.bid_corp_code?.value || ''}</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_price?.value || ''}</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_down_ratio?.value ? (bid.bid_down_ratio.value * 100).toFixed(2) + '%' : ''}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${bid.bid_price_score?.value ? bid.bid_price_score.value.toFixed(3) : ''}</td>
                     </tr>
                 `).join('')}
             </tbody>
