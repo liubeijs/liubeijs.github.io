@@ -371,7 +371,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     }
 
     // 将投标报价信息转换成简道云数据格式
-    function convertBidData(constructionBid, sorted=false, benchmarkPrice=1.0) {
+    function convertBidData(constructionBid, sorted=false, benchmarkPrice=null) {
         if (!Array.isArray(constructionBid)) {
             return [];
         }
@@ -394,8 +394,12 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         // 根据 bid_price_score 从大到小排序，并增加 rank 字段
         bids.sort((a, b) => b.bid_price_score.value - a.bid_price_score.value)
             .forEach((bid, index) => {
-                bid.rank = { value: index + 1 };
-            });            
+                if (bid.benchmarkPrice) {
+                    bid.rank = { value: index + 1 };
+                } else {
+                    bid.rank = 0;
+                }
+            });
 
         if (!sorted) {
             return bids;
@@ -861,7 +865,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             bidListButton.addEventListener('click', function() {
                 // 检查是否有投标数据
                 if (API_CONFIG[4].data && API_CONFIG[4].data.data.constructionBid) {
-                    let bPrice = 1.0;
+                    let bPrice = null;
                     const pp = extractPriceAndParams(API_CONFIG[3].data.data);
                     if (API_CONFIG[3].data && API_CONFIG[3].data.data) {
                         bPrice = pp.benchmarkPrice;
@@ -946,7 +950,11 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         if (pp) {
             baseDownRatio = (1 - pp.benchmarkPrice / pp.topPrice) * 100;
         }
-        title.textContent = `投标报价信息 [基准价:${pp?.benchmarkPrice || '/'}] [最高价:${pp?.topPrice || '/'}] ${baseDownRatio.toFixed(3)}% `;
+        title.textContent = `投标报价信息 [最高价:${pp?.topPrice || '/'}]`;
+        if (pp && pp.benchmarkPrice) {
+            title.textContent = `投标报价信息 [基准价:${pp?.benchmarkPrice || '/'}] [最高价:${pp?.topPrice || '/'}] ${baseDownRatio.toFixed(3)}% `;
+        }
+
         title.style.cssText = 'margin: 0 0 15px 0; color: #333;';
         headerArea.appendChild(title);
         
@@ -1058,7 +1066,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 modal.style.display = 'none';
             }
         });
-    }    
+    }
 
     // 更新按钮状态
     function updateUIAfterApiLoaded(url, data) {
