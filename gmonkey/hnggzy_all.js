@@ -394,10 +394,10 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         // 根据 bid_price_score 从大到小排序，并增加 rank 字段
         bids.sort((a, b) => b.bid_price_score.value - a.bid_price_score.value)
             .forEach((bid, index) => {
-                if (bid.benchmarkPrice) {
+                if (benchmarkPrice) {
                     bid.rank = { value: index + 1 };
                 } else {
-                    bid.rank = 0;
+                    bid.rank = null;
                 }
             });
 
@@ -477,7 +477,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         // 计算偏差率 Di = (Pi - T)/T × 100%
         // Pi 为第 i 家公司的报价，T 为基准价
 
-        if (benchmarkPrice <= 1.0) {
+        if (!benchmarkPrice) {
             return 0.0;
         }
 
@@ -1052,6 +1052,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 `).join('')}
             </tbody>
         `;
+        console.log("Bids:", bids);
         tableContainer.appendChild(table);
         document.body.appendChild(modal);
 
