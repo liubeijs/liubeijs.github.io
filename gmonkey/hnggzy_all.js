@@ -214,7 +214,13 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             btn_title: '更新',
             updateData() {
                 console.log('中标候选人数据更新');
-            },            
+            },
+            postJianDaoYun() {
+                console.log('更新项目中标候选人');
+                let candidates = parseCandidates();
+                console.log(candidates);
+                alert(JSON.stringify(candidates));
+            }
         },
         {
             index: 6,
@@ -729,6 +735,8 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                         alert('当前<招标计划>已存在简道云，无需重复创建!');
                     } else if (api.name === '项目信息' && CUR_PROJECTS[CUR_HNGGZY_ID]) {
                         alert('当前<项目>已存在简道云，无需重复创建!');
+                    } else if (api.name === '中标候选') {
+                        api.postJianDaoYun();
                     } else {
                         if (confirm(`确定在简道云${api.btn_title}<${api.name}>${CUR_PROJECTS[CUR_HNGGZY_ID]?.project_name || '?'}吗？`)) {
                             api.postJianDaoYun();
@@ -1257,6 +1265,89 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     }
 
     // Helper
+
+    // 解析【中标候选人公示】页面中的中标候选人信息
+    function parseCandidates(html = null) {
+        try {
+            // 创建一个临时的DOM元素来解析HTML
+            const parser = new DOMParser();
+            let doc = document;
+            if (html) doc = parser.parseFromString(html, 'text/html');
+            
+            // 查找所有表格
+            const tables = doc.getElementsByTagName('table');
+            
+            // 遍历所有表格
+            for (let table of tables) {
+                const rows = table.getElementsByTagName('tr');
+                if (rows.length < 2) continue; // 至少需要2行
+                
+                // 查找第一列文本为"中标候选人"的行（A行）
+                let candidateRow = null;
+                let nameRow = null;
+                
+                for (let i = 0; i < rows.length - 1; i++) {
+                    const currentRow = rows[i];
+                    const nextRow = rows[i + 1];
+                    
+                    const currentCells = currentRow.getElementsByTagName('td');
+                    const nextCells = nextRow.getElementsByTagName('td');
+                    
+                    if (currentCells.length === 0 || nextCells.length === 0) continue;
+                    
+                    const currentFirstCell = currentCells[0].textContent.replace(/\s+/g, '').trim();
+                    const nextFirstCell = nextCells[0].textContent.replace(/\s+/g, '').trim();
+                    
+                    // 检查是否找到目标行
+                    if (currentFirstCell === '中标候选人' && nextFirstCell === '中标候选人名称') {
+                        candidateRow = currentRow;
+                        nameRow = nextRow;
+                        break;
+                    }
+                }
+                
+                // 如果找到了目标行，提取候选人信息
+                if (nameRow) {
+                    const cells = nameRow.getElementsByTagName('td');
+                    const candidates = {};
+                    
+                    // 从第2列开始提取候选人名称
+                    for (let i = 1; i < cells.length && i <= 3; i++) {
+                        const text = cells[i].textContent.replace(/\s+/g, '').trim(); // 去除所有空格字符
+                        if (text && text !== '无') {
+                            switch(i) {
+                                case 1:
+                                    candidates.first = text;
+                                    break;
+                                case 2:
+                                    candidates.second = text;
+                                    break;
+                                case 3:
+                                    candidates.third = text;
+                                    break;
+                            }
+                        }
+                    }
+                    
+                    // 如果至少找到一个候选人，返回结果
+                    if (Object.keys(candidates).length > 0) {
+                        return {
+                            first: candidates.first || null,
+                            second: candidates.second || null,
+                            third: candidates.third || null
+                        };
+                    }
+                }
+            }
+            
+            // 如果没有找到有效的候选人信息，返回null
+            return null;
+            
+        } catch (error) {
+            console.error('解析中标候选人信息时出错:', error);
+            return null;
+        }
+    }
 
     // 判断当前页面URL是否为项目计划页面
     function isBidPlanDetailPage() {
