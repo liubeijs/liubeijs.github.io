@@ -217,9 +217,44 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             },
             postJianDaoYun() {
                 console.log('更新项目中标候选人');
-                let candidates = parseCandidates();
+                let candidates = parseCandidatesAndRejectedBidder();
                 console.log(candidates);
+
+                if (candidates.length === 0) {
+                    alert("未获取到中标候选人信息");
+                    return;
+                }
+                
                 alert(JSON.stringify(candidates));
+
+                const bids = convertBidData(getConstructionBid(), false, null, candidates);
+                if (bids.length === 0) {
+                    alert("未获取到投标人报价信息");
+                    return;
+                }
+
+                safePostToJianDaoYun(
+                    "POST",
+                    "https://api.jiandaoyun.com/api/v5/app/entry/data/update",
+                    {
+                        "app_id": JIANDAOYUN_APP_ID,
+                        "entry_id": JIANDAOYUN_ENTRY_PROJECT_ID,
+                        "data_id": CUR_PROJECTS[CUR_HNGGZY_ID]?._id,
+                        "data": {
+                            "bids_count": {
+                                "value": bids.length,
+                            },
+                            "project_bids":{
+                                "value": bids,
+                            },
+                            "bids_url": {
+                                "value": `https://pages.liubeijs.com/project.html?project_id=${CUR_PROJECTS[CUR_HNGGZY_ID]?.project_id}`,
+                            }
+                        }
+                    },
+                    5
+                );
+
             }
         },
         {
@@ -377,7 +412,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     }
 
     // 将投标报价信息转换成简道云数据格式
-    function convertBidData(constructionBid, sorted=false, benchmarkPrice=null) {
+    function convertBidData(constructionBid, sorted=false, benchmarkPrice=null, candidates=null) {
         if (!Array.isArray(constructionBid)) {
             return [];
         }
@@ -396,6 +431,19 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 bid_stat: { value: "" },
                 bid_comment: { value: "" }
             }));
+
+        // 更新 bids 数组中的 bid_stat 和 bid_comment
+        if (typeof candidates !== 'undefined' && Array.isArray(candidates)) {
+            bids.forEach(bid => {
+                const matchingCandidate = candidates.find(candidate => candidate.bid_corp_name === bid.bid_corp_name.value);
+                if (matchingCandidate) {
+                    bid.bid_stat.value = matchingCandidate.bid_stat;
+                    if (matchingCandidate.hasOwnProperty('bid_comment')) {
+                        bid.bid_comment.value = matchingCandidate.bid_comment;
+                    }
+                }
+            });
+        }
 
         // 根据 bid_price_score 从大到小排序，并增加 rank 字段
         bids.sort((a, b) => b.bid_price_score.value - a.bid_price_score.value)
@@ -1266,88 +1314,120 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
 
     // Helper
 
-    // 解析【中标候选人公示】页面中的中标候选人信息
-    function parseCandidates(html = null) {
+    // 解析【中标候选人公示】页面中的中标候选人和否决投标人信息
+    function parseCandidatesAndRejectedBidder() {
         try {
-            // 创建一个临时的DOM元素来解析HTML
-            const parser = new DOMParser();
-            let doc = document;
-            if (html) doc = parser.parseFromString(html, 'text/html');
-            
+            const results = []; // 用于存储所有解析结果
             // 查找所有表格
-            const tables = doc.getElementsByTagName('table');
-            
+            const tables = document.getElementsByTagName('table');
+            console.log(tables.length);
+
             // 遍历所有表格
             for (let table of tables) {
+                console.log('table', table);
                 const rows = table.getElementsByTagName('tr');
                 if (rows.length < 2) continue; // 至少需要2行
-                
-                // 查找第一列文本为"中标候选人"的行（A行）
+
+                // 尝试解析中标候选人
                 let candidateRow = null;
-                let nameRow = null;
-                
+                let nameRowForCandidate = null;
+
                 for (let i = 0; i < rows.length - 1; i++) {
                     const currentRow = rows[i];
                     const nextRow = rows[i + 1];
-                    
+
                     const currentCells = currentRow.getElementsByTagName('td');
                     const nextCells = nextRow.getElementsByTagName('td');
-                    
+
                     if (currentCells.length === 0 || nextCells.length === 0) continue;
-                    
-                    const currentFirstCell = currentCells[0].textContent.replace(/\s+/g, '').trim();
-                    const nextFirstCell = nextCells[0].textContent.replace(/\s+/g, '').trim();
-                    
-                    // 检查是否找到目标行
-                    if (currentFirstCell === '中标候选人' && nextFirstCell === '中标候选人名称') {
+
+                    const currentFirstCellText = currentCells[0].textContent.replace(/\s+/g, '').trim();
+                    const nextFirstCellText = nextCells[0].textContent.replace(/\s+/g, '').trim();
+
+                    if (currentFirstCellText === '中标候选人' && nextFirstCellText === '中标候选人名称') {
                         candidateRow = currentRow;
-                        nameRow = nextRow;
+                        nameRowForCandidate = nextRow;
                         break;
                     }
                 }
-                
-                // 如果找到了目标行，提取候选人信息
-                if (nameRow) {
-                    const cells = nameRow.getElementsByTagName('td');
-                    const candidates = {};
-                    
-                    // 从第2列开始提取候选人名称
+
+                if (nameRowForCandidate) {
+                    const cells = nameRowForCandidate.getElementsByTagName('td');
+                    const candidateNames = [];
                     for (let i = 1; i < cells.length && i <= 3; i++) {
-                        const text = cells[i].textContent.replace(/\s+/g, '').trim(); // 去除所有空格字符
+                        const text = cells[i].textContent.replace(/\s+/g, '').trim();
                         if (text && text !== '无') {
-                            switch(i) {
-                                case 1:
-                                    candidates.first = text;
-                                    break;
-                                case 2:
-                                    candidates.second = text;
-                                    break;
-                                case 3:
-                                    candidates.third = text;
-                                    break;
+                            candidateNames.push(text);
+                        }
+                    }
+                    if (candidateNames.length > 0) {
+                        candidateNames.forEach((name, index) => {
+                            let resultText = '';
+                            if (index === 0) resultText = '第一候选人';
+                            else if (index === 1) resultText = '第二候选人';
+                            else if (index === 2) resultText = '第三候选人';
+                            const newItem = { bid_corp_name: name, bid_stat: resultText };
+                            // 去重检查
+                            const isDuplicate = results.some(existingItem => 
+                                existingItem.bid_corp_name === newItem.bid_corp_name && existingItem.bid_stat === newItem.bid_stat
+                            );
+                            if (!isDuplicate) {
+                                results.push(newItem);
+                            }
+                        });
+                    }
+                }
+
+                // 尝试解析被否决投标人
+                let rejectedBidderHeaderRowIndex = -1;
+                for (let i = 0; i < rows.length; i++) {
+                    const cells = rows[i].getElementsByTagName('td');
+                    if (cells.length >= 3) {
+                        const cell1Text = cells[1].textContent.replace(/\s+/g, '').trim();
+                        const cell2Text = cells[2].textContent.replace(/\s+/g, '').trim();
+                        if (cell1Text === '投标人名称' && cell2Text === '否决依据和原因') {
+                            rejectedBidderHeaderRowIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (rejectedBidderHeaderRowIndex !== -1) {
+                    for (let i = rejectedBidderHeaderRowIndex + 1; i < rows.length; i++) {
+                        const cells = rows[i].getElementsByTagName('td');
+                        if (cells.length >= 3) {
+                            const name = cells[1].textContent.replace(/\s+/g, '').trim();
+                            const comment = cells[2].textContent.replace(/\s+/g, '').trim();
+                            // 确保提取到的名称不为空，原因可以为空，并且名称不是表头的一部分（例如，避免再次匹配到“投标人名称”）
+                            if (name && name !== '投标人名称') {
+                                const newItem = {
+                                    bid_corp_name: name,
+                                    bid_stat: '废标',
+                                    bid_comment: comment
+                                };
+                                // 去重检查
+                                const isDuplicate = results.some(existingItem => 
+                                    existingItem.bid_corp_name === newItem.bid_corp_name && 
+                                    existingItem.bid_stat === newItem.bid_stat && 
+                                    existingItem.bid_comment === newItem.bid_comment
+                                );
+                                if (!isDuplicate) {
+                                    results.push(newItem);
+                                }
                             }
                         }
                     }
-                    
-                    // 如果至少找到一个候选人，返回结果
-                    if (Object.keys(candidates).length > 0) {
-                        return {
-                            first: candidates.first || null,
-                            second: candidates.second || null,
-                            third: candidates.third || null
-                        };
-                    }
                 }
             }
-            
-            // 如果没有找到有效的候选人信息，返回null
-            return null;
-            
+
+            return results.length > 0 ? results : null; // 如果有结果则返回，否则返回null
+
         } catch (error) {
-            console.error('解析中标候选人信息时出错:', error);
+            console.error('解析中标候选人及否决投标人信息时出错:', error);
             return null;
         }
     }
+
 
     // 判断当前页面URL是否为项目计划页面
     function isBidPlanDetailPage() {
@@ -1362,6 +1442,15 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         CUR_HNGGZY_ID = urlParams.get('bidSectionId') || '';
         console.log('CUR_PROJECT_BID_ID:',CUR_HNGGZY_ID);
         return CUR_HNGGZY_ID;
+    }
+
+    // 得到当前项目的报价信息（JSON）
+    function getConstructionBid() {
+        if (API_CONFIG[4].data && API_CONFIG[4].data.data.constructionBid) {
+            return API_CONFIG[4].data.data.constructionBid;
+        } else {
+            return null;
+        }
     }
 
     // 从URL中获取id参数
