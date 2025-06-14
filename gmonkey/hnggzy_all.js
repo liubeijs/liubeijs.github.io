@@ -18,7 +18,7 @@
 // @resource     JSONEDITOR_ICONS https://cdn.bootcdn.net/ajax/libs/jsoneditor/10.1.3/img/jsoneditor-icons.svg
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     // 1. 全局变量
@@ -26,10 +26,10 @@
     let editor = null;
 
     // 定义全局变量, 当前简道云对应的项目
-const JIANDAOYUN_APP_ID = "63324ce70ae4b40008f38909";
-const JIANDAOYUN_ENTRY_PROJECT_ID = "64979d25210a5200083fbf9d";
-const JIANDAOYUN_ENTRY_PLAN_ID = "683292c9a6a4af8b452e12cf";
-const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_max_price", "project_base_price", "bids_url", "hnggzy_id"];
+    const JIANDAOYUN_APP_ID = "63324ce70ae4b40008f38909";
+    const JIANDAOYUN_ENTRY_PROJECT_ID = "64979d25210a5200083fbf9d";
+    const JIANDAOYUN_ENTRY_PLAN_ID = "683292c9a6a4af8b452e12cf";
+    const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_max_price", "project_base_price", "bids_url", "hnggzy_id"];
 
     let CUR_PROJECTS = {}
     let CUR_HNGGZY_ID = '';
@@ -59,20 +59,20 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                         "app_id": JIANDAOYUN_APP_ID,
                         "entry_id": JIANDAOYUN_ENTRY_PLAN_ID,
                         "data": {
-                            "hnggzy_id":{"value": this.data.data.id},
-                            "project_name":{"value": this.data.data.projectName},
-                            "plan_pub_time":{"value": this.data.data.noticeSendDate},
-                            "project_owner":{"value": this.data.data.noticeContent['招标人名称']},
-                            "project_invest_price":{"value": parseAmount(this.data.data.noticeContent['投资估算'] || this.data.data.noticeContent['投资估算(万元)'])},
-                            "fund_source":{"value": this.data.data.noticeContent['资金来源']},
-                            "bid_openning_time":{"value": parseDateTime(this.data.data.noticeContent['计划招标时间'])},
-                            "plan_pub_url":{"value": window.location.href},
-                            "project_info":{"value": this.data.data.noticeContent['项目概况'] || this.data.data.noticeContent['招标内容']},
-                            "project_work":{"value": this.data.data.noticeContent['招标范围']},
-                            "other":{"value": this.data.data.noticeContent['其他']},
-                            "comment":{"value": this.data.data.noticeContent['备注']},
-                            "region_code":{"value": this.data.data.regionCode},
-                            "project_place":{"value": getJianDaoYunAreaJsonByCodeOrString(this.data.data.regionCode)},
+                            "hnggzy_id": { "value": this.data.data.id },
+                            "project_name": { "value": this.data.data.projectName },
+                            "plan_pub_time": { "value": this.data.data.noticeSendDate },
+                            "project_owner": { "value": this.data.data.noticeContent['招标人名称'] },
+                            "project_invest_price": { "value": parseAmount(this.data.data.noticeContent['投资估算'] || this.data.data.noticeContent['投资估算(万元)']) },
+                            "fund_source": { "value": this.data.data.noticeContent['资金来源'] },
+                            "bid_openning_time": { "value": parseDateTime(this.data.data.noticeContent['计划招标时间']) },
+                            "plan_pub_url": { "value": window.location.href },
+                            "project_info": { "value": this.data.data.noticeContent['项目概况'] || this.data.data.noticeContent['招标内容'] },
+                            "project_work": { "value": this.data.data.noticeContent['招标范围'] },
+                            "other": { "value": this.data.data.noticeContent['其他'] },
+                            "comment": { "value": this.data.data.noticeContent['备注'] },
+                            "region_code": { "value": this.data.data.regionCode },
+                            "project_place": { "value": getJianDaoYunAreaJsonByCodeOrString(this.data.data.regionCode) },
                         } // 实际数据
                     },
                     0
@@ -86,13 +86,13 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             pattern: '/tradeApi/constructionTender/getBySectionId',
             data: null,
             enabled: false,
-            btn_title: '创建',            
+            btn_title: '创建',
             updateData() {
                 console.log('项目信息数据更新');
             },
             postJianDaoYun() {
                 console.log('招标项目发布');
-                console.log('this.data.data:',this.data.data.constructionSectionList[0]);
+                console.log('this.data.data:', this.data.data.constructionSectionList[0]);
 
                 safePostToJianDaoYun(
                     "POST",
@@ -102,15 +102,15 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                         "entry_id": JIANDAOYUN_ENTRY_PROJECT_ID,
                         "fields": JIANDAOYUN_FIELDS,
                         "data": {
-                            "hnggzy_id":{"value": this.data.data.constructionSectionList[0].id},
-                            "project_name":{"value": this.data.data.constructionTender.tenderProjectName},
-                            "project_pub_url":{"value": window.location.href},
-                            "hnggzy_type":{"value": this.data.data.constructionTender.tenderProjectType},
-                            "project_owner":{"value": this.data.data.constructionTender.tendererName},
-                            "project_proxy":{"value": this.data.data.constructionTender.tenderAgencyName},
-                            "project_info":{"value": this.data.data.constructionTender.tenderContent},
-                            "project_place":{"value": getJianDaoYunAreaJsonByCodeOrString(this.data.data.constructionProject.regionCode)},
-                            "project_max_price":{"value": this.data.data.constructionSectionList[0].tenderControlPrice*10000},
+                            "hnggzy_id": { "value": this.data.data.constructionSectionList[0].id },
+                            "project_name": { "value": this.data.data.constructionTender.tenderProjectName },
+                            "project_pub_url": { "value": window.location.href },
+                            "hnggzy_type": { "value": this.data.data.constructionTender.tenderProjectType },
+                            "project_owner": { "value": this.data.data.constructionTender.tendererName },
+                            "project_proxy": { "value": this.data.data.constructionTender.tenderAgencyName },
+                            "project_info": { "value": this.data.data.constructionTender.tenderContent },
+                            "project_place": { "value": getJianDaoYunAreaJsonByCodeOrString(this.data.data.constructionProject.regionCode) },
+                            "project_max_price": { "value": this.data.data.constructionSectionList[0].tenderControlPrice * 10000 },
                         }
                     },
                     1
@@ -193,7 +193,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                             "bids_count": {
                                 "value": bids.length,
                             },
-                            "project_bids":{
+                            "project_bids": {
                                 "value": bids,
                             },
                             "bids_url": {
@@ -224,7 +224,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                     alert("未获取到中标候选人信息");
                     return;
                 }
-                
+
                 alert(JSON.stringify(candidates));
 
                 const bids = convertBidData(getConstructionBid(), false, null, candidates);
@@ -244,7 +244,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                             "bids_count": {
                                 "value": bids.length,
                             },
-                            "project_bids":{
+                            "project_bids": {
                                 "value": bids,
                             },
                             "bids_url": {
@@ -284,7 +284,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 "X-Custom-Header": "Tampermonkey Request"     // 自定义头
             },
             data: JSON.stringify(requestBody),
-            onload: function(response) {
+            onload: function (response) {
                 try {
                     const data = JSON.parse(response.responseText);
                     //console.log('XXX 响应数据:', data);
@@ -299,18 +299,18 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                             updateProjectInfo();
 
                         }
-                        showNotification("请求成功",`${data.data._id}`,'a');
+                        showNotification("请求成功", `${data.data._id}`, 'a');
                     } else {
                         throw new Error(data.message || "未知错误");
                     }
                 } catch (e) {
                     console.error("响应解析失败:", e);
-                    showNotification("请求异常",`状态码: ${response.status}`,'a');
+                    showNotification("请求异常", `状态码: ${response.status}`, 'a');
                 }
             },
-            onerror: function(error) {
+            onerror: function (error) {
                 console.error("网络错误:", error);
-                showNotification("请求失败","请检查网络连接",'a');
+                showNotification("请求失败", "请检查网络连接", 'a');
             },
             timeout: 15000 // 15秒超时
         });
@@ -319,13 +319,13 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     // 加载简道云项目数据
     function loadCurrentJianDaoYunProject() {
         const baseUrl = "https://api.jiandaoyun.com/api/v5/app/entry/data/list";
-        
+
         let targetEntryId = JIANDAOYUN_ENTRY_PROJECT_ID;
         if (isBidPlanDetailPage()) {
             targetEntryId = JIANDAOYUN_ENTRY_PLAN_ID;
         }
         setCurrentHnggzyID();
-        
+
         if (!CUR_HNGGZY_ID) {
             console.log('未找到有效的 hnggzy_id，无法加载项目');
             return;
@@ -347,7 +347,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             },
             limit: 1
         };
-  
+
         GM_xmlhttpRequest({
             method: "POST",
             url: baseUrl,
@@ -357,7 +357,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 "X-Custom-Header": "Tampermonkey Request"     // 自定义头
             },
             data: JSON.stringify(requestBody),
-            onload: function(response) {
+            onload: function (response) {
                 try {
                     const data = JSON.parse(response.responseText);
                     if (response.status >= 200 && response.status < 300) {
@@ -369,18 +369,18 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                         } else {
                             console.log(`未找到ID为${CUR_HNGGZY_ID}的项目数据`);
                         }
-                        showNotification("请求成功",`已加载hnggzy_id=${CUR_HNGGZY_ID}的项目数据`);
+                        showNotification("请求成功", `已加载hnggzy_id=${CUR_HNGGZY_ID}的项目数据`);
                     } else {
                         throw new Error(data.message || "未知错误");
                     }
                 } catch (e) {
                     console.error("响应解析失败:", e);
-                    showNotification("请求异常",`状态码: ${response.status}`,"a");
+                    showNotification("请求异常", `状态码: ${response.status}`, "a");
                 }
             },
-            onerror: function(error) {
+            onerror: function (error) {
                 console.error("网络错误:", error);
-                showNotification("请求失败","请检查网络连接","a");
+                showNotification("请求失败", "请检查网络连接", "a");
             },
             timeout: 5000 // 5秒超时
         });
@@ -400,33 +400,33 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             projectNameElement.textContent = bid?.project_name || '?';
 
             if (isBidPlanDetailPage()) {
-                infoElement.textContent = "-";    
+                infoElement.textContent = "-";
             } else {
                 let bid_down_ratio = 0;
                 if (bid && bid.project_base_price && bid.project_max_price) {
-                    bid_down_ratio = (1.0 - bid.project_base_price / bid.project_max_price)*100;
+                    bid_down_ratio = (1.0 - bid.project_base_price / bid.project_max_price) * 100;
                 }
-                infoElement.textContent = `投标数量：${CUR_PROJECTS[CUR_HNGGZY_ID]?.bids_count} 基准价：${bid_down_ratio.toFixed(3)}%`;    
+                infoElement.textContent = `投标数量：${CUR_PROJECTS[CUR_HNGGZY_ID]?.bids_count} 基准价：${bid_down_ratio.toFixed(3)}%`;
             }
         }
     }
 
     // 将投标报价信息转换成简道云数据格式
-    function convertBidData(constructionBid, sorted=false, benchmarkPrice=null, candidates=null) {
+    function convertBidData(constructionBid, sorted = false, benchmarkPrice = null, candidates = null) {
         if (!Array.isArray(constructionBid)) {
             return [];
         }
-    
-        const bids =  constructionBid
+
+        const bids = constructionBid
             .filter(bid => bid.bidPrice !== null)
             .map((bid, index) => ({
                 bid_id: { value: index + 1 },
                 bid_corp_name: { value: bid.bidderName },
                 bid_corp_code: { value: bid.bidderCode },
                 bid_price: { value: bid.bidPrice },
-                bid_down_ratio: { value: 1.0-parseFloat(bid.bidPrice)/(parseFloat(bid.controlPrice)*10000.0) },
+                bid_down_ratio: { value: 1.0 - parseFloat(bid.bidPrice) / (parseFloat(bid.controlPrice) * 10000.0) },
                 bid_benchmark_price: { value: benchmarkPrice },
-                bid_max_price: { value: parseFloat(bid.controlPrice)*10000.0 },
+                bid_max_price: { value: parseFloat(bid.controlPrice) * 10000.0 },
                 bid_price_score: { value: calculateBidScore(benchmarkPrice, bid.bidPrice) },
                 bid_stat: { value: "" },
                 bid_comment: { value: "" }
@@ -468,7 +468,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         if (!Array.isArray(data)) {
             return '';
         }
-    
+
         return data.map(item => {
             const key = item.key;
             const value = item.value;
@@ -487,11 +487,11 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             benchmarkPrice: null,
             params: {}
         };
-        
+
         // 参数映射表
         const paramMapping = {
             '算术平均数随机权重a': 'a',
-            '中位数随机权重b': 'b', 
+            '中位数随机权重b': 'b',
             '四分位数随机权重c': 'c',
             '几何平均数随机权重d': 'd',
             '算数平均数随机权重e': 'e',
@@ -500,7 +500,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '比例系数C1': 'C1',
             '下浮系数r': 'r'
         };
-        
+
         // 遍历数据数组
         data.forEach(item => {
             // 提取topPrice（所有项目的topPrice应该相同）
@@ -510,14 +510,14 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             if (item.benchmarkPrice && !result.benchmarkPrice) {
                 result.benchmarkPrice = parseFloat(item.benchmarkPrice);
             }
-            
+
             // 根据key提取对应参数
             if (item.key && paramMapping[item.key]) {
                 const paramName = paramMapping[item.key];
                 result.params[paramName] = parseFloat(item.value);
             }
         });
-        
+
         return result;
     }
 
@@ -536,10 +536,10 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         }
 
         const deviation = 1.0 * (bidPrice - benchmarkPrice) / benchmarkPrice;
-        
+
         // 根据偏差率计算得分
         let score;
-        
+
         if (deviation < -0.1) {
             score = 80.0 - 1.0 * (Math.abs(deviation) - 0.1) * 100;
         } else if (deviation >= -0.1 && deviation < 0.0) {
@@ -791,7 +791,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                         }
                     }
                 } else {
-                    showNotification('发送失败','当前接口不支持发送数据','a');
+                    showNotification('发送失败', '当前接口不支持发送数据', 'a');
                 }
             }
         });
@@ -831,7 +831,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 <button id="jiandaoyun-project-btn" style="padding: 4px 12px; background: #409EFF; color: white; border: none; border-radius: 4px; cursor: pointer;">简道云</button>
             </div>
         `;
-        
+
         // 创建按钮容器
         const buttonContainer = document.createElement('div');
         buttonContainer.id = 'api-buttons';
@@ -864,11 +864,11 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             const jsonData = editor.get();
             navigator.clipboard.writeText(JSON.stringify(jsonData, null, 2))
                 .then(() => {
-                    showNotification('复制成功','数据已复制到剪贴板','a');
+                    showNotification('复制成功', '数据已复制到剪贴板', 'a');
                 })
                 .catch(err => {
                     console.error('复制失败:', err);
-                    showNotification('复制失败','请手动复制数据');
+                    showNotification('复制失败', '请手动复制数据');
                 });
         });
 
@@ -892,17 +892,17 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             if (element) {
                 element.style.cursor = 'pointer';
                 element.title = '点击复制';
-                element.addEventListener('click', function(event) {
+                element.addEventListener('click', function (event) {
                     navigator.clipboard.writeText(element.textContent);
                     showTempHint('已复制', event);
                 });
             }
-        });    
+        });
 
         // 添加项目链接按钮点击事件
         const linkButton = projectInfoBar.querySelector('#jiandaoyun-project-btn');
         if (linkButton) {
-            linkButton.addEventListener('click', function() {
+            linkButton.addEventListener('click', function () {
                 let jian_p_url = `https://www.jiandaoyun.com/dashboard/app/${JIANDAOYUN_APP_ID}/form/${JIANDAOYUN_ENTRY_PROJECT_ID}/data/${CUR_PROJECTS[CUR_HNGGZY_ID]?._id}/qr_link`;
                 if (isBidPlanDetailPage()) {
                     jian_p_url = `https://www.jiandaoyun.com/dashboard/app/${JIANDAOYUN_APP_ID}/form/${JIANDAOYUN_ENTRY_PLAN_ID}/data/${CUR_PROJECTS[CUR_HNGGZY_ID]?._id}/qr_link`;
@@ -918,7 +918,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         // 添加报价按钮点击事件
         const bidListButton = projectInfoBar.querySelector('#bid-list-btn');
         if (bidListButton) {
-            bidListButton.addEventListener('click', function() {
+            bidListButton.addEventListener('click', function () {
                 // 检查是否有投标数据
                 if (API_CONFIG[4].data && API_CONFIG[4].data.data.constructionBid) {
                     let bPrice = null;
@@ -942,23 +942,23 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         // 添加分析按钮点击事件
         const analyzeButton = projectInfoBar.querySelector('#analyze-btn');
         if (analyzeButton) {
-            analyzeButton.addEventListener('click', function() {
+            analyzeButton.addEventListener('click', function () {
 
                 if (API_CONFIG[3].data && API_CONFIG[3].data.data && API_CONFIG[4].data && API_CONFIG[4].data.data) {
                     const sortedBids = convertBidData(API_CONFIG[4].data.data.constructionBid, true);
                     const pp = extractPriceAndParams(API_CONFIG[3].data.data);
-    
+
                     const bids = sortedBids.map(bid => bid.bid_price.value).join(',');
                     const stats = "";
-    
+
                     // 构建跳转URL，添加六参数
                     const url = `https://pages.liubeijs.com/cal65.html?maxPrice=${pp.topPrice}&bids=${bids}&stats=${encodeURIComponent(stats)}`
                         + `&a=${pp.params.a || ''}&b=${pp.params.b || ''}&c=${pp.params.c || ''}&d=${pp.params.d || ''}&e=${pp.params.e || ''}&f=${pp.params.f || ''}&g=${pp.params.g || ''}`
                         + `&C1=${pp.params.C1 || ''}&r=${pp.params.r || ''}`;
-                    
+
                     console.log('url', url);
                     // 跳转到新页面
-                    window.open(url, '_blank');                                        
+                    window.open(url, '_blank');
                 } else {
                     showNotification('暂无数据', '请先加载[开标参数][开标信息]', 'a');
                 }
@@ -975,7 +975,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     function getCurrentApiData() {
         // 从当前页面或全局变量中获取API数据
         // 这里需要根据你的实际数据结构来实现
-        
+
         return window.currentApiData || null;
     }
 
@@ -983,7 +983,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
      * 创建投标报价弹窗
      * @param {Array} bids - 投标数据数组
      */
-    function createBidPriceModal(bids, pp=null) {
+    function createBidPriceModal(bids, pp = null) {
         // 检查是否已存在弹窗
         let existingModal = document.querySelector('#bid-price-modal');
         if (existingModal) {
@@ -994,12 +994,12 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         const modal = document.createElement('div');
         modal.id = 'bid-price-modal';
         modal.style.cssText = 'display: block; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); z-index: 10000; max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;';
-        
+
         // 创建固定的标题区域
         const headerArea = document.createElement('div');
         headerArea.style.cssText = 'padding: 20px 20px 0 20px; flex-shrink: 0;';
         modal.appendChild(headerArea);
-        
+
         // 添加标题
         const title = document.createElement('h3');
         let baseDownRatio = 0.0;
@@ -1013,49 +1013,49 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
 
         title.style.cssText = 'margin: 0 0 15px 0; color: #333;';
         headerArea.appendChild(title);
-        
+
         // 添加下浮率区间统计区域
         const statsContainer = document.createElement('div');
         statsContainer.style.cssText = 'margin-bottom: 15px; padding: 10px; background-color: #f5f7fa; border-radius: 5px; border: 1px solid #ddd;';
-        
+
         // 计算各区间的单位数量
         const intervalStats = {};
         const minDownRatio = Math.floor(Math.min(...bids.map(bid => bid.bid_down_ratio?.value * 100 || 0)));
         const maxDownRatio = Math.ceil(Math.max(...bids.map(bid => bid.bid_down_ratio?.value * 100 || 0)));
-        
+
         // 初始化区间统计
         for (let i = minDownRatio; i < maxDownRatio; i++) {
-            intervalStats[`${i}%-${i+1}%`] = 0;
+            intervalStats[`${i}%-${i + 1}%`] = 0;
         }
-        
+
         // 统计各区间的单位数量
         bids.forEach(bid => {
             if (bid.bid_down_ratio?.value) {
                 const downRatioPercent = bid.bid_down_ratio.value * 100;
-                const interval = `${Math.floor(downRatioPercent)}%-${Math.floor(downRatioPercent)+1}%`;
+                const interval = `${Math.floor(downRatioPercent)}%-${Math.floor(downRatioPercent) + 1}%`;
                 if (intervalStats[interval] !== undefined) {
                     intervalStats[interval]++;
                 }
             }
         });
-        
+
         // 创建统计标题
         const statsTitle = document.createElement('h4');
         statsTitle.textContent = '下浮率区间统计';
         statsTitle.style.cssText = 'margin: 0 0 10px 0; color: #333;';
         statsContainer.appendChild(statsTitle);
-        
+
         // 创建统计内容
         const statsContent = document.createElement('div');
         statsContent.style.cssText = 'display: flex; flex-wrap: wrap; gap: 10px;';
-        
+
         // 将区间按单位数量排序，找出前5个最多的区间
         const sortedIntervals = Object.entries(intervalStats)
             .filter(([_, count]) => count > 0) // 只保留有单位的区间
             .sort((a, b) => b[1] - a[1]); // 按单位数量从多到少排序
-        
+
         const top5Intervals = new Set(sortedIntervals.slice(0, 5).map(item => item[0]));
-        
+
         Object.entries(intervalStats).forEach(([interval, count]) => {
             if (count > 0) { // 只显示有单位的区间
                 const statItem = document.createElement('div');
@@ -1066,10 +1066,10 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 statsContent.appendChild(statItem);
             }
         });
-        
+
         statsContainer.appendChild(statsContent);
         headerArea.appendChild(statsContainer);
-        
+
         // 添加关闭按钮
         const closeBtn = document.createElement('button');
         closeBtn.textContent = '×';
@@ -1080,7 +1080,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         const tableContainer = document.createElement('div');
         tableContainer.style.cssText = 'padding: 0 20px 20px 20px; overflow-y: auto; flex-grow: 1;';
         modal.appendChild(tableContainer);
-        
+
         // 创建表格
         const table = document.createElement('table');
         table.style.cssText = 'width: 100%; border-collapse: collapse; margin-top: 10px;';
@@ -1110,6 +1110,25 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         `;
         console.log("Bids:", bids);
         tableContainer.appendChild(table);
+
+        // 计算平均报价和平均下浮率
+        const totalBidPrice = bids.reduce((sum, bid) => sum + (parseFloat(bid.bid_price?.value) || 0), 0);
+        const averageBidPrice = bids.length > 0 ? (totalBidPrice / bids.length) : 0;
+        const totalDownRatio = bids.reduce((sum, bid) => sum + (bid.bid_down_ratio?.value || 0), 0);
+        const averageDownRatio = bids.length > 0 ? (totalDownRatio / bids.length) : 0;
+
+        const averagePriceDiv = document.createElement('div');
+        averagePriceDiv.style.cssText = 'margin-top: 10px; font-weight: bold;';
+        averagePriceDiv.textContent = `平均报价: ${averageBidPrice.toFixed(2)}`;
+
+        const averageRatioDiv = document.createElement('div');
+        averageRatioDiv.style.cssText = 'margin-top: 5px; font-weight: bold;';
+        averageRatioDiv.textContent = `平均下浮率: ${(averageDownRatio * 100).toFixed(2)}%`;
+
+        // 将平均值信息添加到表格容器的顶部
+        tableContainer.insertBefore(averageRatioDiv, tableContainer.firstChild);
+        tableContainer.insertBefore(averagePriceDiv, tableContainer.firstChild);
+
         document.body.appendChild(modal);
 
         // 绑定关闭事件
@@ -1132,12 +1151,12 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         if (url.includes('/tradeApi/constructionNotice/selectWinningBidNotice/')) {
             const isCandidate = url.endsWith('/0');
             const isResult = url.endsWith('/1');
-            
+
             if (isCandidate || isResult) {
-                const apiIndex = API_CONFIG.findIndex(api => 
+                const apiIndex = API_CONFIG.findIndex(api =>
                     api.name === (isCandidate ? '中标候选' : '中标结果')
                 );
-                
+
                 if (apiIndex !== -1) {
                     API_CONFIG[apiIndex].data = data;
                     API_CONFIG[apiIndex].enabled = true;
@@ -1146,7 +1165,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                     const button = document.querySelectorAll('.api-button')[apiIndex];
                     button.classList.add('enabled');
 
-                    showNotification(`${API_CONFIG[apiIndex].name}数据已获取`,'点击按钮查看详细信息');
+                    showNotification(`${API_CONFIG[apiIndex].name}数据已获取`, '点击按钮查看详细信息');
                 }
                 return;
             }
@@ -1162,7 +1181,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             const button = document.querySelectorAll('.api-button')[apiIndex];
             button.classList.add('enabled');
 
-            showNotification(`${API_CONFIG[apiIndex].name}数据已获取`,'点击按钮查看详细信息');
+            showNotification(`${API_CONFIG[apiIndex].name}数据已获取`, '点击按钮查看详细信息');
         }
 
     }
@@ -1193,10 +1212,10 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         const options = {
             mode: 'view',
             modes: ['view', 'form', 'code', 'tree'],
-            onModeChange: function(newMode, oldMode) {
+            onModeChange: function (newMode, oldMode) {
                 contentElement.style.overflow = newMode === 'code' ? 'hidden' : 'auto';
             },
-            onError: function(error) {
+            onError: function (error) {
                 console.error('JSON编辑器错误:', error);
             }
         };
@@ -1206,10 +1225,10 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     }
 
     // Utils
-    
+
     function showNotification(title, text, type = "c") {
         if (type === "c") {
-            console.log(`【通知】${title} - ${text}`);    
+            console.log(`【通知】${title} - ${text}`);
         } else {
             alert(`${title} - ${text}`);
         }
@@ -1232,12 +1251,12 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             z-index: 10000;
         `;
         document.body.appendChild(hint);
-        
+
         // 触发淡出动画
         setTimeout(() => {
             hint.style.opacity = '0';
         }, 10);
-        
+
         // 移除元素
         setTimeout(() => {
             document.body.removeChild(hint);
@@ -1249,16 +1268,16 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         const originalOpen = XMLHttpRequest.prototype.open;
         const originalSend = XMLHttpRequest.prototype.send;
 
-        XMLHttpRequest.prototype.open = function(method, url) {
+        XMLHttpRequest.prototype.open = function (method, url) {
             this._url = url;
             return originalOpen.apply(this, arguments);
         };
 
-        XMLHttpRequest.prototype.send = function() {
+        XMLHttpRequest.prototype.send = function () {
             const xhr = this;
             const originalOnReadyStateChange = xhr.onreadystatechange;
 
-            xhr.onreadystatechange = function() {
+            xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
                         const data = JSON.parse(xhr.responseText);
@@ -1280,33 +1299,33 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     // 拦截Fetch请求
     function interceptFetch() {
         const originalFetch = window.fetch;
-        window.fetch = async function(input, init) {
+        window.fetch = async function (input, init) {
             const response = await originalFetch.apply(this, arguments);
             const url = typeof input === 'string' ? input : input.url;
 
             response.clone().json().then(data => {
                 updateUIAfterApiLoaded(url, data);
-            }).catch(() => {});
+            }).catch(() => { });
 
             return response;
         };
-    }    
+    }
 
     // 监听 URL 变化并更新项目信息
     function setupUrlChangeListener() {
         // 监听浏览器的前进后退
         window.addEventListener('popstate', updateProjectInfoFromUrl);
-        
+
         // 监听通过 history.pushState 和 history.replaceState 修改的 URL
         const originalPushState = history.pushState;
         const originalReplaceState = history.replaceState;
-        
-        history.pushState = function() {
+
+        history.pushState = function () {
             originalPushState.apply(this, arguments);
             updateProjectInfoFromUrl();
         };
-        
-        history.replaceState = function() {
+
+        history.replaceState = function () {
             originalReplaceState.apply(this, arguments);
             updateProjectInfoFromUrl();
         };
@@ -1368,7 +1387,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                             else if (index === 2) resultText = '第三候选人';
                             const newItem = { bid_corp_name: name, bid_stat: resultText };
                             // 去重检查
-                            const isDuplicate = results.some(existingItem => 
+                            const isDuplicate = results.some(existingItem =>
                                 existingItem.bid_corp_name === newItem.bid_corp_name && existingItem.bid_stat === newItem.bid_stat
                             );
                             if (!isDuplicate) {
@@ -1406,9 +1425,9 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                                     bid_comment: comment
                                 };
                                 // 去重检查
-                                const isDuplicate = results.some(existingItem => 
-                                    existingItem.bid_corp_name === newItem.bid_corp_name && 
-                                    existingItem.bid_stat === newItem.bid_stat && 
+                                const isDuplicate = results.some(existingItem =>
+                                    existingItem.bid_corp_name === newItem.bid_corp_name &&
+                                    existingItem.bid_stat === newItem.bid_stat &&
                                     existingItem.bid_comment === newItem.bid_comment
                                 );
                                 if (!isDuplicate) {
@@ -1433,14 +1452,14 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     function isBidPlanDetailPage() {
         const currentUrl = window.location.href;
         return currentUrl.includes('resources/bidPlanDetail?id');
-    }    
-    
+    }
+
     // 从URL中获取bidSectionId
     function getBidSectionIdFromUrl() {
         const url = window.location.href;
         const urlParams = new URLSearchParams(url.split('?')[1]);
         CUR_HNGGZY_ID = urlParams.get('bidSectionId') || '';
-        console.log('CUR_PROJECT_BID_ID:',CUR_HNGGZY_ID);
+        console.log('CUR_PROJECT_BID_ID:', CUR_HNGGZY_ID);
         return CUR_HNGGZY_ID;
     }
 
@@ -1485,11 +1504,11 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
     function parseAmount(amountStr) {
         // 移除所有空格
         amountStr = amountStr.replace(/\s+/g, '');
-        
+
         // 提取数字部分
-        const match = amountStr.match(/(\d+(?:\.\d+)?)/); 
+        const match = amountStr.match(/(\d+(?:\.\d+)?)/);
         if (!match) return 0;
-        
+
         // 转换为数字并乘以10000（万元转元）
         const amount = parseFloat(match[1]) * 10000;
         return amount;
@@ -1497,13 +1516,13 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
 
     // 解析时间字符串为标准日期
     function parseDateTime(dateTimeStr) {
-        console.log('dateTimeStr:',dateTimeStr);
+        console.log('dateTimeStr:', dateTimeStr);
 
         if (!dateTimeStr) return '';
-        
+
         // 移除多余的空格
         dateTimeStr = dateTimeStr.trim();
-        
+
         // 处理中文日期格式（例如：2025年6月24日）
         dateTimeStr = dateTimeStr.replace(/年|月|日/g, (match) => {
             switch (match) {
@@ -1512,26 +1531,26 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 case '日': return '';
             }
         });
-        
+
         // 处理斜杠日期格式（例如：2025/6/23）
         dateTimeStr = dateTimeStr.replace(/\//g, '-');
-        
+
         // 解析日期部分
         let date = dateTimeStr.split(' ')[0];
         let time = dateTimeStr.split(' ')[1] || '00:00';
-        
+
         // 处理日期部分
         let [year, month, day] = date.split('-');
-        
+
         // 确保月和日是两位数
         month = month ? month.padStart(2, '0') : '01';
         day = day ? day.padStart(2, '0') : '01';
-        
+
         // 处理时间部分
         let [hour, minute] = time.split(':');
         hour = (hour || '00').padStart(2, '0');
         minute = (minute || '00').padStart(2, '0');
-        
+
         // 返回格式化的日期时间字符串
         return `${year}-${month}-${day} ${hour}:${minute}`;
     }
@@ -1541,14 +1560,14 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         // 创建临时DOM元素解析HTML
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
-        
+
         // 获取tbody中的所有行
         const tbody = tempDiv.querySelector('tbody');
         if (!tbody) return {};
-        
+
         const rows = tbody.getElementsByTagName('tr');
         const result = {};
-        
+
         // 遍历每行，只取前两个单元格
         Array.from(rows).forEach(row => {
             const cells = row.getElementsByTagName('td');
@@ -1557,13 +1576,13 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
                 const key = cells[0].textContent.replace(/\s+/g, '');
                 // 第二个单元格作为value（仅删除头尾空白字符）
                 const value = cells[1].textContent.trim();
-                
+
                 if (key && value) {
                     result[key] = value;
                 }
             }
         });
-        
+
         return result;
     }
 
@@ -1573,12 +1592,12 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
         if (!code || typeof code !== 'string' || !/^\d{6}$/.test(code)) {
             return '';
         }
-    
+
         // 湖南省行政区划代码以43开头
         if (!code.startsWith('43')) {
             return '';
         }
-    
+
         // 湖南省行政区划代码对照表
         const areaMap = {
             '430100': '长沙市',
@@ -1591,7 +1610,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '430121': '长沙县',
             '430181': '浏阳市',
             '430182': '宁乡市',
-    
+
             '430200': '株洲市',
             '430202': '荷塘区',
             '430203': '芦淞区',
@@ -1602,14 +1621,14 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '430224': '茶陵县',
             '430225': '炎陵县',
             '430281': '醴陵市',
-    
+
             '430300': '湘潭市',
             '430302': '雨湖区',
             '430304': '岳塘区',
             '430321': '湘潭县',
             '430381': '湘乡市',
             '430382': '韶山市',
-    
+
             '430400': '衡阳市',
             '430405': '珠晖区',
             '430406': '雁峰区',
@@ -1623,7 +1642,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '430426': '祁东县',
             '430481': '耒阳市',
             '430482': '常宁市',
-    
+
             '430500': '邵阳市',
             '430502': '双清区',
             '430503': '大祥区',
@@ -1637,7 +1656,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '430529': '城步苗族自治县',
             '430581': '武冈市',
             '430582': '邵东市',
-    
+
             '430600': '岳阳市',
             '430602': '岳阳楼区',
             '430603': '云溪区',
@@ -1648,7 +1667,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '430626': '平江县',
             '430681': '汨罗市',
             '430682': '临湘市',
-    
+
             '430700': '常德市',
             '430702': '武陵区',
             '430703': '鼎城区',
@@ -1659,13 +1678,13 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '430725': '桃源县',
             '430726': '石门县',
             '430781': '津市市',
-    
+
             '430800': '张家界市',
             '430802': '永定区',
             '430811': '武陵源区',
             '430821': '慈利县',
             '430822': '桑植县',
-    
+
             '430900': '益阳市',
             '430902': '资阳区',
             '430903': '赫山区',
@@ -1673,7 +1692,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '430922': '桃江县',
             '430923': '安化县',
             '430981': '沅江市',
-    
+
             '431000': '郴州市',
             '431002': '北湖区',
             '431003': '苏仙区',
@@ -1686,7 +1705,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '431027': '桂东县',
             '431028': '安仁县',
             '431081': '资兴市',
-    
+
             '431100': '永州市',
             '431102': '零陵区',
             '431103': '冷水滩区',
@@ -1699,7 +1718,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '431127': '蓝山县',
             '431128': '新田县',
             '431129': '江华瑶族自治县',
-    
+
             '431200': '怀化市',
             '431202': '鹤城区',
             '431221': '中方县',
@@ -1713,14 +1732,14 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '431229': '靖州苗族侗族自治县',
             '431230': '通道侗族自治县',
             '431281': '洪江市',
-    
+
             '431300': '娄底市',
             '431302': '娄星区',
             '431321': '双峰县',
             '431322': '新化县',
             '431381': '冷水江市',
             '431382': '涟源市',
-    
+
             '433100': '湘西土家族苗族自治州',
             '433101': '吉首市',
             '433122': '泸溪县',
@@ -1731,7 +1750,7 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             '433127': '永顺县',
             '433130': '龙山县'
         };
-    
+
         // 如果是区县级代码（后两位不是00），需要特殊处理
         if (!code.endsWith('00')) {
             // 获取所属地级市代码（将后两位替换为00）
@@ -1756,37 +1775,37 @@ const JIANDAOYUN_FIELDS = ["project_id", "project_name", "bids_count", "project_
             if (!areaStr) return null;
             areaStr = `湖南省·${areaStr}`;
         }
-        
+
         // 处理地区字符串
         if (!areaStr || typeof areaStr !== 'string') return null;
-        
+
         // 移除所有空格
         areaStr = areaStr.trim();
-        
+
         // 分割地区字符串（支持点号、中点号和其他常见分隔符）
         const parts = areaStr.split(/[·.-。\s]+/);
-        
+
         // 确保至少有省市区三级
         if (parts.length < 2) return null;
-        
+
         // 处理省份名称（确保以"省"结尾）
         let province = parts[0];
         if (!province.endsWith('省')) province += '省';
-        
+
         // 处理城市名称（确保以"市"结尾）
         let city = parts[1];
         if (!city.endsWith('市') && !city.endsWith('自治州')) city += '市';
-        
+
         // 处理区县名称（确保以"区"、"市"、"县"或"自治县"结尾）
         let district = "";
         if (parts.length > 2) {
             district = parts[2];
-            if (!district.endsWith('区') &&!district.endsWith('市') &&
-              !district.endsWith('县') &&!district.endsWith('自治县')) {
+            if (!district.endsWith('区') && !district.endsWith('市') &&
+                !district.endsWith('县') && !district.endsWith('自治县')) {
                 district += '县';
             }
         }
-        
+
         // 返回标准格式的地区信息
         return {
             "province": province,
