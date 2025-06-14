@@ -233,6 +233,29 @@
                     return;
                 }
 
+                const winning_bidder_index = getWinningBidderIndex(bids);
+
+                console.log(winning_bidder_index);
+                function getWinningBidderIndex(bids) {
+                    if (!bids || bids.length === 0) {
+                        return -1;
+                    }
+                    for (let i = 0; i < bids.length; i++) {
+                        const bidStat = bids[i].bid_stat?.value;
+                        if (bidStat === "第一候选人" || bidStat === "中标人") {
+                            return i;
+                        }
+                    }
+                    // 如果没有明确的第一候选人或中标人，检查是否有 bid_stat 包含 “中标”
+                    for (let i = 0; i < bids.length; i++) {
+                        const bidStat = bids[i].bid_stat?.value;
+                        if (bidStat && bidStat.includes("中标")) {
+                            return i;
+                        }
+                    }
+                    return -1; // 如果没有找到中标人，返回-1
+                }
+
                 safePostToJianDaoYun(
                     "POST",
                     "https://api.jiandaoyun.com/api/v5/app/entry/data/update",
@@ -246,6 +269,18 @@
                             },
                             "project_bids": {
                                 "value": bids,
+                            },
+                            "winning_bidder_index": {
+                                "value": winning_bidder_index,
+                            },
+                            "winning_bidder": {
+                                "value": bids[winning_bidder_index]?.bid_corp_name.value,
+                            },
+                            "winning_bidder_price": {
+                                "value": bids[winning_bidder_index]?.bid_price.value,
+                            },
+                            "winning_bidder_down_ratio": {
+                                "value": bids[winning_bidder_index]?.bid_down_ratio.value,
                             },
                             "bids_url": {
                                 "value": `https://pages.liubeijs.com/project.html?project_id=${CUR_PROJECTS[CUR_HNGGZY_ID]?.project_id}`,
