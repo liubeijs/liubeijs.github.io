@@ -127,6 +127,30 @@
             btn_title: '更新',
             updateData() {
                 console.log('公告信息数据更新');
+            },
+            postJianDaoYun() {
+                console.log('更新项目公告信息');
+                const bidOpenningTime = parseBidOpenningTime();
+                if (bidOpenningTime) {
+                    alert(`更新开标时间：${bidOpenningTime}`);
+                } else {
+                    alert('未获取到开标时间');
+                    return;
+                }
+
+                safePostToJianDaoYun(
+                    "POST",
+                    "https://api.jiandaoyun.com/api/v5/app/entry/data/update",
+                    {
+                        "app_id": JIANDAOYUN_APP_ID,
+                        "entry_id": JIANDAOYUN_ENTRY_PROJECT_ID,
+                        "data_id": CUR_PROJECTS[CUR_HNGGZY_ID]?._id,
+                        "data": {
+                            "bid_openning_time": { "value": bidOpenningTime },
+                        }
+                    },
+                    2
+                );
             }
         },
         {
@@ -1367,6 +1391,51 @@
     }
 
     // Helper
+
+    function parseBidOpenningTime() {
+        try {
+            // 查找所有表格
+            const tables = document.getElementsByTagName('table');
+            
+            // 遍历所有表格
+            for (let table of tables) {
+                // 检查是否是目标表格（class="table-list"）
+                if (table.classList.contains('table-list')) {
+                    // 获取所有行
+                    const rows = table.getElementsByTagName('tr');
+                    
+                    // 遍历所有行
+                    for (let row of rows) {
+                        // 获取所有th单元格
+                        const ths = row.getElementsByTagName('th');
+                        
+                        // 遍历所有th单元格
+                        for (let i = 0; i < ths.length; i++) {
+                            const th = ths[i];
+                            const thText = th.textContent.trim();
+                            
+                            // 检查是否包含"开标时间"
+                            if (thText.includes('开标时间')) {
+                                // 获取同一行中的下一个td单元格
+                                const nextTd = row.getElementsByTagName('td')[i];
+                                if (nextTd) {
+                                    // 提取开标时间
+                                    const bidOpenningTime = nextTd.textContent.trim();
+                                    console.log('开标时间:', bidOpenningTime);
+                                    return bidOpenningTime;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return null; // 如果没有找到开标时间，返回null
+        } catch (error) {
+            console.error('解析开标时间出错:', error);
+            return null;
+        }
+    }
 
     // 解析【中标候选人公示】页面中的中标候选人和否决投标人信息
     function parseCandidatesAndRejectedBidder() {

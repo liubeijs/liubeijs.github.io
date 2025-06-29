@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Y公式分布模拟</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    #chart { margin-top: 30px; }
+    .bar { fill: steelblue; }
+    .bar-label { font-size: 12px; text-anchor: middle; }
+    .axis-label { font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h2>Y = (100×C1 + 88×(1-C1))×(1-R) 取整分布模拟</h2>
+  <p>C1 ∈ [0.4, 0.6]，R ∈ [0.02, 0.1]，各自均匀随机，模拟100,000次，统计Y取整后的频数分布。</p>
+  <button onclick="simulate()">开始模拟</button>
+  <div id="result"></div>
+  <svg id="chart" width="700" height="350"></svg>
+  <script>
+    function simulate() {
+      const N = 1000000;
+      const freq = {};
+      let minY = Infinity, maxY = -Infinity;
+      for (let i = 0; i < N; i++) {
+        const C1 = Math.random() * 0.2 + 0.4;
+        const R = Math.random() * 0.08 + 0.02;
+        const Y = (100 * C1 + 88 * (1 - C1)) * (1 - R);
+        const Yint = Math.round(Y);
+        freq[Yint] = (freq[Yint] || 0) + 1;
+        if (Yint < minY) minY = Yint;
+        if (Yint > maxY) maxY = Yint;
+      }
+      // 统计最高频数值
+      let maxFreq = 0, maxFreqYs = [];
+      for (let y in freq) {
+        if (freq[y] > maxFreq) {
+          maxFreq = freq[y];
+          maxFreqYs = [y];
+        } else if (freq[y] === maxFreq) {
+          maxFreqYs.push(y);
+        }
+      }
+      document.getElementById('result').innerHTML =
+        `最高频数值：<b>${maxFreqYs.join(', ')}</b>，出现次数：<b>${maxFreq}</b>`;
+      drawChart(freq, minY, maxY, maxFreq);
+    }
+    function drawChart(freq, minY, maxY, maxFreq) {
+      const svg = document.getElementById('chart');
+      svg.innerHTML = '';
+      const width = svg.width.baseVal.value;
+      const height = svg.height.baseVal.value;
+      const barWidth = Math.max(10, Math.floor(width / (maxY - minY + 1)));
+      const maxCount = Math.max(...Object.values(freq));
+      let x = 40;
+      // Y轴
+      const yAxis = document.createElementNS('http://www.w3.org/2000/svg','line');
+      yAxis.setAttribute('x1', x-10); yAxis.setAttribute('y1', 10);
+      yAxis.setAttribute('x2', x-10); yAxis.setAttribute('y2', height-30);
+      yAxis.setAttribute('stroke', '#333');
+      svg.appendChild(yAxis);
+      // X轴
+      const xAxis = document.createElementNS('http://www.w3.org/2000/svg','line');
+      xAxis.setAttribute('x1', x-10); xAxis.setAttribute('y1', height-30);
+      xAxis.setAttribute('x2', width-10); xAxis.setAttribute('y2', height-30);
+      xAxis.setAttribute('stroke', '#333');
+      svg.appendChild(xAxis);
+      // 柱状图
+      for (let y = minY; y <= maxY; y++) {
+        const count = freq[y] || 0;
+        const barHeight = Math.round((count / maxCount) * (height-60));
+        const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+        rect.setAttribute('x', x);
+        rect.setAttribute('y', height-30-barHeight);
+        rect.setAttribute('width', barWidth-2);
+        rect.setAttribute('height', barHeight);
+        rect.setAttribute('class', 'bar');
+        if (count === maxFreq) rect.setAttribute('fill', 'orange');
+        svg.appendChild(rect);
+        // X轴标签
+        if ((maxY-minY)<30 || y%2===0) {
+          const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+          label.setAttribute('x', x+barWidth/2-1);
+          label.setAttribute('y', height-10);
+          label.setAttribute('class', 'bar-label');
+          label.textContent = y;
+          svg.appendChild(label);
+        }
+        // 柱顶数值
+        if (barHeight > 20) {
+          const countLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+          countLabel.setAttribute('x', x+barWidth/2-1);
+          countLabel.setAttribute('y', height-35-barHeight);
+          countLabel.setAttribute('class', 'bar-label');
+          countLabel.textContent = count;
+          svg.appendChild(countLabel);
+        }
+        x += barWidth;
+      }
+      // Y轴标签
+      const yLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+      yLabel.setAttribute('x', 0);
+      yLabel.setAttribute('y', 20);
+      yLabel.setAttribute('class', 'axis-label');
+      yLabel.textContent = '频数';
+      svg.appendChild(yLabel);
+      // X轴标签
+      const xLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+      xLabel.setAttribute('x', width/2);
+      xLabel.setAttribute('y', height);
+      xLabel.setAttribute('class', 'axis-label');
+      xLabel.textContent = 'Y取整值';
+      svg.appendChild(xLabel);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二年级数学题 - 八仙桌拼接问题</title>
+    <style>
+        body {
+            font-family: 'Arial', '微软雅黑', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .step {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step-title {
+            font-size: 1.3em;
+            color: #3498db;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .step-number {
+            background-color: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+        }
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        svg {
+            background-color: #f5f5f5;
+            border-radius: 5px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .explanation {
+            background-color: #eaf7ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .highlight {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .formula {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 15px 0;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .step {
+                padding: 15px;
+            }
+            svg {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>八仙桌拼接问题</h1>
+    
+    <div class="step">
+        <div class="step-title"><span class="step-number">1</span>三个正方形八仙桌</div>
+        <p>有3个正方形的八仙桌，每个正方形有4条边（用4根木棒表示）。</p>
+        <div class="canvas-container">
+            <svg id="step1" width="600" height="220"></svg>
+        </div>
+        <div class="explanation">
+            <p>我们用<span class="highlight">12根木棒</span>表示3个正方形八仙桌的所有边。</p>
+            <p>每个正方形的周长 = 4 × 边长</p>
+            <p>3个正方形的周长总和 = 3 × 4 × 边长 = 12 × 边长</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-title"><span class="step-number">2</span>拼接成长方形</div>
+        <p>将3个正方形八仙桌一排拼成一个大长方形桌。</p>
+        <div class="canvas-container">
+            <svg id="step2" width="600" height="220"></svg>
+        </div>
+        <div class="controls">
+            <button id="animateBtn">演示拼接过程</button>
+            <button id="resetBtn">重置</button>
+        </div>
+        <div class="explanation">
+            <p>拼接后，中间的<span class="highlight">4根木棒</span>被移除了。</p>
+            <p>长方形的周长 = 2 × (长 + 宽) = 2 × (3 × 边长 + 边长) = 2 × 4 × 边长 = 8 × 边长</p>
+            <p>周长减少了 = 12 × 边长 - 8 × 边长 = 4 × 边长</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-title"><span class="step-number">3</span>计算边长和面积</div>
+        <div class="explanation">
+            <p>已知：周长减少了36分米，这就是被移除的4根木棒的总长度。</p>
+            <p>所以：4 × 边长 = 36分米</p>
+            <p>边长 = 36 ÷ 4 = 9分米</p>
+            <div class="formula">
+                正方形八仙桌的面积 = 边长 × 边长 = 9 × 9 = 81平方分米
+            </div>
+        </div>
+        <div class="canvas-container">
+            <svg id="step3" width="600" height="220"></svg>
+        </div>
+    </div>
+
+    <script>
+        // 配置参数
+        const config = {
+            squareSize: 70,
+            stickWidth: 8,
+            stickGap: 4,  // 木棒之间的间隙
+            animationDuration: 1500,
+            colors: {
+                stick: '#8e44ad',
+                removedStick: '#e74c3c',
+                squareFill: 'rgba(52, 152, 219, 0.2)',
+                text: '#2c3e50'
+            }
+        };
+
+        // SVG命名空间
+        const svgNS = "http://www.w3.org/2000/svg";
+
+        // 创建SVG元素
+        function createSVGElement(type, attributes) {
+            const element = document.createElementNS(svgNS, type);
+            for (const key in attributes) {
+                element.setAttribute(key, attributes[key]);
+            }
+            return element;
+        }
+
+        // 步骤1：绘制三个正方形
+        function drawStep1() {
+            const svg = document.getElementById('step1');
+            const startX = 100;
+            const startY = 70;
+            
+            for (let i = 0; i < 3; i++) {
+                const x = startX + i * (config.squareSize + 60);
+                
+                // 绘制正方形填充
+                const square = createSVGElement('rect', {
+                    x: x + config.stickWidth/2,
+                    y: startY + config.stickWidth/2,
+                    width: config.squareSize - config.stickWidth,
+                    height: config.squareSize - config.stickWidth,
+                    fill: config.colors.squareFill
+                });
+                svg.appendChild(square);
+                
+                // 绘制四根木棒（带间隙）
+                // 上边
+                drawStick(svg, x, startY, config.squareSize, 'horizontal');
+                // 右边
+                drawStick(svg, x + config.squareSize, startY, config.squareSize, 'vertical');
+                // 下边
+                drawStick(svg, x, startY + config.squareSize, config.squareSize, 'horizontal');
+                // 左边
+                drawStick(svg, x, startY, config.squareSize, 'vertical');
+                
+                // 添加标签
+                const label = createSVGElement('text', {
+                    x: x + config.squareSize/2,
+                    y: startY + config.squareSize + 30,
+                    'text-anchor': 'middle',
+                    'font-size': '14px',
+                    fill: config.colors.text
+                });
+                label.textContent = `正方形${i+1}`;
+                svg.appendChild(label);
+            }
+            
+            // 添加说明文字
+            const totalSticks = createSVGElement('text', {
+                x: 300,
+                y: 30,
+                'text-anchor': 'middle',
+                'font-size': '16px',
+                'font-weight': 'bold',
+                fill: config.colors.text
+            });
+            totalSticks.textContent = '总共12根木棒';
+            svg.appendChild(totalSticks);
+        }
+
+        // 绘制木棒（带间隙）
+        function drawStick(svg, x, y, length, orientation) {
+            const stick = createSVGElement('rect', {
+                x: orientation === 'horizontal' ? x + config.stickGap : x,
+                y: orientation === 'vertical' ? y + config.stickGap : y,
+                width: orientation === 'horizontal' ? length - 2 * config.stickGap : config.stickWidth,
+                height: orientation === 'vertical' ? length - 2 * config.stickGap : config.stickWidth,
+                fill: config.colors.stick,
+                rx: 2,
+                ry: 2
+            });
+            svg.appendChild(stick);
+            return stick;
+        }
+
+        // 步骤2：绘制拼接过程
+        function drawStep2() {
+            const svg = document.getElementById('step2');
+            svg.innerHTML = '';
+            
+            const startX = 100;
+            const startY = 70;
+            const squares = [];
+            const sticks = [];
+            
+            // 绘制初始的三个正方形
+            for (let i = 0; i < 3; i++) {
+                const x = startX + i * (config.squareSize + 60);
+                
+                // 正方形填充
+                const square = createSVGElement('rect', {
+                    x: x + config.stickWidth/2,
+                    y: startY + config.stickWidth/2,
+                    width: config.squareSize - config.stickWidth,
+                    height: config.squareSize - config.stickWidth,
+                    fill: config.colors.squareFill
+                });
+                svg.appendChild(square);
+                squares.push({element: square, x, y: startY});
+                
+                // 四根木棒
+                const topStick = drawStick(svg, x, startY, config.squareSize, 'horizontal');
+                const rightStick = drawStick(svg, x + config.squareSize, startY, config.squareSize, 'vertical');
+                const bottomStick = drawStick(svg, x, startY + config.squareSize, config.squareSize, 'horizontal');
+                const leftStick = drawStick(svg, x, startY, config.squareSize, 'vertical');
+                
+                sticks.push(
+                    {element: topStick, position: 'top', square: i},
+                    {element: rightStick, position: 'right', square: i},
+                    {element: bottomStick, position: 'bottom', square: i},
+                    {element: leftStick, position: 'left', square: i}
+                );
+            }
+            
+            // 添加说明文字
+            const instructionText = createSVGElement('text', {
+                x: 300,
+                y: 30,
+                'text-anchor': 'middle',
+                'font-size': '16px',
+                'font-weight': 'bold',
+                fill: config.colors.text
+            });
+            instructionText.textContent = '点击"演示拼接过程"按钮查看动画';
+            svg.appendChild(instructionText);
+            
+            return { squares, sticks, startX, startY };
+        }
+
+        // 动画：拼接成长方形
+        function animateJoining(data) {
+            const { squares, sticks, startX, startY } = data;
+            const svg = document.getElementById('step2');
+            
+            // 更新说明文字
+            const instructionText = svg.querySelector('text');
+            instructionText.textContent = '正在拼接...';
+            
+            // 禁用按钮
+            document.getElementById('animateBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = true;
+            
+            // 移动第二个和第三个正方形
+            const targetX1 = startX + config.squareSize - config.stickGap;
+            const targetX2 = startX + 2 * config.squareSize - 2 * config.stickGap;
+            
+            // 动画：移动正方形
+            setTimeout(() => {
+                // 移动第二个正方形
+                animateSquare(squares[1], targetX1, startY, squares, sticks, () => {
+                    // 移动第三个正方形
+                    animateSquare(squares[2], targetX2, startY, squares, sticks, () => {
+                        // 移除中间的木棒
+                        setTimeout(() => {
+                            // 标记要移除的木棒
+                            const toRemove = sticks.filter(stick => 
+                                (stick.position === 'right' && stick.square === 0) ||
+                                (stick.position === 'left' && stick.square === 1) ||
+                                (stick.position === 'right' && stick.square === 1) ||
+                                (stick.position === 'left' && stick.square === 2)
+                            );
+                            
+                            // 高亮显示要移除的木棒
+                            toRemove.forEach(stick => {
+                                stick.element.setAttribute('fill', config.colors.removedStick);
+                            });
+                            
+                            // 更新说明文字
+                            instructionText.textContent = '移除中间的4根木棒';
+                            
+                            // 添加移除的木棒长度说明
+                            const removedText = createSVGElement('text', {
+                                x: 300,
+                                y: 190,
+                                'text-anchor': 'middle',
+                                'font-size': '16px',
+                                fill: config.colors.removedStick
+                            });
+                            removedText.textContent = '移除的4根木棒总长 = 36分米';
+                            svg.appendChild(removedText);
+                            
+                            // 在右侧单独展示被移除的木棒
+                            setTimeout(() => {
+                                // 创建标题
+                                const removedTitle = createSVGElement('text', {
+                                    x: 500,
+                                    y: 30,
+                                    'text-anchor': 'middle',
+                                    'font-size': '16px',
+                                    'font-weight': 'bold',
+                                    fill: config.colors.removedStick
+                                });
+                                removedTitle.textContent = '移除中间的4根木棒';
+                                svg.appendChild(removedTitle);
+                                
+                                // 绘制被移除的4根木棒
+                                const stickLength = config.squareSize - 2 * config.stickGap;
+                                const startRemovedX = 450;
+                                const startRemovedY = 60;
+                                const spacing = 20;
+                                
+                                // 绘制4根垂直的木棒
+                                for (let i = 0; i < 4; i++) {
+                                    const stick = createSVGElement('rect', {
+                                        x: startRemovedX + i * (config.stickWidth + spacing),
+                                        y: startRemovedY,
+                                        width: config.stickWidth,
+                                        height: stickLength,
+                                        fill: config.colors.removedStick,
+                                        rx: 2,
+                                        ry: 2
+                                    });
+                                    svg.appendChild(stick);
+                                }
+                                
+                                // 添加说明文字
+                                const removedLengthText = createSVGElement('text', {
+                                    x: 500,
+                                    y: startRemovedY + stickLength + 20,
+                                    'text-anchor': 'middle',
+                                    'font-size': '14px',
+                                    fill: config.colors.removedStick
+                                });
+                                removedLengthText.textContent = '总长 = 36分米';
+                                svg.appendChild(removedLengthText);
+                            }, 1000);
+                            
+                            // 启用重置按钮
+                            setTimeout(() => {
+                                document.getElementById('resetBtn').disabled = false;
+                            }, 1500);
+                        }, 500);
+                    });
+                });
+            }, 500);
+        }
+
+        // 动画：移动正方形
+        function animateSquare(square, targetX, targetY, allSquares, allSticks, callback) {
+            const element = square.element;
+            const startX = parseInt(element.getAttribute('x')) - config.stickWidth/2;
+            const distance = targetX - startX;
+            const startTime = performance.now();
+            
+            // 找到与这个正方形相关的所有木棒
+            const squareIndex = allSquares.indexOf(square);
+            const relatedSticks = allSticks.filter(stick => stick.square === squareIndex);
+            
+            function step(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / config.animationDuration, 1);
+                const easeProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI); // 缓动函数
+                
+                const currentX = startX + distance * easeProgress;
+                element.setAttribute('x', currentX + config.stickWidth/2);
+                
+                // 同时移动相关的木棒
+                relatedSticks.forEach(stick => {
+                    const stickElement = stick.element;
+                    const position = stick.position;
+                    
+                    if (position === 'top') {
+                        stickElement.setAttribute('x', currentX + config.stickGap);
+                    } else if (position === 'bottom') {
+                        stickElement.setAttribute('x', currentX + config.stickGap);
+                    } else if (position === 'left') {
+                        stickElement.setAttribute('x', currentX);
+                    } else if (position === 'right') {
+                        stickElement.setAttribute('x', currentX + config.squareSize);
+                    }
+                });
+                
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    square.x = targetX;
+                    if (callback) callback();
+                }
+            }
+            
+            requestAnimationFrame(step);
+        }
+
+        // 步骤3：显示计算结果
+        function drawStep3() {
+            const svg = document.getElementById('step3');
+            const startX = 100;
+            const startY = 70;
+            const sideLength = 90; // 9分米对应的像素大小
+            
+            // 绘制一个正方形
+            const square = createSVGElement('rect', {
+                x: startX + config.stickWidth/2,
+                y: startY + config.stickWidth/2,
+                width: sideLength - config.stickWidth,
+                height: sideLength - config.stickWidth,
+                fill: config.colors.squareFill
+            });
+            svg.appendChild(square);
+            
+            // 绘制四根木棒
+            drawStick(svg, startX, startY, sideLength, 'horizontal');
+            drawStick(svg, startX + sideLength, startY, sideLength, 'vertical');
+            drawStick(svg, startX, startY + sideLength, sideLength, 'horizontal');
+            drawStick(svg, startX, startY, sideLength, 'vertical');
+            
+            // 添加边长标注
+            const lengthLabel = createSVGElement('text', {
+                x: startX + sideLength/2,
+                y: startY - 10,
+                'text-anchor': 'middle',
+                'font-size': '14px',
+                fill: config.colors.text
+            });
+            lengthLabel.textContent = '9分米';
+            svg.appendChild(lengthLabel);
+            
+            // 添加面积标注
+            const areaLabel = createSVGElement('text', {
+                x: startX + sideLength/2,
+                y: startY + sideLength/2,
+                'text-anchor': 'middle',
+                'dominant-baseline': 'middle',
+                'font-size': '16px',
+                'font-weight': 'bold',
+                fill: config.colors.text
+            });
+            areaLabel.textContent = '81平方分米';
+            svg.appendChild(areaLabel);
+            
+            // 添加拼接后的长方形
+            const rectX = startX + 150;
+            const rectWidth = sideLength * 3;
+            const rectHeight = sideLength;
+            
+            // 长方形填充
+            const rect = createSVGElement('rect', {
+                x: rectX + config.stickWidth/2,
+                y: startY + config.stickWidth/2,
+                width: rectWidth - config.stickWidth,
+                height: rectHeight - config.stickWidth,
+                fill: config.colors.squareFill
+            });
+            svg.appendChild(rect);
+            
+            // 长方形的四根木棒
+            drawStick(svg, rectX, startY, rectWidth, 'horizontal');
+            drawStick(svg, rectX + rectWidth, startY, rectHeight, 'vertical');
+            drawStick(svg, rectX, startY + rectHeight, rectWidth, 'horizontal');
+            drawStick(svg, rectX, startY, rectHeight, 'vertical');
+            
+            // 添加长方形尺寸标注
+            const widthLabel = createSVGElement('text', {
+                x: rectX + rectWidth/2,
+                y: startY - 10,
+                'text-anchor': 'middle',
+                'font-size': '14px',
+                fill: config.colors.text
+            });
+            widthLabel.textContent = '27分米';
+            svg.appendChild(widthLabel);
+            
+            const heightLabel = createSVGElement('text', {
+                x: rectX - 10,
+                y: startY + rectHeight/2,
+                'text-anchor': 'end',
+                'dominant-baseline': 'middle',
+                'font-size': '14px',
+                fill: config.colors.text
+            });
+            heightLabel.textContent = '9分米';
+            svg.appendChild(heightLabel);
+            
+            // 添加面积标注
+            const rectAreaLabel = createSVGElement('text', {
+                x: rectX + rectWidth/2,
+                y: startY + rectHeight/2,
+                'text-anchor': 'middle',
+                'dominant-baseline': 'middle',
+                'font-size': '16px',
+                'font-weight': 'bold',
+                fill: config.colors.text
+            });
+            rectAreaLabel.textContent = '243平方分米';
+            svg.appendChild(rectAreaLabel);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绘制步骤1
+            drawStep1();
+            
+            // 绘制步骤2
+            const step2Data = drawStep2();
+            
+            // 绘制步骤3
+            drawStep3();
+            
+            // 添加按钮事件
+            document.getElementById('animateBtn').addEventListener('click', function() {
+                animateJoining(step2Data);
+            });
+            
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                const newData = drawStep2();
+                step2Data.squares = newData.squares;
+                step2Data.sticks = newData.sticks;
+                document.getElementById('animateBtn').disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
