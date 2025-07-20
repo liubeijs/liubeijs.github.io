@@ -223,20 +223,28 @@
     </div>
     
 
-    <button type="button" id="calculate" class="fixed-button">计算评标基准值</button>
+    <button type="button" id="calculate" class="fixed-button" style="right: 300px;">计算评标基准值</button>
+    <button type="button" id="scatter-plot" class="fixed-button" style="right: 120px;">报价散列图</button>
     
     <div id="calculation-steps"></div>
 
     <div id="result-range"></div>
     <div id="price-distribution"></div>
     
-    <!-- 修改图表容器 -->
+    <!-- 图表容器 -->
     <div style="margin-top: 20px; padding: 15px; background-color: #fff; height: 400px;">
         <canvas id="distributionChart"></canvas>
+    </div>
+    
+    <!-- 散列图容器 -->
+    <div id="scatter-chart-container" style="margin-top: 20px; padding: 15px; background-color: #fff; height: 400px; display: none;">
+        <canvas id="scatterChart"></canvas>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 报价散列图按钮
+            document.getElementById('scatter-plot').addEventListener('click', generateScatterPlot);
 
 
             // 获取URL参数
@@ -706,6 +714,192 @@
 
     </script>
 
+    <script>
+        // 生成报价散列图
+        function generateScatterPlot() {
+            // 获取最高限价和报价
+            const maxPrice = parseFloat(document.getElementById('max-price').value);
+            const bidsText = document.getElementById('bids-input').value;
+            const bidLines = bidsText.split('\n');
+            let bids = [];
+            
+            // 解析有效报价
+            bidLines.forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed) {
+                    const value = parseFloat(trimmed);
+                    if (!isNaN(value)) {
+                        bids.push(value);
+                    }
+                }
+            });
+            
+            if (bids.length === 0) {
+                alert('请输入至少一个有效报价');
+                return;
+            }
+            
+            // 计算每个报价的下浮率
+            const bidRatios = bids.map(bid => {
+                const ratio = (1 - bid / maxPrice) * 100;
+                return parseFloat(ratio.toFixed(2));
+            });
+            
+            // 创建区间（5.0%-5.99%, 6.0%-6.99%, 等）
+            const minRatio = Math.floor(Math.min(...bidRatios));
+            const maxRatio = Math.ceil(Math.max(...bidRatios));
+            
+            // 创建区间数组
+            const intervals = [];
+            for (let i = minRatio; i <= maxRatio; i++) {
+                intervals.push({
+                    min: i,
+                    max: i + 0.99,
+                    label: `${i}.0%-${i}.99%`,
+                    count: 0,
+                    bids: []
+                });
+            }
+            
+            // 统计每个区间的报价数量
+            bidRatios.forEach((ratio, index) => {
+                const intervalIndex = Math.floor(ratio) - minRatio;
+                if (intervalIndex >= 0 && intervalIndex < intervals.length) {
+                    intervals[intervalIndex].count++;
+                    intervals[intervalIndex].bids.push({
+                        price: bids[index],
+                        ratio: ratio
+                    });
+                }
+            });
+            
+            // 清除旧图表
+            const chartCanvas = document.getElementById('scatterChart');
+            if (window.scatterChart && typeof window.scatterChart.destroy === 'function') {
+                window.scatterChart.destroy();
+            }
+            
+            // 准备散列图数据
+            const datasets = [];
+            const colors = [
+                'rgba(255, 99, 132, 0.7)',   // 红色
+                'rgba(54, 162, 235, 0.7)',   // 蓝色
+                'rgba(255, 206, 86, 0.7)',   // 黄色
+                'rgba(75, 192, 192, 0.7)',   // 青色
+                'rgba(153, 102, 255, 0.7)',  // 紫色
+                'rgba(255, 159, 64, 0.7)',   // 橙色
+                'rgba(199, 199, 199, 0.7)',  // 灰色
+                'rgba(83, 102, 255, 0.7)',   // 靛蓝色
+                'rgba(255, 99, 255, 0.7)',   // 粉色
+                'rgba(99, 255, 132, 0.7)'    // 浅绿色
+            ];
+            
+            // 为每个区间创建一个数据集
+            intervals.forEach((interval, index) => {
+                if (interval.count > 0) {
+                    const colorIndex = index % colors.length;
+                    // 修改散列图数据点的坐标计算
+                    const data = interval.bids.map(bid => {
+                        const integerPart = Math.floor(bid.ratio); // 整数部分作为x轴
+                        const decimalPart = bid.ratio - integerPart; // 小数部分作为y轴
+                        return {
+                            x: integerPart,
+                            y: decimalPart,
+                            price: bid.price,
+                            fullRatio: bid.ratio
+                        };
+                    });
+                    
+                    datasets.push({
+                        label: interval.label,
+                        data: data,
+                        backgroundColor: colors[colorIndex],
+                        borderColor: colors[colorIndex].replace('0.7', '1'),
+                        borderWidth: 1,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    });
+                }
+            });
+            
+            // 显示散列图容器
+            document.getElementById('scatter-chart-container').style.display = 'block';
+            
+            // 创建散列图
+            window.scatterChart = new Chart(chartCanvas, {
+                type: 'scatter',
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: '下浮率整数部分 (%)'
+                            },
+                            min: Math.floor(Math.min(...bidRatios)) - 0.5,
+                            max: Math.floor(Math.max(...bidRatios)) + 0.5,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '下浮率小数部分'
+                            },
+                            min: 0,
+                            max: 1,
+                            ticks: {
+                                stepSize: 0.1
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '报价下浮率散列分布图',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const point = context.raw;
+                                    return [
+                                        `报价: ${point.price}`,
+                                        `完整下浮率: ${point.fullRatio.toFixed(2)}%`,
+                                        `整数部分: ${point.x}%`,
+                                        `小数部分: ${point.y.toFixed(3)}`
+                                    ];
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 12,
+                                generateLabels: function(chart) {
+                                    const originalLabels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                                    return originalLabels.map(label => {
+                                        const dataset = chart.data.datasets[label.datasetIndex];
+                                        label.text = `${dataset.label} (${dataset.data.length}个)`;
+                                        return label;
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
     
 </body>
 </html>
