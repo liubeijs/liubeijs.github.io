@@ -136,6 +136,43 @@
         .price-distribution-table tr:hover {
             background-color: #f8f9fa;
         }
+
+        /* 在现有CSS中添加折叠样式 */
+        .collapsible-section {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .collapsible-header {
+            padding: 15px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .collapsible-header:hover {
+            background-color: #e0e0e0;
+        }
+
+        .collapsible-content {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .collapse-icon {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .collapse-icon.expanded {
+            transform: rotate(90deg);
+        }
     </style>
 </head>
 <body>
@@ -226,9 +263,17 @@
     <button type="button" id="calculate" class="fixed-button" style="right: 300px;">计算评标基准值</button>
     <button type="button" id="scatter-plot" class="fixed-button" style="right: 120px;">报价散列图</button>
     
-    <div id="calculation-steps"></div>
+    <div class="collapsible-section">
+        <div class="collapsible-header" onclick="toggleCollapse('calculation-steps-content')">
+            <span>📊 评标基准值计算过程</span>
+            <span class="collapse-icon" id="calculation-steps-icon">▶</span>
+        </div>
+        <div id="calculation-steps-content" class="collapsible-content" style="display: none;">
+            <div id="calculation-steps"></div>
+            <div id="result-range"></div>            
+        </div>
+    </div>
 
-    <div id="result-range"></div>
     <div id="price-distribution"></div>
     
     <!-- 图表容器 -->
@@ -899,6 +944,23 @@
                 }
             });
         }
+
+        // 添加折叠切换函数
+        function toggleCollapse(contentId) {
+            const content = document.getElementById(contentId);
+            const icon = document.getElementById('calculation-steps-icon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.textContent = '▼';
+                icon.classList.add('expanded');
+            } else {
+                content.style.display = 'none';
+                icon.textContent = '▶';
+                icon.classList.remove('expanded');
+            }
+        }
+
     </script>
     
 </body>
