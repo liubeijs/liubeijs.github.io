@@ -981,8 +981,9 @@
                 // 检查是否有投标数据
                 if (API_CONFIG[4].data && API_CONFIG[4].data.data.constructionBid) {
                     let bPrice = null;
-                    const pp = extractPriceAndParams(API_CONFIG[3].data.data);
+                    let pp = null;
                     if (API_CONFIG[3].data && API_CONFIG[3].data.data) {
+                        pp = extractPriceAndParams(API_CONFIG[3].data.data);
                         bPrice = pp.benchmarkPrice;
                     }
                     console.log('基准价 bPrice', bPrice);
@@ -1019,7 +1020,19 @@
                     // 跳转到新页面
                     window.open(url, '_blank');
                 } else {
-                    showNotification('暂无数据', '请先加载[开标参数][开标信息]', 'a');
+
+                    if (API_CONFIG[4].data && API_CONFIG[4].data.data) {
+                        const sortedBids = convertBidData(API_CONFIG[4].data.data.constructionBid, true);
+                        const bids = sortedBids.map(bid => bid.bid_price.value).join(',');
+                        const topPrice = sortedBids[0].bid_max_price.value;
+
+                        // 构建跳转URL，添加六参数
+                        const url = `https://pages.liubeijs.com/cal65.html?maxPrice=${topPrice}&bids=${bids}`;
+                        window.open(url, '_blank');
+                    } else {
+                        showNotification('暂无数据', '请先加载[开标参数][开标信息]', 'a');
+                    }
+                    
                 }
 
             });

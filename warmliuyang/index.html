@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="温暖浏阳 - 发现浏阳的每个小惊喜">
+    <meta name="keywords" content="浏阳,烟花,共治,便民服务,温暖">
+    <title>温暖浏阳 - 发现浏阳的每个小惊喜</title>
+    
+    <!-- PWA支持 -->
+    <meta name="theme-color" content="#E55C27">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="温暖浏阳">
+    
+    <!-- 字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>温暖浏阳</span>
+            <span>🔋100%</span>
+        </div>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 首页 -->
+            <div id="home-tab" class="tab-content active">
+                <div class="home-header">
+                    <div class="location-weather">
+                        <span>📍 浏阳市区</span>
+                        <span>☀️ 24°C</span>
+                    </div>
+                    <input type="text" class="search-box" id="searchBox" placeholder="搜厕所、车位、故事…">
+                </div>
+                
+                <div class="banner-carousel">
+                    <div class="carousel-container">
+                        <div class="carousel-slide active">
+                            <img src="sources/fireworks1.jpeg" alt="浏阳烟花秀1" class="banner-image">
+                            <div class="banner-overlay">
+                                <div class="banner-text">🎆 烟火秀倒计时 | 主题征集活动</div>
+                            </div>
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="sources/fireworks2.jpeg" alt="浏阳烟花秀2" class="banner-image">
+                            <div class="banner-overlay">
+                                <div class="banner-text">✨ 璀璨烟花 | 点亮浏阳夜空</div>
+                            </div>
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="sources/fireworks3.jpeg" alt="浏阳烟花秀3" class="banner-image">
+                            <div class="banner-overlay">
+                                <div class="banner-text">🌟 烟花之都 | 世界级视觉盛宴</div>
+                            </div>
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="sources/fireworks4.jpeg" alt="浏阳烟花秀4" class="banner-image">
+                            <div class="banner-overlay">
+                                <div class="banner-text">🎇 传承工艺 | 匠心独运</div>
+                            </div>
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="sources/fireworks5.jpeg" alt="浏阳烟花秀5" class="banner-image">
+                            <div class="banner-overlay">
+                                <div class="banner-text">🎊 节庆烟花 | 共庆佳节</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-indicators">
+                        <span class="indicator active" data-slide="0"></span>
+                        <span class="indicator" data-slide="1"></span>
+                        <span class="indicator" data-slide="2"></span>
+                        <span class="indicator" data-slide="3"></span>
+                        <span class="indicator" data-slide="4"></span>
+                    </div>
+                </div>
+                
+                <div class="quick-services">
+                    <div class="service-grid">
+                        <div class="service-item" data-service="parking">
+                            <div class="service-icon">🅿️</div>
+                            <div class="service-label">找车位</div>
+                        </div>
+                        <div class="service-item" data-service="toilet">
+                            <div class="service-icon">🚻</div>
+                            <div class="service-label">找厕所</div>
+                        </div>
+                        <div class="service-item" data-service="fireworks">
+                            <div class="service-icon">🎆</div>
+                            <div class="service-label">烟火秀</div>
+                        </div>
+                        <div class="service-item" data-service="report">
+                            <div class="service-icon">📷</div>
+                            <div class="service-label">随手拍</div>
+                        </div>
+                        <div class="service-item" data-service="food">
+                            <div class="service-icon">🍜</div>
+                            <div class="service-label">美食</div>
+                        </div>
+                        <div class="service-item" data-service="transport">
+                            <div class="service-icon">🚌</div>
+                            <div class="service-label">公交</div>
+                        </div>
+                        <div class="service-item" data-service="hospital">
+                            <div class="service-icon">🏥</div>
+                            <div class="service-label">医院</div>
+                        </div>
+                        <div class="service-item" data-service="more">
+                            <div class="service-icon">➕</div>
+                            <div class="service-label">更多</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feed-tabs">
+                    <div class="feed-tab active" data-feed="recommend">推荐</div>
+                    <div class="feed-tab" data-feed="follow">关注</div>
+                </div>
+                
+                <div class="feed-list" id="feedList">
+                    <!-- 动态内容将通过JavaScript加载 -->
+                </div>
+            </div>
+
+            <!-- 服务页面 -->
+            <div id="service-tab" class="tab-content">
+                <div class="service-header">
+                    便民服务
+                </div>
+                
+                <div class="map-container">
+                    <img src="sources/map1.png" alt="浏阳市地图" class="map-image">
+                    <div class="map-overlay">
+                        <div class="map-controls">
+                            <button class="map-btn">📍 定位</button>
+                            <button class="map-btn">🔍 搜索</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="service-list" id="serviceList">
+                    <!-- 服务列表将通过JavaScript加载 -->
+                </div>
+            </div>
+
+            <!-- 烟火秀页面 -->
+            <div id="fireworks-tab" class="tab-content">
+                <div class="fireworks-header">
+                    <div class="countdown-timer" id="countdown">加载中...</div>
+                    <div class="countdown-label">距离下次烟火秀</div>
+                </div>
+                
+                <div class="viewing-spots">
+                    <h2 class="spots-title">🎯 最佳观赏点</h2>
+                    
+                    <div class="spot-card">
+                        <div class="spot-info">
+                            <h3>浏阳河畔观景台</h3>
+                            <div class="spot-type">场外观赏点 • 免费</div>
+                        </div>
+                        <button class="ticket-btn">导航前往</button>
+                    </div>
+                    
+                    <div class="spot-card">
+                        <div class="spot-info">
+                            <h3>市民广场VIP区</h3>
+                            <div class="spot-type">场内座位 • ¥88</div>
+                        </div>
+                        <button class="ticket-btn">立即购票</button>
+                    </div>
+                    
+                    <div class="spot-card">
+                        <div class="spot-info">
+                            <h3>烟花大桥观景点</h3>
+                            <div class="spot-type">场外观赏点 • 免费</div>
+                        </div>
+                        <button class="ticket-btn">导航前往</button>
+                    </div>
+                </div>
+                
+                <div class="past-shows">
+                    <h2 class="spots-title">📹 往期精彩</h2>
+                    <div class="video-grid">
+                        <div class="video-item">
+                            <img src="sources/last1.jpeg" alt="上周烟火秀" class="video-thumbnail">
+                            <div class="video-overlay">
+                                <div class="play-button">▶️</div>
+                                <div class="video-title">上周烟火秀</div>
+                            </div>
+                        </div>
+                        <div class="video-item">
+                            <img src="sources/last2.jpeg" alt="国庆特别版" class="video-thumbnail">
+                            <div class="video-overlay">
+                                <div class="play-button">▶️</div>
+                                <div class="video-title">国庆特别版</div>
+                            </div>
+                        </div>
+                        <div class="video-item">
+                            <img src="sources/last3.jpeg" alt="中秋烟火夜" class="video-thumbnail">
+                            <div class="video-overlay">
+                                <div class="play-button">▶️</div>
+                                <div class="video-title">中秋烟火夜</div>
+                            </div>
+                        </div>
+                        <div class="video-item">
+                            <img src="sources/last4.jpeg" alt="夏日烟花节" class="video-thumbnail">
+                            <div class="video-overlay">
+                                <div class="play-button">▶️</div>
+                                <div class="video-title">夏日烟花节</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 共治页面 -->
+            <div id="governance-tab" class="tab-content">
+                <div class="governance-header">
+                    共建共治
+                </div>
+                
+                <div class="governance-actions">
+                    <div class="governance-card">
+                        <div class="governance-icon">📷</div>
+                        <div class="governance-title">随手拍</div>
+                        <div class="governance-desc">发现问题，随手上报</div>
+                    </div>
+                    
+                    <div class="governance-card">
+                        <div class="governance-icon">🅿️</div>
+                        <div class="governance-title">共享车位</div>
+                        <div class="governance-desc">分享闲置车位</div>
+                    </div>
+                    
+                    <div class="governance-card">
+                        <div class="governance-icon">🚻</div>
+                        <div class="governance-title">共享厕所</div>
+                        <div class="governance-desc">开放商户厕所</div>
+                    </div>
+                    
+                    <div class="governance-card">
+                        <div class="governance-icon">🍜</div>
+                        <div class="governance-title">公益餐</div>
+                        <div class="governance-desc">添双筷子献爱心</div>
+                    </div>
+                </div>
+                
+                <div class="leaderboard">
+                    <h2 class="leaderboard-title">🏆 城市温暖之星</h2>
+                    <div id="leaderboard">
+                        <!-- 排行榜将通过JavaScript加载 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 我的页面 -->
+            <div id="profile-tab" class="tab-content">
+                <div class="profile-header">
+                    <div class="profile-avatar">👤</div>
+                    <div class="profile-name">温暖市民</div>
+                    <div class="badge-wall">
+                        <span class="badge">烟火达人</span>
+                        <span class="badge">共治之星</span>
+                        <span class="badge">美食捕手</span>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="volunteerHours">24</div>
+                        <div class="stat-label">公益时长(小时)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="parkingIncome">156</div>
+                        <div class="stat-label">车位收益(元)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="storyLikes">89</div>
+                        <div class="stat-label">故事获赞</div>
+                    </div>
+                </div>
+                
+                <div class="menu-list">
+                    <div class="menu-item">
+                        <div class="menu-icon">📅</div>
+                        <div class="menu-text">我的预约</div>
+                        <div class="menu-arrow">›</div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-icon">❤️</div>
+                        <div class="menu-text">我的收藏</div>
+                        <div class="menu-arrow">›</div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-icon">📊</div>
+                        <div class="menu-text">数据统计</div>
+                        <div class="menu-arrow">›</div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-icon">⚙️</div>
+                        <div class="menu-text">设置</div>
+                        <div class="menu-arrow">›</div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-icon">ℹ️</div>
+                        <div class="menu-text">关于我们</div>
+                        <div class="menu-arrow">›</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 悬浮按钮 -->
+        <button class="fab" id="fab" aria-label="发布内容">
+            ➕
+        </button>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" data-tab="home" role="button" tabindex="0" aria-label="首页">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">发现</div>
+            </div>
+            <div class="nav-item" data-tab="service" role="button" tabindex="0" aria-label="服务">
+                <div class="nav-icon">🛠️</div>
+                <div class="nav-label">便民</div>
+            </div>
+            <div class="nav-item" data-tab="fireworks" role="button" tabindex="0" aria-label="烟火秀">
+                <div class="nav-icon">🎆</div>
+                <div class="nav-label">烟火秀</div>
+            </div>
+            <div class="nav-item" data-tab="governance" role="button" tabindex="0" aria-label="共治">
+                <div class="nav-icon">🤝</div>
+                <div class="nav-label">共治</div>
+            </div>
+            <div class="nav-item" data-tab="profile" role="button" tabindex="0" aria-label="我的">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">我的</div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- JavaScript文件 -->
+    <script src="app.js"></script>
+</body>
+</html>
