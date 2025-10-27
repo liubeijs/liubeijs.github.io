@@ -860,15 +860,6 @@ body {
   }
 }
 
-/* 深色模式支持 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --misty-grey: #1E1E1E;
-    --white: #2D2D2D;
-    --night-ink: #FFFFFF;
-  }
-}
-
 /* 动效 */
 @keyframes fireworksBurst {
   0% { transform: scale(1); }
