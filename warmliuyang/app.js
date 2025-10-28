@@ -136,6 +136,46 @@ class WarmLiuyangApp {
     if (noticesExpandBtn) {
       noticesExpandBtn.addEventListener('click', this.toggleNoticesExpand.bind(this));
     }
+
+    // 便民服务筛选标签
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('filter-tab')) {
+        this.handleServiceFilter(e.target);
+      }
+    });
+
+    // 随手拍编辑页面事件监听
+    const captureBackBtn = document.getElementById('captureBackBtn');
+    if (captureBackBtn) {
+      captureBackBtn.addEventListener('click', () => {
+        window.history.back();
+      });
+    }
+
+    const submitReportBtn = document.getElementById('submitReportBtn');
+    if (submitReportBtn) {
+      submitReportBtn.addEventListener('click', this.submitReport.bind(this));
+    }
+
+    const locationEditBtn = document.getElementById('locationEditBtn');
+    if (locationEditBtn) {
+      locationEditBtn.addEventListener('click', this.editLocation.bind(this));
+    }
+
+    // 媒体上传点击事件
+    for (let i = 1; i <= 3; i++) {
+      const mediaUpload = document.getElementById(`mediaUpload${i}`);
+      if (mediaUpload) {
+        mediaUpload.addEventListener('click', () => this.handleMediaUpload(i));
+      }
+    }
+
+    // 事件分类选择
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('category-item')) {
+        this.handleCategorySelect(e.target);
+      }
+    });
   }
 
   // 添加视频点击处理方法
@@ -213,7 +253,8 @@ class WarmLiuyangApp {
   // 服务项目点击处理
   handleServiceClick(serviceElement) {
     const serviceName = serviceElement.querySelector('.service-label').textContent;
-    console.log('点击服务:', serviceName);
+    const serviceType = serviceElement.dataset.service;
+    console.log('点击服务:', serviceName, serviceType);
     
     // 添加点击动效
     serviceElement.classList.add('fireworks-animation');
@@ -222,22 +263,45 @@ class WarmLiuyangApp {
     }, 600);
     
     // 根据不同服务跳转到相应功能
-    switch(serviceName) {
-      case '找车位':
+    switch(serviceType) {
+      case 'parking':
         this.showTab('service');
+        this.switchToServiceFilter('parking');
         break;
-      case '找厕所':
+      case 'toilet':
         this.showTab('service');
+        this.switchToServiceFilter('toilet');
         break;
-      case '烟火秀':
+      case 'food':
+        this.showTab('service');
+        this.switchToServiceFilter('food');
+        break;
+      case 'attractions':
+        this.showTab('service');
+        this.switchToServiceFilter('scenic');
+        break;
+      case 'fireworks':
         this.showTab('fireworks');
         break;
-      case '随手拍':
-        this.showTab('governance');
+      case 'report':
+        this.openCaptureEditor();
         break;
       default:
         this.showToast(`${serviceName}功能开发中...`);
     }
+  }
+
+  // 切换到便民页面的指定筛选标签
+  switchToServiceFilter(filterType) {
+    // 延迟执行，确保页面切换完成
+    setTimeout(() => {
+      // 找到对应的筛选标签
+      const filterTab = document.querySelector(`.filter-tab[data-filter="${filterType}"]`);
+      if (filterTab) {
+        // 模拟点击筛选标签
+        this.handleServiceFilter(filterTab);
+      }
+    }, 100);
   }
 
   // Feed动作处理
@@ -268,7 +332,7 @@ class WarmLiuyangApp {
     
     switch(title) {
       case '随手拍':
-        this.openCamera();
+        this.openCaptureEditor();
         break;
       case '共享车位':
         this.showShareParkingForm();
@@ -427,29 +491,110 @@ class WarmLiuyangApp {
     const serviceList = document.getElementById('serviceList');
     if (!serviceList) return;
     
-    const services = [
+    // 完整的服务数据，包含分类信息
+    this.allServices = [
+      // 找车位
       {
         name: '市政府停车场',
         status: '剩余车位 12',
         distance: '距离 0.5km',
         tags: ['无障碍', '充电桩'],
-        statusColor: 'success'
+        statusColor: 'success',
+        category: 'parking'
       },
       {
         name: '人民广场地下停车场',
         status: '剩余车位 3',
         distance: '距离 0.8km',
         tags: ['24小时', '监控'],
-        statusColor: 'warning'
+        statusColor: 'warning',
+        category: 'parking'
       },
       {
         name: '商业中心停车场',
         status: '已满',
         distance: '距离 1.2km',
         tags: ['商场', '餐饮'],
-        statusColor: 'danger'
+        statusColor: 'danger',
+        category: 'parking'
+      },
+      // 找厕所
+      {
+        name: '市民广场公厕',
+        status: '开放中',
+        distance: '距离 0.3km',
+        tags: ['无障碍', '母婴室'],
+        statusColor: 'success',
+        category: 'toilet'
+      },
+      {
+        name: '浏阳河畔公厕',
+        status: '开放中',
+        distance: '距离 0.6km',
+        tags: ['24小时', '清洁'],
+        statusColor: 'success',
+        category: 'toilet'
+      },
+      // 地道菜
+      {
+        name: '老浏阳蒸菜馆',
+        status: '营业中',
+        distance: '距离 0.4km',
+        tags: ['特色菜', '老字号'],
+        statusColor: 'success',
+        category: 'food'
+      },
+      {
+        name: '浏阳河鱼馆',
+        status: '营业中',
+        distance: '距离 0.7km',
+        tags: ['河鲜', '招牌菜'],
+        statusColor: 'success',
+        category: 'food'
+      },
+      {
+        name: '传统豆腐坊',
+        status: '营业中',
+        distance: '距离 0.9km',
+        tags: ['手工制作', '百年老店'],
+        statusColor: 'success',
+        category: 'food'
+      },
+      // 打卡景点
+      {
+        name: '浏阳文庙',
+        status: '开放中',
+        distance: '距离 1.1km',
+        tags: ['历史文化', '免费'],
+        statusColor: 'success',
+        category: 'scenic'
+      },
+      {
+        name: '烟花博物馆',
+        status: '开放中',
+        distance: '距离 1.5km',
+        tags: ['特色展览', '互动体验'],
+        statusColor: 'success',
+        category: 'scenic'
+      },
+      {
+        name: '浏阳河风光带',
+        status: '全天开放',
+        distance: '距离 0.8km',
+        tags: ['自然风光', '散步'],
+        statusColor: 'success',
+        category: 'scenic'
       }
     ];
+    
+    // 默认显示所有服务
+    this.renderServiceList(this.allServices);
+  }
+
+  // 渲染服务列表
+  renderServiceList(services) {
+    const serviceList = document.getElementById('serviceList');
+    if (!serviceList) return;
     
     serviceList.innerHTML = services.map(service => `
       <div class="service-card">
@@ -470,6 +615,48 @@ class WarmLiuyangApp {
       </div>
     `).join('');
   }
+
+  // 处理服务筛选
+  handleServiceFilter(filterTab) {
+    // 更新标签状态
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    filterTab.classList.add('active');
+    
+    // 获取筛选类型
+    const filterType = filterTab.dataset.filter;
+    
+    // 筛选服务数据
+    let filteredServices;
+    if (filterType === 'all') {
+      filteredServices = this.allServices;
+    } else {
+      filteredServices = this.allServices.filter(service => service.category === filterType);
+    }
+    
+    // 重新渲染列表
+    this.renderServiceList(filteredServices);
+    
+    // 显示筛选反馈
+    const categoryNames = {
+      'all': '全部服务',
+      'parking': '停车场',
+      'toilet': '公共厕所',
+      'food': '地道美食',
+      'scenic': '打卡景点'
+    };
+    
+    this.showToast(`已筛选：${categoryNames[filterType]} (${filteredServices.length}个)`);
+  }
+
+  // 打开随手拍编辑页面
+  openCaptureEditor() {
+    // 跳转到独立的随手拍页面
+    window.location.href = 'capture.html';
+  }
+
+
 
   // 加载排行榜
   loadLeaderboard() {
@@ -690,9 +877,13 @@ class WarmLiuyangApp {
   }
 }
 
+// 全局变量，供HTML中的onclick使用
+let app;
+
 // 页面加载完成后初始化应用
 document.addEventListener('DOMContentLoaded', () => {
-  window.app = new WarmLiuyangApp();
+  app = new WarmLiuyangApp();
+  window.app = app;
 });
 
 // 导出供其他模块使用

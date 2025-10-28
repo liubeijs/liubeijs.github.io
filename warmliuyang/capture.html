@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="随手拍 - 温暖浏阳">
+    <meta name="keywords" content="随手拍,上报,浏阳,城市管理">
+    <title>随手拍 - 温暖浏阳</title>
+    
+    <!-- PWA支持 -->
+    <meta name="theme-color" content="#E55C27">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="随手拍">
+    
+    <!-- 字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="capture.css">
+    
+    <!-- JavaScript文件 -->
+    <script src="capture.js"></script>
+</head>
+<body>
+    <div class="capture-page">
+        <!-- 头部 -->
+        <div class="capture-header">
+            <button class="capture-back-btn" id="captureBackBtn">
+                <span class="back-icon">‹</span>
+            </button>
+            <div class="capture-title">随手拍</div>
+            <div class="capture-placeholder"></div>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="capture-content">
+            <!-- 媒体上传区域 -->
+            <div class="media-upload-section">
+                <div class="section-title">上传图片或视频 (最多3个)</div>
+                <div class="media-upload-grid">
+                    <div class="media-upload-item" id="mediaUpload1">
+                        <div class="upload-placeholder">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">点击上传</div>
+                        </div>
+                    </div>
+                    <div class="media-upload-item" id="mediaUpload2">
+                        <div class="upload-placeholder">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">点击上传</div>
+                        </div>
+                    </div>
+                    <div class="media-upload-item" id="mediaUpload3">
+                        <div class="upload-placeholder">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">点击上传</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 位置信息区域 -->
+            <div class="location-section">
+                <div class="section-title">事发位置</div>
+                <div class="location-input-group">
+                    <div class="location-icon">📍</div>
+                    <input type="text" class="location-input" id="locationInput" placeholder="正在获取位置..." readonly>
+                    <button class="location-edit-btn" id="locationEditBtn">编辑</button>
+                </div>
+                <div class="location-tips">系统已自动识别您的当前位置</div>
+            </div>
+            
+            <!-- 事件分类区域 -->
+            <div class="category-section">
+                <div class="section-title">事件分类</div>
+                <div class="current-category">
+                    <div class="category-display" id="currentCategory">
+                        <div class="category-icon">🅿️</div>
+                        <div class="category-text">违章占道</div>
+                    </div>
+                    <button class="category-select-btn" id="categorySelectBtn">选择</button>
+                </div>
+                <div class="category-tips">系统已智能识别事件类型，您可以手动调整</div>
+            </div>
+            
+            <!-- 描述区域 -->
+            <div class="description-section">
+                <div class="section-title">问题描述 (可选)</div>
+                <textarea class="description-input" id="descriptionInput" placeholder="请详细描述发现的问题..."></textarea>
+            </div>
+        </div>
+        
+        <!-- 底部操作区域 -->
+        <div class="capture-footer">
+            <button class="submit-btn" id="submitReportBtn">
+                <span class="submit-icon">📤</span>
+                <span class="submit-text">一键上报</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // 随手拍页面的JavaScript功能
+        class CaptureApp {
+            constructor() {
+                this.selectedCategory = '违章占道';
+                this.uploadedMedia = [];
+                this.currentLocation = '';
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.getCurrentLocation();
+                this.initCategorySelection();
+                this.initMediaUpload();
+            }
+
+            bindEvents() {
+                // 返回按钮
+                const backBtn = document.getElementById('captureBackBtn');
+                if (backBtn) {
+                    backBtn.addEventListener('click', () => {
+                        window.history.back();
+                    });
+                }
+
+                // 提交按钮
+                const submitBtn = document.getElementById('submitReportBtn');
+                if (submitBtn) {
+                    submitBtn.addEventListener('click', () => {
+                        this.submitReport();
+                    });
+                }
+
+                // 位置编辑按钮
+                const locationEditBtn = document.getElementById('locationEditBtn');
+                if (locationEditBtn) {
+                    locationEditBtn.addEventListener('click', () => {
+                        this.editLocation();
+                    });
+                }
+            }
+
+            getCurrentLocation() {
+                const locationInput = document.getElementById('locationInput');
+                if (!locationInput) return;
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const { latitude, longitude } = position.coords;
+                            // 这里应该调用地理编码API获取地址
+                            // 暂时使用模拟地址
+                            this.currentLocation = `浏阳市淮川街道办事处 (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+                            locationInput.value = this.currentLocation;
+                            locationInput.placeholder = '';
+                        },
+                        (error) => {
+                            console.error('获取位置失败:', error);
+                            this.currentLocation = '浏阳市淮川街道办事处';
+                            locationInput.value = this.currentLocation;
+                            locationInput.placeholder = '';
+                        }
+                    );
+                } else {
+                    this.currentLocation = '浏阳市淮川街道办事处';
+                    locationInput.value = this.currentLocation;
+                    locationInput.placeholder = '';
+                }
+            }
+
+            initCategorySelection() {
+                const categoryItems = document.querySelectorAll('.category-item');
+                categoryItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        // 移除所有active类
+                        categoryItems.forEach(i => i.classList.remove('active'));
+                        // 添加active类到当前项
+                        item.classList.add('active');
+                        this.selectedCategory = item.dataset.category;
+                    });
+                });
+            }
+
+            initMediaUpload() {
+                for (let i = 1; i <= 3; i++) {
+                    const uploadItem = document.getElementById(`mediaUpload${i}`);
+                    if (uploadItem) {
+                        uploadItem.addEventListener('click', () => {
+                            this.selectMedia(i);
+                        });
+                    }
+                }
+            }
+
+            selectMedia(index) {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*,video/*';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        this.handleMediaUpload(file, index);
+                    }
+                };
+                input.click();
+            }
+
+            handleMediaUpload(file, index) {
+                const uploadItem = document.getElementById(`mediaUpload${index}`);
+                if (!uploadItem) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const mediaUrl = e.target.result;
+                    
+                    // 创建预览元素
+                    const preview = document.createElement('div');
+                    preview.style.cssText = `
+                        width: 100%;
+                        height: 100%;
+                        position: relative;
+                        border-radius: 10px;
+                        overflow: hidden;
+                    `;
+
+                    if (file.type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = mediaUrl;
+                        img.style.cssText = `
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        `;
+                        preview.appendChild(img);
+                    } else if (file.type.startsWith('video/')) {
+                        const video = document.createElement('video');
+                        video.src = mediaUrl;
+                        video.style.cssText = `
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        `;
+                        preview.appendChild(video);
+                    }
+
+                    // 添加删除按钮
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '×';
+                    removeBtn.style.cssText = `
+                        position: absolute;
+                        top: 4px;
+                        right: 4px;
+                        width: 20px;
+                        height: 20px;
+                        background: rgba(0, 0, 0, 0.6);
+                        border: none;
+                        border-radius: 50%;
+                        color: white;
+                        font-size: 12px;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    `;
+                    removeBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.removeMedia(index);
+                    };
+                    preview.appendChild(removeBtn);
+
+                    // 替换上传区域内容
+                    uploadItem.innerHTML = '';
+                    uploadItem.appendChild(preview);
+                    uploadItem.classList.add('has-media');
+
+                    // 保存文件信息
+                    this.uploadedMedia[index - 1] = {
+                        file: file,
+                        url: mediaUrl,
+                        type: file.type
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+
+            removeMedia(index) {
+                const uploadItem = document.getElementById(`mediaUpload${index}`);
+                if (!uploadItem) return;
+
+                // 恢复原始上传界面
+                uploadItem.innerHTML = `
+                    <div class="upload-placeholder">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">点击上传</div>
+                    </div>
+                `;
+                uploadItem.classList.remove('has-media');
+
+                // 清除文件信息
+                this.uploadedMedia[index - 1] = null;
+            }
+
+            editLocation() {
+                const locationInput = document.getElementById('locationInput');
+                if (!locationInput) return;
+
+                const newLocation = prompt('请输入新的位置信息:', this.currentLocation);
+                if (newLocation && newLocation.trim()) {
+                    this.currentLocation = newLocation.trim();
+                    locationInput.value = this.currentLocation;
+                }
+            }
+
+            submitReport() {
+                const description = document.getElementById('descriptionInput')?.value || '';
+                
+                // 验证必填项
+                if (this.uploadedMedia.filter(media => media).length === 0) {
+                    alert('请至少上传一张图片或视频');
+                    return;
+                }
+
+                if (!this.currentLocation) {
+                    alert('请确认事发位置');
+                    return;
+                }
+
+                // 构建上报数据
+                const reportData = {
+                    category: this.selectedCategory,
+                    location: this.currentLocation,
+                    description: description,
+                    media: this.uploadedMedia.filter(media => media),
+                    timestamp: new Date().toISOString()
+                };
+
+                console.log('上报数据:', reportData);
+
+                // 显示提交成功
+                alert('上报成功！感谢您的参与，我们会尽快处理。');
+                
+                // 返回首页
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            // 注释掉原有的CaptureApp类初始化，使用capture.js中的初始化
+            // new CaptureApp();
+        });
+    </script>
+</body>
+</html>
