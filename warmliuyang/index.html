@@ -221,6 +221,43 @@
                     共建共治
                 </div>
                 
+                <!-- 城管温馨提示 -->
+                <div class="notices-section">
+                    <div class="notices-header">
+                        <div class="notices-title">
+                            <span class="notices-icon">📢</span>
+                            <span class="notices-text">城管温馨提示❗️</span>
+                        </div>
+                        <button class="notices-expand-btn" id="noticesExpandBtn">
+                            <span class="expand-text">展开</span>
+                            <span class="expand-icon">▼</span>
+                        </button>
+                    </div>
+                    <div class="notices-list">
+                        <div class="notice-item" data-notice-id="0">
+                            <div class="notice-content">
+                                <div class="notice-title">违停占道请及时驶离</div>
+                                <div class="notice-location">📍 锦城大道人行道</div>
+                            </div>
+                            <div class="notice-arrow">›</div>
+                        </div>
+                        <div class="notice-item notice-item-hidden" data-notice-id="1">
+                            <div class="notice-content">
+                                <div class="notice-title">人流密集请注意安全</div>
+                                <div class="notice-location">📍 集里街道菜市场</div>
+                            </div>
+                            <div class="notice-arrow">›</div>
+                        </div>
+                        <div class="notice-item notice-item-hidden" data-notice-id="2">
+                            <div class="notice-content">
+                                <div class="notice-title">道路积水请绕道行驶</div>
+                                <div class="notice-location">📍 淮川街道天桥底下</div>
+                            </div>
+                            <div class="notice-arrow">›</div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="governance-actions">
                     <div class="governance-card">
                         <div class="governance-icon">📷</div>
@@ -385,6 +422,28 @@
                         <span class="action-icon">💬</span>
                         <span class="action-text">评论</span>
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知详情页面 -->
+    <div id="noticeDetail" class="notice-detail-page" style="display: none;">
+        <div class="notice-detail-header">
+            <button class="back-btn" id="noticeBackBtn">
+                <span class="back-icon">←</span>
+                <span class="back-text">返回</span>
+            </button>
+            <div class="notice-detail-title">城管温馨提示</div>
+        </div>
+        <div class="notice-detail-content">
+            <div class="notice-detail-info">
+                <h2 id="noticeDetailTitle" class="notice-title-large"></h2>
+                <div id="noticeDetailLocation" class="notice-location-large"></div>
+                <div id="noticeDetailDescription" class="notice-description"></div>
+                <div class="notice-footer">
+                    <div class="notice-source">浏阳市城市管理和综合执法局</div>
+                    <div class="notice-time">刚刚发布</div>
                 </div>
             </div>
         </div>

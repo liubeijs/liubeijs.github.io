@@ -79,6 +79,11 @@ class WarmLiuyangApp {
         this.openStoryDetail(e.target.closest('.feed-item'));
       }
       
+      // 通知项点击 - 点击通知项打开详情页
+      if (e.target.closest('.notice-item')) {
+        this.openNoticeDetail(e.target.closest('.notice-item'));
+      }
+      
       if (e.target.closest('.ticket-btn')) {
         this.handleTicketPurchase(e.target);
       }
@@ -119,6 +124,18 @@ class WarmLiuyangApp {
         this.handleStoryComment();
       }
     });
+
+    // 通知详情页返回按钮
+    const noticeBackBtn = document.getElementById('noticeBackBtn');
+    if (noticeBackBtn) {
+      noticeBackBtn.addEventListener('click', this.closeNoticeDetail.bind(this));
+    }
+
+    // 城管温馨提示展开按钮
+    const noticesExpandBtn = document.getElementById('noticesExpandBtn');
+    if (noticesExpandBtn) {
+      noticesExpandBtn.addEventListener('click', this.toggleNoticesExpand.bind(this));
+    }
   }
 
   // 添加视频点击处理方法
@@ -593,6 +610,83 @@ class WarmLiuyangApp {
 
   handleStoryComment() {
     this.showToast('正在打开评论...');
+  }
+
+  // 通知详情页相关方法
+  openNoticeDetail(noticeItem) {
+    const noticeId = parseInt(noticeItem.dataset.noticeId);
+    const noticesData = [
+      {
+        title: '违停占道请及时驶离',
+        location: '锦城大道人行道',
+        description: '各位车主您好，整洁通畅的道路交通环境需要你我共同守护。请您将爱车停放在正规停车位或指定区域，切勿占用消防通道、盲道及人行道。目前，对于非严管路段的违停行为，我们通常采取"先提示后处理"的柔性管理方式：若您收到违停驶离短信，请及时挪车，常常在10分钟内驶离可免于处罚。特别是消防通道，一旦被占用，将直接危及公共安全。您的规范停车，不仅展现了个人素养，也为城市文明添彩。与人方便，与己方便，让我们携手维护安全、有序、畅通的静态交通环境。'
+      },
+      {
+        title: '人流密集请注意安全',
+        location: '集里街道菜市场',
+        description: '在商圈、广场、交通枢纽等人流密集区域，请您时刻将安全意识放在首位。务必留意现场安全出口、疏散通道的位置。如遇人群拥挤，请保持冷静，顺人流有序行进，切勿逆流、推搡或蹲下。一旦发现人群速度或方向突变、听到异常尖叫等踩踏信号，需高度警惕。若不慎摔倒，应尽量靠近墙角，身体蜷缩成球状，双手护住后颈和头部。遇他人摔倒，请大声呼救，提醒后方人群停止前进。经营商户也需确保门前畅通，不占道经营。安全无小事，防范于未然。'
+      },
+      {
+        title: '道路积水请绕道行驶',
+        location: '淮川街道天桥底下',
+        description: '近期降雨频繁，部分低洼路段容易出现积水，出行请特别注意安全。驾车出行前，请提前了解天气和路况信息。若遇积水路段，请勿强行通过，应先观察水深与流速。水中熄火切勿重启发动机，以免造成严重损伤。建议尽量绕行已知的易积水点。行经积水路段请低速慢行，避免溅水影响他人。同时，请勿在易积水区域停放车辆。步行或骑行时，请警惕井盖、漩涡，远离电力设备。道路千万条，安全第一条。'
+      }
+    ];
+    
+    const noticeData = noticesData[noticeId];
+    if (!noticeData) return;
+    
+    // 填充通知详情页内容
+    document.getElementById('noticeDetailTitle').textContent = noticeData.title;
+    document.getElementById('noticeDetailLocation').textContent = `📍 ${noticeData.location}`;
+    document.getElementById('noticeDetailDescription').textContent = noticeData.description;
+    
+    // 显示通知详情页
+    const noticeDetailPage = document.getElementById('noticeDetail');
+    noticeDetailPage.style.display = 'block';
+    
+    // 滚动到顶部
+    noticeDetailPage.scrollTop = 0;
+    
+    // 隐藏主内容
+    document.querySelector('.app-container').style.display = 'none';
+  }
+
+  closeNoticeDetail() {
+    // 隐藏通知详情页
+    document.getElementById('noticeDetail').style.display = 'none';
+    
+    // 显示主内容
+    document.querySelector('.app-container').style.display = 'block';
+  }
+
+  // 城管温馨提示展开/收起功能
+  toggleNoticesExpand() {
+    const expandBtn = document.getElementById('noticesExpandBtn');
+    const hiddenItems = document.querySelectorAll('.notice-item-hidden');
+    const expandText = expandBtn.querySelector('.expand-text');
+    
+    if (expandBtn.classList.contains('expanded')) {
+      // 收起状态 -> 展开状态
+      hiddenItems.forEach(item => {
+        item.classList.remove('show');
+        setTimeout(() => {
+          item.style.display = 'none';
+        }, 300);
+      });
+      expandBtn.classList.remove('expanded');
+      expandText.textContent = '展开';
+    } else {
+      // 展开状态 -> 收起状态
+      hiddenItems.forEach((item, index) => {
+        setTimeout(() => {
+          item.style.display = 'flex';
+          item.classList.add('show');
+        }, index * 100);
+      });
+      expandBtn.classList.add('expanded');
+      expandText.textContent = '收起';
+    }
   }
 }
 
