@@ -348,6 +348,48 @@
         </nav>
     </div>
 
+    <!-- 故事详情页面 -->
+    <div id="storyDetail" class="story-detail-page" style="display: none;">
+        <div class="story-detail-header">
+            <button class="back-btn" id="storyBackBtn">
+                <span class="back-icon">←</span>
+                <span class="back-text">返回</span>
+            </button>
+            <div class="story-detail-title">故事详情</div>
+        </div>
+        <div class="story-detail-content">
+            <div class="story-detail-image">
+                <img id="storyDetailImage" src="" alt="故事图片" class="story-image">
+            </div>
+            <div class="story-detail-info">
+                <h2 id="storyDetailTitle" class="story-title"></h2>
+                <div id="storyDetailLocation" class="story-location"></div>
+                <div id="storyDetailDescription" class="story-description"></div>
+                <div class="story-meta">
+                    <div class="story-author">
+                        <div class="author-avatar">👤</div>
+                        <div class="author-name">温暖浏阳用户</div>
+                    </div>
+                    <div class="story-time">刚刚</div>
+                </div>
+                <div class="story-actions">
+                    <button class="story-action-btn like-btn">
+                        <span class="action-icon">❤️</span>
+                        <span class="action-text">点赞</span>
+                    </button>
+                    <button class="story-action-btn share-btn">
+                        <span class="action-icon">📤</span>
+                        <span class="action-text">分享</span>
+                    </button>
+                    <button class="story-action-btn comment-btn">
+                        <span class="action-icon">💬</span>
+                        <span class="action-text">评论</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript文件 -->
     <script src="app.js"></script>
 </body>

@@ -74,6 +74,11 @@ class WarmLiuyangApp {
         this.handleFeedAction(e.target);
       }
       
+      // 故事项点击 - 点击故事内容区域打开详情页
+      if (e.target.closest('.feed-item') && !e.target.closest('.action-btn')) {
+        this.openStoryDetail(e.target.closest('.feed-item'));
+      }
+      
       if (e.target.closest('.ticket-btn')) {
         this.handleTicketPurchase(e.target);
       }
@@ -94,6 +99,25 @@ class WarmLiuyangApp {
       tab.addEventListener('click', (e) => {
         this.switchFeedTab(e.target.dataset.feed);
       });
+    });
+
+    // 故事详情页返回按钮
+    const storyBackBtn = document.getElementById('storyBackBtn');
+    if (storyBackBtn) {
+      storyBackBtn.addEventListener('click', this.closeStoryDetail.bind(this));
+    }
+
+    // 故事详情页操作按钮
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.like-btn')) {
+        this.handleStoryLike();
+      }
+      if (e.target.closest('.share-btn')) {
+        this.handleStoryShare();
+      }
+      if (e.target.closest('.comment-btn')) {
+        this.handleStoryComment();
+      }
     });
   }
 
@@ -356,8 +380,8 @@ class WarmLiuyangApp {
   }
 
   renderFeedList(container, data) {
-    container.innerHTML = data.map(item => `
-      <div class="feed-item">
+    container.innerHTML = data.map((item, index) => `
+      <div class="feed-item" data-story-index="${index}">
         <div class="feed-content">
           <div class="feed-image">
             <img src="${item.image}" 
@@ -376,6 +400,9 @@ class WarmLiuyangApp {
         </div>
       </div>
     `).join('');
+    
+    // 存储当前数据供详情页使用
+    this.currentFeedData = data;
   }
 
   // 加载服务数据
@@ -522,6 +549,50 @@ class WarmLiuyangApp {
   showCharityMealForm() {
     this.showToast('正在打开公益餐表单...');
     // 这里可以显示公益餐表单
+  }
+
+  // 故事详情页相关方法
+  openStoryDetail(feedItem) {
+    const storyIndex = parseInt(feedItem.dataset.storyIndex);
+    const storyData = this.currentFeedData[storyIndex];
+    
+    if (!storyData) return;
+    
+    // 填充故事详情页内容
+    document.getElementById('storyDetailImage').src = storyData.image;
+    document.getElementById('storyDetailTitle').textContent = storyData.title;
+    document.getElementById('storyDetailLocation').textContent = `📍 ${storyData.location}`;
+    document.getElementById('storyDetailDescription').textContent = storyData.description;
+    
+    // 显示故事详情页
+    const storyDetailPage = document.getElementById('storyDetail');
+    storyDetailPage.style.display = 'block';
+    
+    // 滚动到顶部
+    storyDetailPage.scrollTop = 0;
+    
+    // 隐藏主内容
+    document.querySelector('.app-container').style.display = 'none';
+  }
+
+  closeStoryDetail() {
+    // 隐藏故事详情页
+    document.getElementById('storyDetail').style.display = 'none';
+    
+    // 显示主内容
+    document.querySelector('.app-container').style.display = 'block';
+  }
+
+  handleStoryLike() {
+    this.showToast('已点赞！');
+  }
+
+  handleStoryShare() {
+    this.showToast('正在分享故事...');
+  }
+
+  handleStoryComment() {
+    this.showToast('正在打开评论...');
   }
 }
 
