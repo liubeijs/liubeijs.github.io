@@ -80,12 +80,12 @@ function handleFileUpload(file, uploadIndex) {
         if (file.type.startsWith('image/')) {
             preview.innerHTML = `
                 <img src="${e.target.result}" class="media-preview" alt="预览图片">
-                <button class="media-remove-btn" onclick="removeMedia(${uploadIndex})">×</button>
+                <button class="media-remove-btn" onclick="event.stopPropagation(); removeMedia(${uploadIndex})">×</button>
             `;
         } else if (file.type.startsWith('video/')) {
             preview.innerHTML = `
                 <video src="${e.target.result}" class="media-preview" controls></video>
-                <button class="media-remove-btn" onclick="removeMedia(${uploadIndex})">×</button>
+                <button class="media-remove-btn" onclick="event.stopPropagation(); removeMedia(${uploadIndex})">×</button>
             `;
         }
         
@@ -379,9 +379,9 @@ function collectReportData() {
     }
     
     // 收集分类信息
-    const activeCategory = document.querySelector('.category-item.active');
-    if (activeCategory) {
-        data.category = activeCategory.dataset.category;
+    const currentCategoryText = document.querySelector('#currentCategory .category-text');
+    if (currentCategoryText) {
+        data.category = currentCategoryText.textContent.trim();
     }
     
     // 收集描述信息
