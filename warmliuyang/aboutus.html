@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="关于温暖浏阳 - 浏阳市城管局官方便民服务平台">
+    <meta name="keywords" content="浏阳,城管局,便民服务,温暖,共治">
+    <title>关于我们 - 温暖浏阳</title>
+    
+    <!-- PWA支持 -->
+    <meta name="theme-color" content="#E55C27">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="温暖浏阳">
+    
+    <!-- 字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="aboutus.css">
+</head>
+<body>
+    <div class="aboutus-container">
+        <!-- 头部导航 -->
+        <header class="aboutus-header">
+            <button class="back-btn" onclick="goBack()">
+                <span class="back-icon">‹</span>
+                <span>返回</span>
+            </button>
+            <div class="aboutus-title">关于我们</div>
+            <div class="header-placeholder"></div>
+        </header>
+
+        <!-- 主要内容 -->
+        <main class="aboutus-content">
+            <!-- Logo和标题 -->
+            <div class="app-intro">
+                <div class="app-logo">
+                    <div class="logo-icon">🏮</div>
+                </div>
+                <h1 class="app-name">温暖浏阳</h1>
+                <p class="app-slogan">发现浏阳的每个小惊喜</p>
+                <div class="version-info">版本 1.0.0</div>
+            </div>
+
+            <!-- 制作方信息 -->
+            <div class="developer-section">
+                <div class="section-header">
+                    <div class="section-icon">🏛️</div>
+                    <h2 class="section-title">开发单位</h2>
+                </div>
+                <div class="developer-card">
+                    <div class="developer-info">
+                        <h3 class="developer-name">浏阳市城市管理和综合执法局</h3>
+                        <p class="developer-desc">
+                            浏阳市城管局致力于提升城市管理水平，改善市民生活品质，
+                            通过数字化手段打造智慧城市，让城市管理更贴心、更温暖。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 应用理念 -->
+            <div class="concept-section">
+                <div class="section-header">
+                    <div class="section-icon">💡</div>
+                    <h2 class="section-title">设计理念</h2>
+                </div>
+                <div class="concept-cards">
+                    <div class="concept-card">
+                        <div class="concept-icon">🤝</div>
+                        <h3 class="concept-title">共享共治</h3>
+                        <p class="concept-desc">
+                            倡导市民参与城市治理，通过共享资源、共同治理，
+                            构建人人参与、人人受益的和谐社区。
+                        </p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="concept-icon">🎆</div>
+                        <h3 class="concept-title">烟火气息</h3>
+                        <p class="concept-desc">
+                            传承浏阳烟花文化，展现城市独特魅力，
+                            让科技与传统文化完美融合。
+                        </p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="concept-icon">❤️</div>
+                        <h3 class="concept-title">人情温暖</h3>
+                        <p class="concept-desc">
+                            以人为本，关注市民需求，通过贴心服务
+                            传递城市温度，营造温暖的生活环境。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 应用目的 -->
+            <div class="purpose-section">
+                <div class="section-header">
+                    <div class="section-icon">🎯</div>
+                    <h2 class="section-title">建设目标</h2>
+                </div>
+                <div class="purpose-content">
+                    <div class="purpose-item">
+                        <div class="purpose-number">01</div>
+                        <div class="purpose-info">
+                            <h3 class="purpose-title">便民服务一体化</h3>
+                            <p class="purpose-desc">
+                                整合城市各类便民服务资源，为市民提供找车位、找厕所、
+                                地道美食推荐等一站式便民服务。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="purpose-item">
+                        <div class="purpose-number">02</div>
+                        <div class="purpose-info">
+                            <h3 class="purpose-title">市民参与共治化</h3>
+                            <p class="purpose-desc">
+                                通过随手拍、共享资源等功能，鼓励市民积极参与城市治理，
+                                共同维护美好家园。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="purpose-item">
+                        <div class="purpose-number">03</div>
+                        <div class="purpose-info">
+                            <h3 class="purpose-title">文化传承数字化</h3>
+                            <p class="purpose-desc">
+                                结合浏阳烟花文化特色，通过数字化手段展示和传承
+                                地方文化，增强市民文化认同感。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="purpose-item">
+                        <div class="purpose-number">04</div>
+                        <div class="purpose-info">
+                            <h3 class="purpose-title">社区互助温暖化</h3>
+                            <p class="purpose-desc">
+                                构建邻里互助网络，促进代际和谐，通过"添双筷子"等
+                                公益活动传递社会温暖。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 联系方式 -->
+            <div class="contact-section">
+                <div class="section-header">
+                    <div class="section-icon">📞</div>
+                    <h2 class="section-title">联系我们</h2>
+                </div>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">🏢</div>
+                        <div class="contact-text">
+                            <div class="contact-label">办公地址</div>
+                            <div class="contact-value">浏阳市政府大楼城管局办公室</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📱</div>
+                        <div class="contact-text">
+                            <div class="contact-label">服务热线</div>
+                            <div class="contact-value">12319（城管热线）</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📧</div>
+                        <div class="contact-text">
+                            <div class="contact-label">邮箱地址</div>
+                            <div class="contact-value">liuyang_chengguan@gov.cn</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 版权信息 -->
+            <div class="copyright-section">
+                <div class="copyright-text">
+                    <p>© 2025 浏阳市城市管理和综合执法局</p>
+                    <p>版权所有 · 保留所有权利</p>
+                    <p class="tech-info">技术支持：浏阳智慧城管超算中心</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.concept-card, .purpose-item');
+            elements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    element.style.transition = 'all 0.6s ease';
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

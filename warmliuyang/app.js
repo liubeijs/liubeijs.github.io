@@ -190,6 +190,13 @@ class WarmLiuyangApp {
         this.handleCategorySelect(e.target);
       }
     });
+
+    // 菜单项点击事件
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.menu-item')) {
+        this.handleMenuClick(e.target.closest('.menu-item'));
+      }
+    });
   }
 
   // 添加视频点击处理方法
@@ -1248,6 +1255,31 @@ class WarmLiuyangApp {
 
   sendMessage() {
     this.showToast('正在打开私信...');
+  }
+
+  // 处理菜单项点击
+  handleMenuClick(menuItem) {
+    const menuText = menuItem.querySelector('.menu-text').textContent;
+    
+    switch(menuText) {
+      case '关于我们':
+        window.location.href = 'aboutus.html';
+        break;
+      case '我的预约':
+        this.showToast('我的预约功能开发中...');
+        break;
+      case '我的收藏':
+        this.showToast('我的收藏功能开发中...');
+        break;
+      case '数据统计':
+        this.showToast('数据统计功能开发中...');
+        break;
+      case '设置':
+        this.showToast('设置功能开发中...');
+        break;
+      default:
+        this.showToast(`${menuText}功能开发中...`);
+    }
   }
 }
 

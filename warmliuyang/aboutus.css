@@ -1,0 +1,414 @@
+/* CSS变量定义 */
+:root {
+  /* 主色调 */
+  --warm-cinnabar: #E55C27;
+  --bamboo-green: #3DA342;
+  --white: #FFFFFF;
+  
+  /* iOS系统色彩 */
+  --ios-background: #F2F2F7;
+  --ios-secondary-background: #FFFFFF;
+  --ios-tertiary-background: #F2F2F7;
+  --ios-quaternary-background: #E5E5EA;
+  --ios-label: #000000;
+  --ios-secondary-label: #3C3C43;
+  --ios-tertiary-label: #3C3C4399;
+  --ios-separator: #C6C6C8;
+  
+  /* 渐变色 */
+  --gradient-warm: linear-gradient(135deg, var(--warm-cinnabar), #FF7043);
+  --gradient-cool: linear-gradient(135deg, var(--bamboo-green), #66BB6A);
+}
+
+/* 基础样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  background: var(--ios-background);
+  color: var(--ios-label);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 容器样式 */
+.aboutus-container {
+  min-height: 100vh;
+  background: var(--ios-background);
+}
+
+/* 头部导航样式 */
+.aboutus-header {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 0.5px solid var(--ios-separator);
+  z-index: 100;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--warm-cinnabar);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 0;
+  transition: opacity 0.2s ease;
+}
+
+.back-btn:hover {
+  opacity: 0.7;
+}
+
+.back-icon {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.aboutus-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-label);
+  text-align: center;
+}
+
+.header-placeholder {
+  width: 60px;
+}
+
+/* 主要内容样式 */
+.aboutus-content {
+  padding: 0 0 40px 0;
+}
+
+/* App介绍区域 */
+.app-intro {
+  background: var(--gradient-warm);
+  color: var(--white);
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.app-logo {
+  margin-bottom: 16px;
+}
+
+.logo-icon {
+  font-size: 64px;
+  display: inline-block;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.app-name {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.app-slogan {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.version-info {
+  font-size: 14px;
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 16px;
+  display: inline-block;
+}
+
+/* 通用区块样式 */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+.section-icon {
+  font-size: 24px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ios-label);
+}
+
+/* 开发单位区域 */
+.developer-section {
+  margin: 32px 0;
+}
+
+.developer-card {
+  background: var(--white);
+  margin: 0 16px;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+}
+
+.developer-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--warm-cinnabar);
+  margin-bottom: 12px;
+}
+
+.developer-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ios-secondary-label);
+}
+
+/* 设计理念区域 */
+.concept-section {
+  margin: 32px 0;
+}
+
+.concept-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+.concept-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.concept-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.concept-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.concept-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ios-label);
+  margin-bottom: 8px;
+}
+
+.concept-desc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ios-secondary-label);
+}
+
+/* 建设目标区域 */
+.purpose-section {
+  margin: 32px 0;
+}
+
+.purpose-content {
+  padding: 0 16px;
+}
+
+.purpose-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+}
+
+.purpose-item:hover {
+  transform: translateY(-1px);
+}
+
+.purpose-number {
+  background: var(--gradient-warm);
+  color: var(--white);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.purpose-info {
+  flex: 1;
+}
+
+.purpose-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ios-label);
+  margin-bottom: 6px;
+}
+
+.purpose-desc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ios-secondary-label);
+}
+
+/* 联系方式区域 */
+.contact-section {
+  margin: 32px 0;
+}
+
+.contact-info {
+  background: var(--white);
+  margin: 0 16px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-bottom: 0.5px solid var(--ios-separator);
+}
+
+.contact-item:last-child {
+  border-bottom: none;
+}
+
+.contact-icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+}
+
+.contact-text {
+  flex: 1;
+}
+
+.contact-label {
+  font-size: 13px;
+  color: var(--ios-secondary-label);
+  margin-bottom: 2px;
+}
+
+.contact-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ios-label);
+}
+
+/* 版权信息区域 */
+.copyright-section {
+  margin: 40px 0 20px 0;
+  padding: 0 20px;
+}
+
+.copyright-text {
+  text-align: center;
+  color: var(--ios-tertiary-label);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.copyright-text p {
+  margin-bottom: 4px;
+}
+
+.tech-info {
+  margin-top: 8px;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* 响应式设计 */
+@media (min-width: 768px) {
+  .concept-cards {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .concept-card {
+    flex: 1;
+    min-width: 280px;
+  }
+  
+  .aboutus-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ios-background: #000000;
+    --ios-secondary-background: #1C1C1E;
+    --ios-tertiary-background: #2C2C2E;
+    --ios-quaternary-background: #3A3A3C;
+    --ios-label: #FFFFFF;
+    --ios-secondary-label: #EBEBF5;
+    --ios-tertiary-label: #EBEBF599;
+    --ios-separator: #38383A;
+  }
+}
+
+/* 动画效果 */
+.concept-card,
+.purpose-item {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* 滚动动画 */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.concept-card.animate,
+.purpose-item.animate {
+  animation: slideInUp 0.6s ease forwards;
+}
