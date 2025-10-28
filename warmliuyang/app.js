@@ -21,6 +21,11 @@ class WarmLiuyangApp {
         const tabId = item.dataset.tab;
         this.showTab(tabId);
         this.updateNavigation(tabId);
+        // 点击底部tab时自动滚动到页面顶部
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
       });
     });
   }
@@ -353,19 +358,21 @@ class WarmLiuyangApp {
   renderFeedList(container, data) {
     container.innerHTML = data.map(item => `
       <div class="feed-item">
-        <div class="feed-image">
-          <img src="${item.image}" 
-               alt="${item.title}" 
-               class="feed-thumbnail"
-               onerror="this.style.display='none'; this.parentElement.innerHTML='🖼️'">
-        </div>
         <div class="feed-content">
-          <div class="feed-title">${item.title}</div>
-          <div class="feed-description">${item.description}</div>
-          <div class="feed-location">📍 ${item.location}</div>
-          <div class="feed-actions">
-            <button class="action-btn">去这里</button>
+          <div class="feed-image">
+            <img src="${item.image}" 
+                 alt="${item.title}" 
+                 class="feed-thumbnail"
+                 onerror="this.style.display='none'; this.parentElement.innerHTML='🖼️'">
           </div>
+          <div class="feed-info">
+            <div class="feed-title">${item.title}</div>
+            <div class="feed-description">${item.description}</div>
+            <div class="feed-location">📍 ${item.location}</div>
+          </div>
+        </div>
+        <div class="feed-actions">
+          <button class="action-btn">去这里</button>
         </div>
       </div>
     `).join('');
@@ -468,7 +475,7 @@ class WarmLiuyangApp {
   }
 
   // 工具方法
-  showToast(message, duration = 3000) {
+  showToast(message, duration = 700) {
     // 创建toast提示
     const toast = document.createElement('div');
     toast.style.cssText = `

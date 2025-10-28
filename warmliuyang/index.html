@@ -23,13 +23,6 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- 状态栏 -->
-        <div class="status-bar">
-            <span>9:41</span>
-            <span>温暖浏阳</span>
-            <span>🔋100%</span>
-        </div>
-
         <!-- 主内容区域 -->
         <main class="main-content">
             <!-- 首页 -->
@@ -39,7 +32,7 @@
                         <span>📍 浏阳市区</span>
                         <span>☀️ 24°C</span>
                     </div>
-                    <input type="text" class="search-box" id="searchBox" placeholder="搜厕所、车位、故事…">
+                    <input type="text" class="search-box" id="searchBox" placeholder="🔍 发现浏阳的每个小惊喜...">
                 </div>
                 
                 <div class="banner-carousel">
@@ -104,15 +97,15 @@
                         </div>
                         <div class="service-item" data-service="food">
                             <div class="service-icon">🍜</div>
-                            <div class="service-label">美食</div>
+                            <div class="service-label">地道菜</div>
                         </div>
                         <div class="service-item" data-service="transport">
                             <div class="service-icon">🚌</div>
                             <div class="service-label">公交</div>
                         </div>
-                        <div class="service-item" data-service="hospital">
-                            <div class="service-icon">🏥</div>
-                            <div class="service-label">医院</div>
+                        <div class="service-item" data-service="attractions">
+                            <div class="service-icon">📍</div>
+                            <div class="service-label">打卡景点</div>
                         </div>
                         <div class="service-item" data-service="more">
                             <div class="service-icon">➕</div>
@@ -265,7 +258,9 @@
             <!-- 我的页面 -->
             <div id="profile-tab" class="tab-content">
                 <div class="profile-header">
-                    <div class="profile-avatar">👤</div>
+                    <div class="profile-avatar">
+                        <img src="sources/avator.jpg" alt="用户头像" class="avatar-image">
+                    </div>
                     <div class="profile-name">温暖市民</div>
                     <div class="badge-wall">
                         <span class="badge">烟火达人</span>
@@ -277,15 +272,15 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number" id="volunteerHours">24</div>
-                        <div class="stat-label">公益时长(小时)</div>
+                        <div class="stat-label">贡献次数</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" id="parkingIncome">156</div>
-                        <div class="stat-label">车位收益(元)</div>
+                        <div class="stat-label">共享收益(元)</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" id="storyLikes">89</div>
-                        <div class="stat-label">故事获赞</div>
+                        <div class="stat-label">分享获赞</div>
                     </div>
                 </div>
                 
