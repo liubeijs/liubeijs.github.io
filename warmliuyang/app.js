@@ -106,11 +106,12 @@ class WarmLiuyangApp {
       });
     });
 
-    // 故事详情页返回按钮
-    const storyBackBtn = document.getElementById('storyBackBtn');
-    if (storyBackBtn) {
-      storyBackBtn.addEventListener('click', this.closeStoryDetail.bind(this));
-    }
+    // 故事详情页返回按钮 - 使用事件委托
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#storyBackBtn')) {
+        this.closeStoryDetail();
+      }
+    });
 
     // 故事详情页操作按钮
     document.addEventListener('click', (e) => {
