@@ -1,0 +1,399 @@
+/* iOS 17 颜色系统 */
+:root {
+  /* 主色调 */
+  --warm-cinnabar: #E55C27;
+  --bamboo-green: #7CB342;
+  --golden-yellow: #FFD54F;
+  
+  /* iOS 17 系统颜色 */
+  --ios-background: #FFFFFF;
+  --ios-secondary-background: #F2F2F7;
+  --ios-tertiary-background: #FFFFFF;
+  --ios-label: #000000;
+  --ios-secondary-label: #3C3C43;
+  --ios-tertiary-label: #3C3C4399;
+  --ios-separator: #3C3C4349;
+  --ios-system-blue: #007AFF;
+  --ios-system-red: #FF3B30;
+  --ios-system-green: #34C759;
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ios-background: #000000;
+    --ios-secondary-background: #1C1C1E;
+    --ios-tertiary-background: #2C2C2E;
+    --ios-label: #FFFFFF;
+    --ios-secondary-label: #EBEBF5;
+    --ios-tertiary-label: #EBEBF599;
+    --ios-separator: #54545899;
+  }
+}
+
+/* 基础样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--ios-background);
+  color: var(--ios-label);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+.story-page {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 头部导航 */
+.story-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--ios-background);
+  border-bottom: 1px solid var(--ios-separator);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--ios-system-blue);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.back-btn:hover {
+  background: var(--ios-secondary-background);
+}
+
+.story-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ios-label);
+}
+
+/* 底部操作区域 */
+.story-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--ios-secondary-background);
+  border-top: 0.5px solid var(--ios-separator);
+  padding: 16px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+}
+
+.publish-btn {
+  width: 100%;
+  background: var(--warm-cinnabar);
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(229, 92, 39, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.publish-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.publish-btn:hover {
+  background: #d14d1f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(229, 92, 39, 0.4);
+}
+
+.publish-btn:hover::before {
+  left: 100%;
+}
+
+.publish-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(229, 92, 39, 0.3);
+}
+
+.publish-btn:disabled {
+  background: var(--ios-tertiary-label);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.publish-text {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.header-placeholder {
+  width: 56px; /* 与back-btn宽度相同，保持平衡 */
+}
+
+/* 主内容区域 */
+.story-content {
+  flex: 1;
+  padding: 20px 16px 100px 16px; /* 底部增加padding为底部按钮留空间 */
+  overflow-y: auto;
+}
+
+/* 输入区域 */
+.input-section {
+  margin-bottom: 24px;
+}
+
+.input-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ios-label);
+  margin-bottom: 8px;
+}
+
+.story-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--ios-separator);
+  border-radius: 12px;
+  background: var(--ios-secondary-background);
+  color: var(--ios-label);
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.story-input:focus {
+  outline: none;
+  border-color: var(--warm-cinnabar);
+  background: var(--ios-background);
+}
+
+.story-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px 16px;
+  border: 1px solid var(--ios-separator);
+  border-radius: 12px;
+  background: var(--ios-secondary-background);
+  color: var(--ios-label);
+  font-size: 16px;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.story-textarea:focus {
+  outline: none;
+  border-color: var(--warm-cinnabar);
+  background: var(--ios-background);
+}
+
+.char-count {
+  text-align: right;
+  font-size: 12px;
+  color: var(--ios-tertiary-label);
+  margin-top: 4px;
+}
+
+/* 媒体上传区域 */
+.media-section {
+  margin-bottom: 24px;
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.media-upload-item {
+  aspect-ratio: 1;
+  border: 2px dashed var(--ios-separator);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.media-upload-item:hover {
+  border-color: var(--warm-cinnabar);
+  background: var(--ios-secondary-background);
+}
+
+.media-upload-item.hidden {
+  display: none;
+}
+
+.media-upload-item.has-image {
+  border: none;
+  padding: 0;
+}
+
+.upload-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.upload-text {
+  font-size: 12px;
+  color: var(--ios-secondary-label);
+  text-align: center;
+}
+
+.file-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.media-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.media-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+/* 位置信息区域 */
+.location-section {
+  margin-bottom: 24px;
+}
+
+.location-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.location-btn {
+  background: var(--ios-system-blue);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.location-btn:hover {
+  background: #0056cc;
+}
+
+.location-display {
+  padding: 12px 16px;
+  background: var(--ios-secondary-background);
+  border-radius: 12px;
+  border: 1px solid var(--ios-separator);
+}
+
+.location-text {
+  font-size: 14px;
+  color: var(--ios-secondary-label);
+}
+
+.location-text.has-location {
+  color: var(--ios-label);
+}
+
+/* Toast 提示 */
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .story-content {
+    padding: 16px 12px 100px 12px; /* 保持底部padding */
+  }
+  
+  .media-grid {
+    gap: 8px;
+  }
+  
+  .story-header {
+    padding: 8px 12px;
+  }
+  
+  .story-footer {
+    padding: 12px;
+  }
+}

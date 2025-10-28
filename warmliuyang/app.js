@@ -348,14 +348,65 @@ class WarmLiuyangApp {
 
   // 显示操作表单
   showActionSheet() {
+    // 创建底部弹出选择器
+    const overlay = document.createElement('div');
+    overlay.className = 'action-sheet-overlay';
+    
+    const actionSheet = document.createElement('div');
+    actionSheet.className = 'action-sheet';
+    
     const actions = [
-      { text: '发故事', icon: '📝', action: () => this.openStoryEditor() },
-      { text: '拍问题', icon: '📷', action: () => this.openCamera() },
-      { text: '共享资源', icon: '🤝', action: () => this.showTab('governance') }
+      { text: '写故事', icon: '📝', action: () => this.openStoryEditor() },
+      { text: '随手拍', icon: '📷', action: () => this.openCaptureEditor() }
     ];
     
-    // 这里可以显示底部弹出的操作选择器
-    console.log('显示操作选择器', actions);
+    actions.forEach(action => {
+      const actionItem = document.createElement('div');
+      actionItem.className = 'action-item';
+      actionItem.innerHTML = `
+        <div class="action-icon">${action.icon}</div>
+        <div class="action-text">${action.text}</div>
+      `;
+      actionItem.addEventListener('click', () => {
+        this.hideActionSheet();
+        action.action();
+      });
+      actionSheet.appendChild(actionItem);
+    });
+    
+    // 取消按钮
+    const cancelItem = document.createElement('div');
+    cancelItem.className = 'action-item cancel';
+    cancelItem.innerHTML = `
+      <div class="action-text">取消</div>
+    `;
+    cancelItem.addEventListener('click', () => this.hideActionSheet());
+    actionSheet.appendChild(cancelItem);
+    
+    overlay.appendChild(actionSheet);
+    document.body.appendChild(overlay);
+    
+    // 点击遮罩关闭
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        this.hideActionSheet();
+      }
+    });
+    
+    // 显示动画
+    setTimeout(() => {
+      overlay.classList.add('show');
+    }, 10);
+  }
+  
+  hideActionSheet() {
+    const overlay = document.querySelector('.action-sheet-overlay');
+    if (overlay) {
+      overlay.classList.remove('show');
+      setTimeout(() => {
+        overlay.remove();
+      }, 300);
+    }
   }
 
   // Feed标签切换
@@ -664,11 +715,11 @@ class WarmLiuyangApp {
     if (!leaderboard) return;
     
     const leaders = [
-      { name: '热心市民王大妈', contribution: '本周贡献 15 次', rank: 1 },
-      { name: '志愿者小李', contribution: '本周贡献 12 次', rank: 2 },
-      { name: '环保达人张师傅', contribution: '本周贡献 10 次', rank: 3 },
-      { name: '文明使者刘阿姨', contribution: '本周贡献 8 次', rank: 4 },
-      { name: '社区管家老陈', contribution: '本周贡献 7 次', rank: 5 }
+      { name: '热心市民王大妈', contribution: '本周贡献 15 点', rank: 1 },
+      { name: '志愿者小李', contribution: '本周贡献 12 点', rank: 2 },
+      { name: '环保达人张师傅', contribution: '本周贡献 10 点', rank: 3 },
+      { name: '文明使者刘阿姨', contribution: '本周贡献 8 点', rank: 4 },
+      { name: '社区管家老陈', contribution: '本周贡献 7 点', rank: 5 }
     ];
     
     leaderboard.innerHTML = leaders.map((leader, idx) => {
@@ -736,8 +787,8 @@ class WarmLiuyangApp {
   }
 
   openStoryEditor() {
-    this.showToast('正在打开故事编辑器...');
-    // 这里可以跳转到故事编辑页面
+    // 跳转到写故事页面
+    window.location.href = 'writestory.html';
   }
 
   showShareParkingForm() {

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="写故事 - 温暖浏阳">
+    <title>写故事 - 温暖浏阳</title>
+    
+    <!-- PWA支持 -->
+    <meta name="theme-color" content="#E55C27">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="writestory.css">
+</head>
+<body>
+    <div class="story-page">
+        <!-- 头部导航 -->
+        <header class="story-header">
+            <button class="back-btn" id="backBtn" aria-label="返回">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <h1 class="story-title">写故事</h1>
+            <div class="header-placeholder"></div>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main class="story-content">
+            <!-- 标题输入 -->
+            <div class="input-section">
+                <label for="storyTitleInput" class="input-label">故事标题</label>
+                <input 
+                    type="text" 
+                    id="storyTitleInput" 
+                    class="story-input" 
+                    placeholder="给你的故事起个好听的名字..."
+                    maxlength="50"
+                >
+                <div class="char-count">
+                    <span id="titleCount">0</span>/50
+                </div>
+            </div>
+
+            <!-- 图片上传区域 -->
+            <div class="media-section">
+                <label class="input-label">添加图片 (最多3张)</label>
+                <div class="media-grid" id="mediaGrid">
+                    <div class="media-upload-item" id="uploadBtn1">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">添加图片</div>
+                        <input type="file" accept="image/*" class="file-input" id="fileInput1">
+                    </div>
+                    <div class="media-upload-item hidden" id="uploadBtn2">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">添加图片</div>
+                        <input type="file" accept="image/*" class="file-input" id="fileInput2">
+                    </div>
+                    <div class="media-upload-item hidden" id="uploadBtn3">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">添加图片</div>
+                        <input type="file" accept="image/*" class="file-input" id="fileInput3">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 内容输入 -->
+            <div class="input-section">
+                <label for="storyContent" class="input-label">故事内容</label>
+                <textarea 
+                    id="storyContent" 
+                    class="story-textarea" 
+                    placeholder="分享你在浏阳的温暖故事..."
+                    maxlength="1000"
+                ></textarea>
+                <div class="char-count">
+                    <span id="contentCount">0</span>/1000
+                </div>
+            </div>
+
+            <!-- 位置信息 -->
+            <div class="location-section">
+                <div class="location-header">
+                    <span class="input-label">📍 位置信息</span>
+                    <button class="location-btn" id="locationBtn">获取当前位置</button>
+                </div>
+                <div class="location-display" id="locationDisplay">
+                    <div class="location-text">点击获取位置信息</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部操作区域 -->
+        <div class="story-footer">
+            <button class="publish-btn" id="publishBtn" disabled>
+                <span class="publish-text">发布故事</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 发布成功提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script src="writestory.js"></script>
+</body>
+</html>
