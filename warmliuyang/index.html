@@ -263,7 +263,58 @@
                     </div>
                 </div>
                 
-                <div class="governance-actions">
+                <!-- 公益任务发布 -->
+                <div class="tasks-section">
+                    <div class="tasks-header">
+                        <div class="tasks-title">
+                            <span class="tasks-icon">🎯</span>
+                            <span class="tasks-text">浏阳城管公益任务发布💝</span>
+                        </div>
+                        <button class="tasks-expand-btn" id="tasksExpandBtn">
+                            <span class="expand-text">展开</span>
+                            <span class="expand-icon">▼</span>
+                        </button>
+                    </div>
+                    <div class="tasks-list">
+                        <div class="task-item" data-task-id="0">
+                            <div class="task-content">
+                                <div class="task-title">"添双筷子"公益餐活动</div>
+                                <div class="task-reward">🏆 每份餐食 5-7 贡献点数</div>
+                            </div>
+                            <div class="task-arrow">›</div>
+                        </div>
+                        <div class="task-item" data-task-id="1">
+                            <div class="task-content">
+                                <div class="task-title">"邻里共享"车位开放计划</div>
+                                <div class="task-reward">🏆 每小时 3-5 贡献点数</div>
+                            </div>
+                            <div class="task-arrow">›</div>
+                        </div>
+                        <div class="task-item" data-task-id="2">
+                            <div class="task-content">
+                                <div class="task-title">"随手拍"城市问题上报</div>
+                                <div class="task-reward">🏆 每次上报 2-3 贡献点数</div>
+                            </div>
+                            <div class="task-arrow">›</div>
+                        </div>
+                        <div class="task-item task-item-hidden" data-task-id="3">
+                            <div class="task-content">
+                                <div class="task-title">"便民开放"共享厕所计划</div>
+                                <div class="task-reward">🏆 每月 4-6 贡献点数</div>
+                            </div>
+                            <div class="task-arrow">›</div>
+                        </div>
+                        <div class="task-item task-item-hidden" data-task-id="4">
+                            <div class="task-content">
+                                <div class="task-title">"邻里互助"温暖行动</div>
+                                <div class="task-reward">🏆 每次互助 2-4 贡献点数</div>
+                            </div>
+                            <div class="task-arrow">›</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <div class="governance-actions">
                     <div class="governance-card">
                         <div class="governance-icon">📷</div>
                         <div class="governance-title">随手拍</div>
@@ -287,7 +338,7 @@
                         <div class="governance-title">公益餐</div>
                         <div class="governance-desc">添双筷子献爱心</div>
                     </div>
-                </div>
+                </div> -->
                 
                 <div class="leaderboard">
                     <h2 class="leaderboard-title">🏆 城市温暖之星</h2>
@@ -452,6 +503,123 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- 公益任务详情页面 -->
+    <div id="taskDetail" class="task-detail-page" style="display: none;">
+        <div class="task-detail-header">
+            <button class="back-btn" id="taskBackBtn" onclick="app.closeTaskDetail()">
+                <span class="back-icon">←</span>
+                <span class="back-text">返回</span>
+            </button>
+            <div class="task-detail-title">公益任务详情</div>
+        </div>
+        <div class="task-detail-content">
+            <div class="task-detail-info">
+                <div class="task-icon-large" id="taskDetailIcon">🍽️</div>
+                <h2 id="taskDetailTitle" class="task-title-large"></h2>
+                <div class="task-reward-large" id="taskDetailReward"></div>
+                <div class="task-section">
+                    <h3 class="task-section-title">活动描述</h3>
+                    <div id="taskDetailDescription" class="task-description"></div>
+                </div>
+                <div class="task-section">
+                    <h3 class="task-section-title">参与方式</h3>
+                    <div id="taskDetailParticipation" class="task-participation"></div>
+                </div>
+                <div class="task-footer">
+                    <div class="task-source">浏阳市城市管理和综合执法局</div>
+                    <div class="task-time">长期有效</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 城市温暖之星详情页面 -->
+    <div id="warmStarDetail" class="warm-star-detail-page" style="display: none;">
+        <!-- 头部导航 -->
+        <div class="warm-star-detail-header">
+            <button class="back-btn" id="warmStarBackBtn" onclick="app.closeWarmStarDetail()">
+                <span class="back-icon">←</span>
+                <span class="back-text">返回</span>
+            </button>
+            <div class="warm-star-detail-title">城市温暖之星</div>
+            <div class="header-placeholder"></div>
+        </div>
+
+        <!-- 个人信息卡片 -->
+        <div class="warm-star-profile">
+            <div class="profile-background">
+                <div class="profile-gradient"></div>
+            </div>
+            <div class="profile-content">
+                <div class="profile-avatar-container">
+                    <img id="warmStarAvatar" src="sources/avator1.png" alt="温暖之星头像" class="profile-avatar">
+                    <div class="rank-badge">
+                        <span id="warmStarRank">第1名</span>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <h1 id="warmStarName" class="profile-name">热心市民王大妈</h1>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="warmStarTotalContribution">156</div>
+                            <div class="stat-label">总贡献点数</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <div class="stat-text" id="warmStarJoinDate">2023年3月</div>
+                            <div class="stat-label">加入时间</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 徽章墙 -->
+        <div class="badges-section">
+            <h2 class="section-title">🏆 荣誉徽章</h2>
+            <div id="warmStarBadges" class="badges-container">
+                <!-- 徽章将通过JavaScript动态加载 -->
+            </div>
+        </div>
+
+        <!-- 个人简介 -->
+        <div class="bio-section">
+            <h2 class="section-title">📝 个人简介</h2>
+            <div class="bio-content">
+                <p id="warmStarBio" class="bio-text">
+                    <!-- 个人简介将通过JavaScript动态加载 -->
+                </p>
+            </div>
+        </div>
+
+        <!-- 近期活动 -->
+        <div class="activities-section">
+            <h2 class="section-title">📊 近期活动</h2>
+            <div id="warmStarActivities" class="activities-container">
+                <!-- 活动列表将通过JavaScript动态加载 -->
+            </div>
+        </div>
+
+        <!-- 互动按钮 -->
+        <div class="action-buttons">
+            <button class="action-btn primary-btn" onclick="app.followWarmStar()">
+                <span class="btn-icon">👥</span>
+                <span class="btn-text">关注TA</span>
+            </button>
+            <button class="action-btn secondary-btn" onclick="app.shareWarmStar()">
+                <span class="btn-icon">📤</span>
+                <span class="btn-text">分享</span>
+            </button>
+            <button class="action-btn secondary-btn" onclick="app.sendMessage()">
+                <span class="btn-icon">💬</span>
+                <span class="btn-text">私信</span>
+            </button>
+        </div>
+
+        <!-- 底部安全区域 -->
+        <div class="bottom-safe-area"></div>
     </div>
 
     <!-- JavaScript文件 -->

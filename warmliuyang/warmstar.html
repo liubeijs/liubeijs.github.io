@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="城市温暖之星详情 - 温暖浏阳">
+    <meta name="keywords" content="温暖之星,浏阳,志愿者,贡献">
+    <title>城市温暖之星 - 温暖浏阳</title>
+    
+    <!-- PWA支持 -->
+    <meta name="theme-color" content="#E55C27">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="温暖浏阳">
+    
+    <!-- 字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="warmstar.css">
+</head>
+<body>
+    <div class="warm-star-container">
+        <!-- 温暖之星详情页面 -->
+        <div id="warmStarDetail" class="warm-star-detail-page">
+            <!-- 头部导航 -->
+            <div class="warm-star-detail-header">
+                <button class="back-btn" id="warmStarBackBtn" onclick="app.closeWarmStarDetail()">
+                    <span class="back-icon">←</span>
+                    <span class="back-text">返回</span>
+                </button>
+                <div class="warm-star-detail-title">城市温暖之星</div>
+                <div class="header-placeholder"></div>
+            </div>
+
+            <!-- 个人信息卡片 -->
+            <div class="warm-star-profile">
+                <div class="profile-background">
+                    <div class="profile-gradient"></div>
+                </div>
+                <div class="profile-content">
+                    <div class="profile-avatar-container">
+                        <img id="warmStarAvatar" src="sources/avator1.png" alt="温暖之星头像" class="profile-avatar">
+                        <div class="rank-badge">
+                            <span id="warmStarRank">第1名</span>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h1 id="warmStarName" class="profile-name">热心市民王大妈</h1>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" id="warmStarTotalContribution">156</div>
+                                <div class="stat-label">总贡献点数</div>
+                            </div>
+                            <div class="stat-divider"></div>
+                            <div class="stat-item">
+                                <div class="stat-text" id="warmStarJoinDate">2023年3月</div>
+                                <div class="stat-label">加入时间</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 徽章墙 -->
+            <div class="badges-section">
+                <h2 class="section-title">🏆 荣誉徽章</h2>
+                <div id="warmStarBadges" class="badges-container">
+                    <!-- 徽章将通过JavaScript动态加载 -->
+                </div>
+            </div>
+
+            <!-- 个人简介 -->
+            <div class="bio-section">
+                <h2 class="section-title">📝 个人简介</h2>
+                <div class="bio-content">
+                    <p id="warmStarBio" class="bio-text">
+                        <!-- 个人简介将通过JavaScript动态加载 -->
+                    </p>
+                </div>
+            </div>
+
+            <!-- 近期活动 -->
+            <div class="activities-section">
+                <h2 class="section-title">📊 近期活动</h2>
+                <div id="warmStarActivities" class="activities-container">
+                    <!-- 活动列表将通过JavaScript动态加载 -->
+                </div>
+            </div>
+
+            <!-- 互动按钮 -->
+            <div class="action-buttons">
+                <button class="action-btn primary-btn" onclick="app.followWarmStar()">
+                    <span class="btn-icon">👥</span>
+                    <span class="btn-text">关注TA</span>
+                </button>
+                <button class="action-btn secondary-btn" onclick="app.shareWarmStar()">
+                    <span class="btn-icon">📤</span>
+                    <span class="btn-text">分享</span>
+                </button>
+                <button class="action-btn secondary-btn" onclick="app.sendMessage()">
+                    <span class="btn-icon">💬</span>
+                    <span class="btn-text">私信</span>
+                </button>
+            </div>
+
+            <!-- 底部安全区域 -->
+            <div class="bottom-safe-area"></div>
+        </div>
+    </div>
+
+    <!-- 提示消息 -->
+    <div class="toast" id="warmStarToast"></div>
+
+    <!-- JavaScript文件 -->
+    <script src="warmstar.js"></script>
+</body>
+</html>

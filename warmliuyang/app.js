@@ -137,6 +137,19 @@ class WarmLiuyangApp {
       noticesExpandBtn.addEventListener('click', this.toggleNoticesExpand.bind(this));
     }
 
+    // 公益任务发布展开按钮
+    const tasksExpandBtn = document.getElementById('tasksExpandBtn');
+    if (tasksExpandBtn) {
+      tasksExpandBtn.addEventListener('click', this.toggleTasksExpand.bind(this));
+    }
+
+    // 公益任务点击事件
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.task-item')) {
+        this.openTaskDetail(e.target.closest('.task-item'));
+      }
+    });
+
     // 便民服务筛选标签
     document.addEventListener('click', (e) => {
       if (e.target.classList.contains('filter-tab')) {
@@ -714,18 +727,85 @@ class WarmLiuyangApp {
     const leaderboard = document.getElementById('leaderboard');
     if (!leaderboard) return;
     
-    const leaders = [
-      { name: '热心市民王大妈', contribution: '本周贡献 15 点', rank: 1 },
-      { name: '志愿者小李', contribution: '本周贡献 12 点', rank: 2 },
-      { name: '环保达人张师傅', contribution: '本周贡献 10 点', rank: 3 },
-      { name: '文明使者刘阿姨', contribution: '本周贡献 8 点', rank: 4 },
-      { name: '社区管家老陈', contribution: '本周贡献 7 点', rank: 5 }
+    this.leadersData = [
+      { 
+        name: '热心市民王大妈', 
+        contribution: '本周贡献 15 点', 
+        rank: 1,
+        totalContribution: 156,
+        joinDate: '2023年3月',
+        badges: ['共治之星', '热心市民', '环保达人'],
+        recentActivities: [
+          { type: '随手拍', description: '上报道路积水问题', time: '2小时前', points: 3 },
+          { type: '共享车位', description: '开放私人车位2小时', time: '昨天', points: 5 },
+          { type: '公益餐', description: '为环卫工人提供免费早餐', time: '3天前', points: 7 }
+        ],
+        bio: '王大妈是我们社区的热心志愿者，总是第一时间发现并上报各种城市问题。她开放自家车位供邻居使用，还经常为环卫工人提供免费早餐。她说："温暖浏阳需要我们每个人的参与。"'
+      },
+      { 
+        name: '志愿者小李', 
+        contribution: '本周贡献 12 点', 
+        rank: 2,
+        totalContribution: 134,
+        joinDate: '2023年5月',
+        badges: ['志愿先锋', '烟火达人', '文明使者'],
+        recentActivities: [
+          { type: '烟火秀', description: '协助维护观赏秩序', time: '1天前', points: 8 },
+          { type: '随手拍', description: '上报违停车辆', time: '2天前', points: 2 },
+          { type: '故事分享', description: '分享浏阳美食故事', time: '4天前', points: 2 }
+        ],
+        bio: '小李是一名大学生志愿者，热爱摄影和分享。他经常参与烟火秀的志愿服务，用镜头记录浏阳的美好瞬间，传播正能量。'
+      },
+      { 
+        name: '环保达人张师傅', 
+        contribution: '本周贡献 10 点', 
+        rank: 3,
+        totalContribution: 98,
+        joinDate: '2023年7月',
+        badges: ['环保达人', '绿色出行', '节能先锋'],
+        recentActivities: [
+          { type: '共享厕所', description: '开放店铺厕所供市民使用', time: '6小时前', points: 4 },
+          { type: '随手拍', description: '上报垃圾分类问题', time: '1天前', points: 3 },
+          { type: '绿色出行', description: '骑行上班打卡', time: '每天', points: 1 }
+        ],
+        bio: '张师傅经营着一家小店，他主动开放店铺厕所供路人使用，还积极参与垃圾分类宣传。他坚持绿色出行，是环保理念的践行者。'
+      },
+      { 
+        name: '文明使者刘阿姨', 
+        contribution: '本周贡献 8 点', 
+        rank: 4,
+        totalContribution: 87,
+        joinDate: '2023年4月',
+        badges: ['文明使者', '社区管家', '爱心天使'],
+        recentActivities: [
+          { type: '文明劝导', description: '劝导不文明行为', time: '3小时前', points: 2 },
+          { type: '邻里互助', description: '帮助老人购买生活用品', time: '1天前', points: 3 },
+          { type: '公益餐', description: '为独居老人送餐', time: '2天前', points: 3 }
+        ],
+        bio: '刘阿姨是社区的文明使者，经常进行文明劝导工作。她热心帮助邻里，特别关爱独居老人，被大家亲切地称为"爱心阿姨"。'
+      },
+      { 
+        name: '社区管家老陈', 
+        contribution: '本周贡献 7 点', 
+        rank: 5,
+        totalContribution: 76,
+        joinDate: '2023年6月',
+        badges: ['社区管家', '安全卫士', '热心邻居'],
+        recentActivities: [
+          { type: '安全巡查', description: '夜间社区安全巡查', time: '昨晚', points: 4 },
+          { type: '设施维护', description: '修复小区健身器材', time: '2天前', points: 2 },
+          { type: '邻里调解', description: '协调邻里纠纷', time: '3天前', points: 1 }
+        ],
+        bio: '老陈是退休的社区工作者，继续发挥余热为社区服务。他每晚都会进行安全巡查，维护公共设施，是大家心中的"社区守护神"。'
+      }
     ];
+    
+    const leaders = this.leadersData;
     
     leaderboard.innerHTML = leaders.map((leader, idx) => {
       const avatarIndex = (idx % 5) + 1; // 使用 avator1.png ~ avator5.png
       return `
-        <div class="leader-item">
+        <div class="leader-item" data-leader-index="${idx}" onclick="app.openWarmStarDetail(this)">
           <div class="leader-rank">${leader.rank}</div>
           <div class="leader-avatar">
             <img src="sources/avator${avatarIndex}.png" alt="${leader.name}" class="leader-avatar-img">
@@ -734,6 +814,7 @@ class WarmLiuyangApp {
             <div class="leader-name">${leader.name}</div>
             <div class="leader-contribution">${leader.contribution}</div>
           </div>
+          <div class="leader-arrow">›</div>
         </div>
       `;
     }).join('');
@@ -898,6 +979,79 @@ class WarmLiuyangApp {
     document.querySelector('.app-container').style.display = 'block';
   }
 
+  // 城市温暖之星详情页相关方法
+  openWarmStarDetail(leaderItem) {
+    const leaderIndex = parseInt(leaderItem.dataset.leaderIndex);
+    const leaderData = this.leadersData[leaderIndex];
+    
+    if (!leaderData) return;
+    
+    // 填充温暖之星详情页内容
+    document.getElementById('warmStarAvatar').src = `sources/avator${(leaderIndex % 5) + 1}.png`;
+    document.getElementById('warmStarName').textContent = leaderData.name;
+    document.getElementById('warmStarRank').textContent = `第${leaderData.rank}名`;
+    document.getElementById('warmStarTotalContribution').textContent = leaderData.totalContribution;
+    document.getElementById('warmStarJoinDate').textContent = leaderData.joinDate;
+    document.getElementById('warmStarBio').textContent = leaderData.bio;
+    
+    // 渲染徽章
+    const badgesContainer = document.getElementById('warmStarBadges');
+    badgesContainer.innerHTML = leaderData.badges.map(badge => 
+      `<span class="warm-star-badge">${badge}</span>`
+    ).join('');
+    
+    // 渲染近期活动
+    const activitiesContainer = document.getElementById('warmStarActivities');
+    activitiesContainer.innerHTML = leaderData.recentActivities.map(activity => `
+      <div class="activity-item">
+        <div class="activity-icon">${this.getActivityIcon(activity.type)}</div>
+        <div class="activity-content">
+          <div class="activity-description">${activity.description}</div>
+          <div class="activity-meta">
+            <span class="activity-time">${activity.time}</span>
+            <span class="activity-points">+${activity.points}分</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    
+    // 显示温暖之星详情页
+    const warmStarDetailPage = document.getElementById('warmStarDetail');
+    warmStarDetailPage.style.display = 'block';
+    
+    // 滚动到顶部
+    warmStarDetailPage.scrollTop = 0;
+    
+    // 隐藏主内容
+    document.querySelector('.app-container').style.display = 'none';
+  }
+
+  closeWarmStarDetail() {
+    // 隐藏温暖之星详情页
+    document.getElementById('warmStarDetail').style.display = 'none';
+    
+    // 显示主内容
+    document.querySelector('.app-container').style.display = 'block';
+  }
+
+  getActivityIcon(type) {
+    const icons = {
+      '随手拍': '📸',
+      '共享车位': '🅿️',
+      '公益餐': '🍽️',
+      '烟火秀': '🎆',
+      '故事分享': '📖',
+      '共享厕所': '🚻',
+      '绿色出行': '🚴',
+      '文明劝导': '🗣️',
+      '邻里互助': '🤝',
+      '安全巡查': '🔍',
+      '设施维护': '🔧',
+      '邻里调解': '⚖️'
+    };
+    return icons[type] || '⭐';
+  }
+
   // 城管温馨提示展开/收起功能
   toggleNoticesExpand() {
     const expandBtn = document.getElementById('noticesExpandBtn');
@@ -925,6 +1079,118 @@ class WarmLiuyangApp {
       expandBtn.classList.add('expanded');
       expandText.textContent = '收起';
     }
+  }
+
+  // 公益任务发布展开/收起功能
+  toggleTasksExpand() {
+    const expandBtn = document.getElementById('tasksExpandBtn');
+    const hiddenItems = document.querySelectorAll('.task-item-hidden');
+    const expandText = expandBtn.querySelector('.expand-text');
+    
+    if (expandBtn.classList.contains('expanded')) {
+      // 收起状态 -> 展开状态
+      hiddenItems.forEach(item => {
+        item.classList.remove('show');
+        setTimeout(() => {
+          item.style.display = 'none';
+        }, 300);
+      });
+      expandBtn.classList.remove('expanded');
+      expandText.textContent = '展开';
+    } else {
+      // 展开状态 -> 收起状态
+      hiddenItems.forEach((item, index) => {
+        setTimeout(() => {
+          item.style.display = 'flex';
+          item.classList.add('show');
+        }, index * 100);
+      });
+      expandBtn.classList.add('expanded');
+      expandText.textContent = '收起';
+    }
+  }
+
+  // 公益任务详情页相关方法
+  openTaskDetail(taskItem) {
+    const taskId = parseInt(taskItem.dataset.taskId);
+    const tasksData = [
+      {
+        title: '"添双筷子"公益餐活动',
+        icon: '🍽️',
+        reward: '每提供一份公益餐获得5-7贡献点数，连续提供可获得"爱心天使"徽章',
+        description: '鼓励餐厅、食堂和热心市民为环卫工人、外卖小哥、建筑工人等城市服务者提供免费餐食。参与者可以通过APP报名，设置每日提供份数，为城市的辛勤工作者送上温暖。',
+        participation: '商家：在APP中认领"公益餐点"，承诺每日提供一定数量的免费餐食\n个人：可以赞助餐费或亲自制作爱心餐食\n受益者：通过APP查看附近的公益餐点，凭工作证明免费用餐'
+      },
+      {
+        title: '"邻里共享"车位开放计划',
+        icon: '🅿️',
+        reward: '每开放1小时获得3-5贡献点数，累计开放时长可获得"共享达人"徽章',
+        description: '倡导有私人车位的市民在空闲时段开放给邻居或路过的市民使用，缓解停车难问题。可设置公益免费模式或合理收费模式，促进邻里和谐。',
+        participation: '车位主：在APP中发布车位信息，设置开放时段和收费标准\n用车人：通过APP搜索附近可用车位，在线预约使用\n平台提供：智能匹配、导航指引、费用结算等服务'
+      },
+      {
+        title: '"随手拍"城市问题上报',
+        icon: '📸',
+        reward: '每次有效上报获得2-3贡献点数，问题得到解决后额外奖励，可获得"城市卫士"徽章',
+        description: '鼓励市民发现城市管理问题时随手拍照上报，包括道路积水、垃圾堆积、设施损坏、违章停车等，共同维护城市环境。系统自动定位并OCR识别路牌信息。',
+        participation: '发现问题：拍照上传，选择问题类型（环境卫生、交通秩序、设施维护等）\n系统处理：自动定位、智能分类、推送给相关部门\n反馈跟踪：问题处理进度实时更新，解决后给上报者反馈'
+      },
+      {
+        title: '"便民开放"共享厕所计划',
+        icon: '🚻',
+        reward: '每月根据使用频次给予商户4-6贡献点数，优质服务可获得"便民先锋"徽章',
+        description: '鼓励沿街商户、企事业单位开放内部厕所供市民使用，解决市民如厕难题。通过APP标注位置，方便市民查找，提升城市便民服务水平。',
+        participation: '商户申请：在APP中申请成为共享厕所点，上传厕所照片和开放时间\n平台审核：工作人员实地核查，确保卫生标准和安全性\n市民使用：通过APP查找附近的共享厕所，导航前往使用'
+      },
+      {
+        title: '"邻里互助"温暖行动',
+        icon: '🤝',
+        reward: '每次互助行为获得2-4贡献点数，长期参与可获得"邻里之星"徽章',
+        description: '建立邻里互助网络，年轻人帮助老年人购买生活用品、使用智能设备，老年人分享生活经验、照看小孩等，促进代际和谐，构建温暖社区。',
+        participation: '发布需求：老年人可发布购物、维修、陪伴等需求\n响应帮助：年轻人主动响应，提供相应帮助服务\n经验分享：老年人分享烹饪、手工、育儿等生活智慧\n技能交换：不同年龄段居民互相学习，共同成长'
+      }
+    ];
+    
+    const taskData = tasksData[taskId];
+    if (!taskData) return;
+    
+    // 填充任务详情页内容
+    document.getElementById('taskDetailTitle').textContent = taskData.title;
+    document.getElementById('taskDetailIcon').textContent = taskData.icon;
+    document.getElementById('taskDetailReward').textContent = taskData.reward;
+    document.getElementById('taskDetailDescription').textContent = taskData.description;
+    document.getElementById('taskDetailParticipation').innerHTML = taskData.participation.split('\n').map(line => `<p>${line}</p>`).join('');
+    
+    // 显示任务详情页
+    const taskDetailPage = document.getElementById('taskDetail');
+    taskDetailPage.style.display = 'block';
+    
+    // 滚动到顶部
+    taskDetailPage.scrollTop = 0;
+    
+    // 隐藏主内容
+    document.querySelector('.app-container').style.display = 'none';
+  }
+
+  closeTaskDetail() {
+    // 隐藏任务详情页
+    document.getElementById('taskDetail').style.display = 'none';
+    
+    // 显示主内容
+    document.querySelector('.app-container').style.display = 'block';
+  }
+
+  // 温暖之星互动功能
+  followWarmStar() {
+    this.showToast('已关注该温暖之星！');
+  }
+
+  shareWarmStar() {
+    this.showToast('正在分享温暖之星...');
+  }
+
+  sendMessage() {
+    this.showToast('正在打开私信...');
   }
 }
 

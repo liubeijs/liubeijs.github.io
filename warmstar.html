@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="城市温暖之星详情 - 温暖浏阳">
+    <meta name="keywords" content="温暖之星,浏阳,志愿者,公益">
+    <title>城市温暖之星 - 温暖浏阳</title>
+    
+    <!-- PWA支持 -->
+    <meta name="theme-color" content="#E55C27">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="温暖浏阳">
+    
+    <!-- 字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="warmstar.css">
+</head>
+<body>
+    <div class="warm-star-container">
+        <!-- 头部导航 -->
+        <header class="warm-star-header">
+            <button class="back-btn" id="backBtn">
+                <span class="back-icon">←</span>
+                <span class="back-text">返回</span>
+            </button>
+            <h1 class="page-title">城市温暖之星</h1>
+            <div class="header-placeholder"></div>
+        </header>
+
+        <!-- 个人信息卡片 -->
+        <section class="warm-star-profile">
+            <div class="profile-background">
+                <div class="profile-gradient"></div>
+            </div>
+            <div class="profile-content">
+                <div class="profile-avatar-container">
+                    <img id="warmStarAvatar" src="sources/avator1.png" alt="温暖之星头像" class="profile-avatar">
+                    <div class="rank-badge">
+                        <span id="warmStarRank">第1名</span>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <h2 id="warmStarName" class="profile-name">热心市民王大妈</h2>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="warmStarTotalContribution">156</div>
+                            <div class="stat-label">总贡献点数</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <div class="stat-text" id="warmStarJoinDate">2023年3月</div>
+                            <div class="stat-label">加入时间</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 徽章墙 -->
+        <section class="badges-section">
+            <h3 class="section-title">🏆 荣誉徽章</h3>
+            <div id="warmStarBadges" class="badges-container">
+                <!-- 徽章将通过JavaScript动态加载 -->
+            </div>
+        </section>
+
+        <!-- 个人简介 -->
+        <section class="bio-section">
+            <h3 class="section-title">📝 个人简介</h3>
+            <div class="bio-content">
+                <p id="warmStarBio" class="bio-text">
+                    <!-- 个人简介将通过JavaScript动态加载 -->
+                </p>
+            </div>
+        </section>
+
+        <!-- 近期活动 -->
+        <section class="activities-section">
+            <h3 class="section-title">📊 近期活动</h3>
+            <div id="warmStarActivities" class="activities-container">
+                <!-- 活动列表将通过JavaScript动态加载 -->
+            </div>
+        </section>
+
+        <!-- 互动按钮 -->
+        <section class="action-buttons">
+            <button class="action-btn primary-btn" id="followBtn">
+                <span class="btn-icon">👥</span>
+                <span class="btn-text">关注TA</span>
+            </button>
+            <button class="action-btn secondary-btn" id="shareBtn">
+                <span class="btn-icon">📤</span>
+                <span class="btn-text">分享</span>
+            </button>
+            <button class="action-btn secondary-btn" id="messageBtn">
+                <span class="btn-icon">💬</span>
+                <span class="btn-text">私信</span>
+            </button>
+        </section>
+
+        <!-- 底部安全区域 -->
+        <div class="bottom-safe-area"></div>
+    </div>
+
+    <!-- 提示消息 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- JavaScript文件 -->
+    <script src="warmstar.js"></script>
+</body>
+</html>
