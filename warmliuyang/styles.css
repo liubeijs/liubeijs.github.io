@@ -1824,7 +1824,7 @@ body {
 .profile-name {
   font-size: 24px;
   font-weight: 700;
-  color: var(--ios-label);
+  color: white;
   margin-bottom: 12px;
 }
 
