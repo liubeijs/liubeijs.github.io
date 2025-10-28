@@ -583,6 +583,22 @@ class WarmLiuyangApp {
         statusColor: 'danger',
         category: 'parking'
       },
+      {
+        name: '小丽家共享车位',
+        status: '剩余车位 2',
+        distance: '距离 0.3km',
+        tags: ['共享', '便宜', '居民提供'],
+        statusColor: 'success',
+        category: 'parking'
+      },
+      {
+        name: '许记海鲜共享车位',
+        status: '剩余车位 8',
+        distance: '距离 0.6km',
+        tags: ['共享', '商户提供', '优惠'],
+        statusColor: 'success',
+        category: 'parking'
+      },
       // 找厕所
       {
         name: '市民广场公厕',
@@ -597,6 +613,22 @@ class WarmLiuyangApp {
         status: '开放中',
         distance: '距离 0.6km',
         tags: ['24小时', '清洁'],
+        statusColor: 'success',
+        category: 'toilet'
+      },
+      {
+        name: '社区共享厕所',
+        status: '开放中',
+        distance: '距离 0.2km',
+        tags: ['共享', '免费', '清洁'],
+        statusColor: 'success',
+        category: 'toilet'
+      },
+      {
+        name: 'KFC共享厕所',
+        status: '开放中',
+        distance: '距离 0.4km',
+        tags: ['共享', '商户提供', '便民'],
         statusColor: 'success',
         category: 'toilet'
       },
@@ -622,6 +654,30 @@ class WarmLiuyangApp {
         status: '营业中',
         distance: '距离 0.9km',
         tags: ['手工制作', '百年老店'],
+        statusColor: 'success',
+        category: 'food'
+      },
+      {
+        name: '温暖餐厅·添双筷子',
+        status: '营业中',
+        distance: '距离 0.5km',
+        tags: ['公益餐', '免费', '温暖行动'],
+        statusColor: 'success',
+        category: 'food'
+      },
+      {
+        name: '关口社区食堂·添双筷子',
+        status: '营业中',
+        distance: '距离 0.7km',
+        tags: ['公益餐', '社区服务', '爱心'],
+        statusColor: 'success',
+        category: 'food'
+      },
+      {
+        name: '老字号·添双筷子',
+        status: '营业中',
+        distance: '距离 0.8km',
+        tags: ['公益餐', '传统美食', '温情'],
         statusColor: 'success',
         category: 'food'
       },
