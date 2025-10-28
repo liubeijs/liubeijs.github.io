@@ -34,6 +34,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 强制白天模式 */
+  color-scheme: light;
 }
 
 /* 容器样式 */
@@ -375,19 +377,8 @@ body {
   }
 }
 
-/* 深色模式支持 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ios-background: #000000;
-    --ios-secondary-background: #1C1C1E;
-    --ios-tertiary-background: #2C2C2E;
-    --ios-quaternary-background: #3A3A3C;
-    --ios-label: #FFFFFF;
-    --ios-secondary-label: #EBEBF5;
-    --ios-tertiary-label: #EBEBF599;
-    --ios-separator: #38383A;
-  }
-}
+/* 强制白天模式 - 移除深色模式支持 */
+/* 确保始终使用白天模式的颜色变量 */
 
 /* 动画效果 */
 .concept-card,
