@@ -1,0 +1,28 @@
+:root {
+  /* 品牌与主题色 */
+  --warm-cinnabar: #E55C27;
+  --bamboo-green: #3DA342;
+  --misty-grey: #F2F2F7;
+  --night-ink: #1D1D1F;
+  --white: #FFFFFF;
+
+  /* iOS 颜色系统（浅色主题） */
+  --ios-background: #F2F2F7;
+  --ios-secondary-background: #FFFFFF;
+  --ios-tertiary-background: #F2F2F7;
+  --ios-quaternary-background: #E5E5EA;
+  --ios-label: #000000;
+  --ios-secondary-label: rgba(60, 60, 67, 0.6);
+  --ios-tertiary-label: rgba(60, 60, 67, 0.3);
+  --ios-separator: rgba(60, 60, 67, 0.29);
+
+  /* iOS 系统色 */
+  --ios-system-blue: #007AFF;
+  --ios-system-red: #FF3B30;
+  --ios-system-green: #34C759;
+
+  /* 状态色 */
+  --warning-yellow: #FF9F0A;
+  --danger-red: #FF3B30;
+  --success-green: #30D158;
+}
