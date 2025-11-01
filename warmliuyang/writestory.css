@@ -1,54 +1,3 @@
-/* iOS 17 颜色系统 */
-:root {
-  /* 主色调 */
-  --warm-cinnabar: #E55C27;
-  --bamboo-green: #7CB342;
-  --golden-yellow: #FFD54F;
-  
-  /* iOS 17 系统颜色 */
-  --ios-background: #FFFFFF;
-  --ios-secondary-background: #F2F2F7;
-  --ios-tertiary-background: #FFFFFF;
-  --ios-label: #000000;
-  --ios-secondary-label: #3C3C43;
-  --ios-tertiary-label: #3C3C4399;
-  --ios-separator: #3C3C4349;
-  --ios-system-blue: #007AFF;
-  --ios-system-red: #FF3B30;
-  --ios-system-green: #34C759;
-}
-
-/* 暗色模式 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ios-background: #000000;
-    --ios-secondary-background: #1C1C1E;
-    --ios-tertiary-background: #2C2C2E;
-    --ios-label: #FFFFFF;
-    --ios-secondary-label: #EBEBF5;
-    --ios-tertiary-label: #EBEBF599;
-    --ios-separator: #54545899;
-  }
-}
-
-/* 基础样式重置 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--ios-background);
-  color: var(--ios-label);
-  line-height: 1.6;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100vh;
-  overflow-x: hidden;
-}
 
 .story-page {
   width: 100%;
@@ -73,10 +22,8 @@ body {
 }
 
 .back-btn {
-  background: none;
-  border: none;
+  /* 仅保留该页面的差异化：颜色、圆角与内边距 */
   color: var(--ios-system-blue);
-  cursor: pointer;
   padding: 8px;
   border-radius: 8px;
   transition: background-color 0.2s ease;

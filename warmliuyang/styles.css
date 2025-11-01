@@ -1,26 +1,5 @@
 /* 温暖浏阳App样式文件 */
 
-/* 设计令牌 - iOS 17 颜色系统 */
-:root {
-  --warm-cinnabar: #E55C27;
-  --bamboo-green: #3DA342;
-  --misty-grey: #F2F2F7;
-  --night-ink: #1D1D1F;
-  --white: #FFFFFF;
-  --warning-yellow: #FF9F0A;
-  --danger-red: #FF3B30;
-  --success-green: #30D158;
-  --ios-separator: rgba(60, 60, 67, 0.29);
-  --ios-background: #F2F2F7;
-  --ios-secondary-background: #FFFFFF;
-  --ios-tertiary-background: #F2F2F7;
-  --ios-label: #000000;
-  --ios-secondary-label: rgba(60, 60, 67, 0.6);
-  --ios-tertiary-label: rgba(60, 60, 67, 0.3);
-}
-
-
-
 /* 故事详情页面样式 */
 .story-detail-page {
   position: fixed;
@@ -46,27 +25,7 @@
   z-index: 10;
 }
 
-.back-btn {
-  background: none;
-  border: none;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--warm-cinnabar);
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 8px 0;
-}
-
-.back-btn:hover {
-  opacity: 0.7;
-}
-
-.back-icon {
-  font-size: 18px;
-  font-weight: bold;
-}
+/* 使用 common.css 中的 .back-btn/.back-icon 基础样式，避免重复定义 */
 
 .story-detail-title {
   flex: 1;
@@ -1866,9 +1825,7 @@ body {
 
 /* 内容区块通用样式 */
 .section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--ios-label);
+  /* 仅保留该页面所需的额外间距，基础排版来自 common.css */
   margin-bottom: 12px;
   padding: 0 4px;
 }

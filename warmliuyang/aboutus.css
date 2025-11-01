@@ -1,42 +1,4 @@
 /* CSS变量定义 */
-:root {
-  /* 主色调 */
-  --warm-cinnabar: #E55C27;
-  --bamboo-green: #3DA342;
-  --white: #FFFFFF;
-  
-  /* iOS系统色彩 */
-  --ios-background: #F2F2F7;
-  --ios-secondary-background: #FFFFFF;
-  --ios-tertiary-background: #F2F2F7;
-  --ios-quaternary-background: #E5E5EA;
-  --ios-label: #000000;
-  --ios-secondary-label: #3C3C43;
-  --ios-tertiary-label: #3C3C4399;
-  --ios-separator: #C6C6C8;
-  
-  /* 渐变色 */
-  --gradient-warm: linear-gradient(135deg, var(--warm-cinnabar), #FF7043);
-  --gradient-cool: linear-gradient(135deg, var(--bamboo-green), #66BB6A);
-}
-
-/* 基础样式重置 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
-  background: var(--ios-background);
-  color: var(--ios-label);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  /* 强制白天模式 */
-  color-scheme: light;
-}
 
 /* 容器样式 */
 .aboutus-container {
@@ -59,28 +21,7 @@ body {
   z-index: 100;
 }
 
-.back-btn {
-  background: none;
-  border: none;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--warm-cinnabar);
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 8px 0;
-  transition: opacity 0.2s ease;
-}
-
-.back-btn:hover {
-  opacity: 0.7;
-}
-
-.back-icon {
-  font-size: 18px;
-  font-weight: bold;
-}
+/* 使用 common.css 中的 .back-btn/.back-icon 基础样式 */
 
 .aboutus-title {
   font-size: 17px;
@@ -158,9 +99,8 @@ body {
 }
 
 .section-title {
+  /* 放大页面的区块标题字号，其他排版属性由 common.css 提供 */
   font-size: 20px;
-  font-weight: 600;
-  color: var(--ios-label);
 }
 
 /* 开发单位区域 */

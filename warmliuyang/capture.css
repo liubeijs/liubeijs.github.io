@@ -1,43 +1,5 @@
 /* 随手拍页面专用样式 */
 
-/* 基础样式重置 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* 设计令牌 - iOS 17 颜色系统 */
-:root {
-    --warm-cinnabar: #E55C27;
-    --bamboo-green: #3DA342;
-    --misty-grey: #F2F2F7;
-    --night-ink: #1D1D1F;
-    --white: #FFFFFF;
-    --warning-yellow: #FF9F0A;
-    --danger-red: #FF3B30;
-    --success-green: #30D158;
-    --ios-separator: rgba(60, 60, 67, 0.29);
-    --ios-background: #F2F2F7;
-    --ios-secondary-background: #FFFFFF;
-    --ios-tertiary-background: #F2F2F7;
-    --ios-label: #000000;
-    --ios-secondary-label: rgba(60, 60, 67, 0.6);
-    --ios-tertiary-label: rgba(60, 60, 67, 0.3);
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: var(--ios-background);
-    color: var(--ios-label);
-    line-height: 1.5;
-    overflow-x: hidden;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-}
-
 /* 页面布局 */
 .capture-page {
     min-height: 100vh;
@@ -122,9 +84,8 @@ body {
 }
 
 .section-title {
+    /* 与 common.css 保持一致的字重/颜色交由通用样式，保留本页定制的字号与布局 */
     font-size: 17px;
-    font-weight: 600;
-    color: #1D1D1F;
     margin-bottom: 20px;
     display: flex;
     align-items: center;
