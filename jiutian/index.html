@@ -53,6 +53,11 @@
             .card-hover:hover {
                 transform: translateY(-5px);
             }
+            .scene-card-selected {
+                border-color: #0ea5e9;
+                box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
+                background-color: rgba(15, 23, 42, 0.9);
+            }
             .camera-view {
                 background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             }
@@ -364,7 +369,7 @@
                                 <!-- 锦城大道场景卡片 -->
                                 <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="jincheng">
                                     <div class="relative">
-                                        <img src="https://p26-doubao-search-sign.byteimg.com/labis/2a4c3fd8a1ddfeead2e161befb49dc25~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&amp;x-expires=1787158028&amp;x-signature=3LYei1%2Bsoj1a8XFw86EYsvLa0H8%3D" alt="锦城大道" class="w-full h-40 object-cover">
+                                        <img src="scene/scene_01.jpeg" alt="锦城大道" class="w-full h-40 object-cover">
                                         <div class="absolute top-2 right-2 bg-dark/70 text-xs px-2 py-1 rounded">实时</div>
                                     </div>
                                     <div class="p-4">
@@ -376,7 +381,7 @@
                                 <!-- 天空剧院场景卡片 -->
                                 <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="sky-theater">
                                     <div class="relative">
-                                        <img src="https://p3-doubao-search-sign.byteimg.com/labis/7c102e593573195178f1771f3a75735d~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&amp;x-expires=1787158028&amp;x-signature=Yv07G5u4117%2F%2B3vZ2cW3379v1bI%3D" alt="天空剧院" class="w-full h-40 object-cover">
+                                        <img src="scene/scene_02.jpeg" alt="天空剧院" class="w-full h-40 object-cover">
                                         <div class="absolute top-2 right-2 bg-dark/70 text-xs px-2 py-1 rounded">实时</div>
                                     </div>
                                     <div class="p-4">
@@ -616,8 +621,25 @@
             ]
         };
 
+        const staffAvatars = [];
+        for (let i = 1; i <= 20; i++) {
+            staffAvatars.push(`staff/avatar (${i}).png`);
+        }
+
+        function getRandomAvatar() {
+            const index = Math.floor(Math.random() * staffAvatars.length);
+            return staffAvatars[index];
+        }
+
+        Object.values(personnelData).forEach(team => {
+            team.forEach(person => {
+                person.avatar = getRandomAvatar();
+            });
+        });
+
         // 当前选中的队员
         let selectedPersonnel = null;
+        let selectedSceneCard = null;
 
         // DOM 元素
         const moduleTabs = document.querySelectorAll('#module-tabs button');
@@ -687,6 +709,10 @@
                 });
                 tab.classList.remove('border-transparent', 'hover:text-gray-300', 'hover:border-gray-300');
                 tab.classList.add('border-primary', 'text-primary');
+                if (selectedSceneCard) {
+                    selectedSceneCard.classList.remove('scene-card-selected');
+                    selectedSceneCard = null;
+                }
 
                 // 显示/隐藏内容
                 streetContents.forEach(content => {
@@ -790,9 +816,14 @@
         // 场景卡片点击事件
         document.querySelectorAll('.scene-card').forEach(card => {
             card.addEventListener('click', () => {
+                if (selectedSceneCard) {
+                    selectedSceneCard.classList.remove('scene-card-selected');
+                }
+                card.classList.add('scene-card-selected');
+                selectedSceneCard = card;
+
                 const sceneId = card.dataset.scene;
                 console.log(`切换到场景: ${sceneId}`);
-                // 这里可以添加实际的场景切换逻辑
             });
         });
     </script>
