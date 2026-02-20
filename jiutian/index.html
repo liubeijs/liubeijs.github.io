@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九天AR鹰眼控制台</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9',
+                        secondary: '#0284c7',
+                        dark: '#0f172a',
+                        darker: '#020617',
+                        light: '#e2e8f0',
+                        accent: '#38bdf8'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow': '0 0 15px rgba(56, 189, 248, 0.5)',
+                        'card': '0 4px 20px rgba(0, 0, 0, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-glow {
+                text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+            }
+            .border-glow {
+                box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+            }
+            .bg-grid {
+                background-image: 
+                    linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+                background-size: 20px 20px;
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+            }
+            .camera-view {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            }
+            .status-pulse {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+        }
+    </style>
+</head>
+<body class="bg-darker text-light min-h-screen bg-grid overflow-hidden">
+    <div class="container mx-auto px-4 py-4 h-screen flex flex-col">
+        <!-- 控制台标题 -->
+        <header class="mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mr-3 border-glow">
+                        <i class="fa fa-eye text-xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-glow">九天AR鹰眼控制台</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-2 status-pulse"></span>
+                        <span class="text-sm text-green-400">系统运行正常</span>
+                    </div>
+                    <div class="text-sm text-gray-400">
+                        <span id="current-time">00:00:00</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <div class="flex-1 flex justify-center items-start overflow-auto">
+            <div class="w-full max-w-7xl">
+                <div class="bg-dark rounded-lg shadow-card p-4">
+                    <!-- 模块切换标签 -->
+                    <div class="mb-6 border-b border-gray-700">
+                        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="module-tabs" role="tablist">
+                            <li class="mr-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 border-primary text-primary rounded-t-lg" id="scenes-tab" data-module="scenes" type="button" role="tab" aria-selected="true">
+                                    <i class="fa fa-th-large mr-2"></i>场景选择
+                                </button>
+                            </li>
+                            <li class="mr-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 border-transparent hover:text-gray-300 hover:border-gray-300 rounded-t-lg" id="personnel-tab" data-module="personnel" type="button" role="tab">
+                                    <i class="fa fa-users mr-2"></i>执法人员
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 场景选择模块 -->
+                    <div id="scenes-module">
+                        <!-- 街道分类标签 -->
+                        <div class="mb-6 border-b border-gray-700">
+                            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="street-tabs" role="tablist">
+                                <li class="mr-2" role="presentation">
+                                    <button class="inline-block p-4 border-b-2 border-transparent hover:text-gray-300 hover:border-gray-300 rounded-t-lg" id="huai-chuan-tab" data-street="huai-chuan" type="button" role="tab">淮川街道</button>
+                                </li>
+                                <li class="mr-2" role="presentation">
+                                    <button class="inline-block p-4 border-b-2 border-transparent hover:text-gray-300 hover:border-gray-300 rounded-t-lg" id="ji-li-tab" data-street="ji-li" type="button" role="tab">集里街道</button>
+                                </li>
+                                <li class="mr-2" role="presentation">
+                                    <button class="inline-block p-4 border-b-2 border-transparent hover:text-gray-300 hover:border-gray-300 rounded-t-lg" id="he-hua-tab" data-street="he-hua" type="button" role="tab">荷花街道</button>
+                                </li>
+                                <li class="mr-2" role="presentation">
+                                    <button class="inline-block p-4 border-b-2 border-primary text-primary rounded-t-lg" id="guan-kou-tab" data-street="guan-kou" type="button" role="tab" aria-selected="true">关口街道</button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 场景卡片容器 -->
+                        <div class="street-content" id="huai-chuan-content" style="display: none;">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <!-- 淮川街道场景卡片 -->
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="huai-chuan-1">
+                                    <div class="relative">
+                                        <img src="https://p26-doubao-search-sign.byteimg.com/labis/2a4c3fd8a1ddfeead2e161befb49dc25~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&amp;x-expires=1787158028&amp;x-signature=3LYei1%2Bsoj1a8XFw86EYsvLa0H8%3D" alt="淮川场景1" class="w-full h-40 object-cover">
+                                        <div class="absolute top-2 right-2 bg-dark/70 text-xs px-2 py-1 rounded">实时</div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="font-semibold mb-1 truncate">淮川场景1</h3>
+                                        <p class="text-xs text-gray-400">设备状态: 在线</p>
+                                    </div>
+                                </div>
+                                <!-- 更多淮川街道场景卡片 -->
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="huai-chuan-2">
+                                    <div class="relative">
+                                        <img src="https://p26-doubao-search-sign.byteimg.com/labis/2a4c3fd8a1ddfeead2e161befb49dc25~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&amp;x-expires=1787158028&amp;x-signature=3LYei1%2Bsoj1a8XFw86EYsvLa0H8%3D" alt="淮川场景2" class="w-full h-40 object-cover">
+                                        <div class="absolute top-2 right-2 bg-dark/70 text-xs px-2 py-1 rounded">实时</div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="font-semibold mb-1 truncate">淮川场景2</h3>
+                                        <p class="text-xs text-gray-400">设备状态: 在线</p>
+                                    </div>
+                                </div>
+                                <!-- 占位卡片 -->
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="huai-chuan-3">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="huai-chuan-4">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="huai-chuan-5">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="huai-chuan-6">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="huai-chuan-7">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="huai-chuan-8">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="street-content" id="ji-li-content" style="display: none;">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <!-- 集里街道场景卡片 -->
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="ji-li-1">
+                                    <div class="relative">
+                                        <img src="https://p26-doubao-search-sign.byteimg.com/labis/2a4c3fd8a1ddfeead2e161befb49dc25~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&amp;x-expires=1787158028&amp;x-signature=3LYei1%2Bsoj1a8XFw86EYsvLa0H8%3D" alt="集里场景1" class="w-full h-40 object-cover">
+                                        <div class="absolute top-2 right-2 bg-dark/70 text-xs px-2 py-1 rounded">实时</div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="font-semibold mb-1 truncate">集里场景1</h3>
+                                        <p class="text-xs text-gray-400">设备状态: 在线</p>
+                                    </div>
+                                </div>
+                                <!-- 占位卡片 -->
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="ji-li-2">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="ji-li-3">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="ji-li-4">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="ji-li-5">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="ji-li-6">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="ji-li-7">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="ji-li-8">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="street-content" id="he-hua-content" style="display: none;">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <!-- 荷花街道场景卡片 -->
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="he-hua-1">
+                                    <div class="relative">
+                                        <img src="https://p26-doubao-search-sign.byteimg.com/labis/2a4c3fd8a1ddfeead2e161befb49dc25~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&amp;x-expires=1787158028&amp;x-signature=3LYei1%2Bsoj1a8XFw86EYsvLa0H8%3D" alt="荷花场景1" class="w-full h-40 object-cover">
+                                        <div class="absolute top-2 right-2 bg-dark/70 text-xs px-2 py-1 rounded">实时</div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="font-semibold mb-1 truncate">荷花场景1</h3>
+                                        <p class="text-xs text-gray-400">设备状态: 在线</p>
+                                    </div>
+                                </div>
+                                <!-- 占位卡片 -->
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="he-hua-2">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="he-hua-3">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="he-hua-4">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="he-hua-5">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="he-hua-6">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="he-hua-7">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="he-hua-8">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="street-content" id="guan-kou-content">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <!-- 锦城大道场景卡片 -->
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="jincheng">
+                                    <div class="relative">
+                                        <img src="https://p26-doubao-search-sign.byteimg.com/labis/2a4c3fd8a1ddfeead2e161befb49dc25~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&amp;x-expires=1787158028&amp;x-signature=3LYei1%2Bsoj1a8XFw86EYsvLa0H8%3D" alt="锦城大道" class="w-full h-40 object-cover">
+                                        <div class="absolute top-2 right-2 bg-dark/70 text-xs px-2 py-1 rounded">实时</div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="font-semibold mb-1 truncate">锦城大道</h3>
+                                        <p class="text-xs text-gray-400">设备状态: 在线</p>
+                                    </div>
+                                </div>
+
+                                <!-- 天空剧院场景卡片 -->
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="sky-theater">
+                                    <div class="relative">
+                                        <img src="https://p3-doubao-search-sign.byteimg.com/labis/7c102e593573195178f1771f3a75735d~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&amp;x-expires=1787158028&amp;x-signature=Yv07G5u4117%2F%2B3vZ2cW3379v1bI%3D" alt="天空剧院" class="w-full h-40 object-cover">
+                                        <div class="absolute top-2 right-2 bg-dark/70 text-xs px-2 py-1 rounded">实时</div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="font-semibold mb-1 truncate">天空剧院</h3>
+                                        <p class="text-xs text-gray-400">设备状态: 在线</p>
+                                    </div>
+                                </div>
+
+                                <!-- 占位卡片 -->
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="guan-kou-3">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="guan-kou-4">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="guan-kou-5">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="guan-kou-6">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="guan-kou-7">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="guan-kou-8">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fa fa-plus-circle text-3xl text-gray-600 mb-2"></i>
+                                            <p class="text-gray-500">场景占位</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 执法人员模块 -->
+                    <div id="personnel-module" class="hidden">
+                        <!-- 中队选择下拉框 -->
+                        <div class="mb-6">
+                            <label for="team-select" class="block text-sm font-medium text-gray-400 mb-2">选择中队</label>
+                            <select id="team-select" class="bg-dark border border-gray-700 text-light rounded-lg block w-full p-2.5 focus:outline-none focus:border-primary">
+                                <option value="huai-chuan">淮川中队</option>
+                                <option value="ji-li">集里中队</option>
+                                <option value="he-hua">荷花中队</option>
+                                <option value="guan-kou">关口中队</option>
+                                <option value="dong-yang">洞阳中队</option>
+                                <option value="economic">经开区中队</option>
+                                <option value="city">市容中队</option>
+                                <option value="construction-1">建设执法一中队</option>
+                                <option value="construction-2">建设执法二中队</option>
+                                <option value="demolition-1">拆违控违一中队</option>
+                                <option value="demolition-2">拆违控违二中队</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 队员列表 -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" id="personnel-list">
+                            <!-- 队员卡片将通过JS动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部版权信息 -->
+        <footer class="mt-4 text-center text-sm text-gray-500">
+            <p>© 2026 浏阳市城市管理和综合执法局 版权所有</p>
+        </footer>
+    </div>
+
+    <!-- 队员指令模态框 -->
+    <div id="command-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+        <div class="bg-dark rounded-lg shadow-lg max-w-md w-full mx-4">
+            <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-semibold" id="modal-title">队员指令</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-white">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center mb-6">
+                    <img id="modal-avatar" src="" alt="队员头像" class="w-16 h-16 rounded-full object-cover mr-4">
+                    <div>
+                        <h4 id="modal-name" class="text-lg font-medium"></h4>
+                        <p id="modal-team" class="text-sm text-gray-400"></p>
+                        <p id="modal-status" class="text-xs mt-1"></p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="command-btn bg-primary hover:bg-secondary text-white py-2 px-4 rounded-lg flex items-center justify-center" data-command="task">
+                        <i class="fa fa-check-circle mr-2"></i>执行任务
+                    </button>
+                    <button class="command-btn bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center" data-command="report">
+                        <i class="fa fa-file-text mr-2"></i>汇报情况
+                    </button>
+                    <button class="command-btn bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg flex items-center justify-center" data-command="stop">
+                        <i class="fa fa-stop-circle mr-2"></i>停止任务
+                    </button>
+                    <button class="command-btn bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg flex items-center justify-center" data-command="return">
+                        <i class="fa fa-arrow-left-circle mr-2"></i>立即返回
+                    </button>
+                    <button class="command-btn bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg flex items-center justify-center col-span-2" data-command="call">
+                        <i class="fa fa-phone mr-2"></i>语音通话
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 执法人员数据
+        const personnelData = {
+            'huai-chuan': [
+                { id: 1, name: '张三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 2, name: '李四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '副中队长' },
+                { id: 3, name: '王五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 4, name: '赵六', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 5, name: '钱七', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 6, name: '孙八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 7, name: '周九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 8, name: '吴十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 9, name: '郑十一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 10, name: '王十二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+            ],
+            'ji-li': [
+                { id: 11, name: '陈一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
+                { id: 12, name: '林二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '副中队长' },
+                { id: 13, name: '黄三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 14, name: '何四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 15, name: '罗五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 16, name: '马六', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 17, name: '牛七', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 18, name: '秦八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 19, name: '尤九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 20, name: '许十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+            ],
+            'he-hua': [
+                { id: 21, name: '杨一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
+                { id: 22, name: '朱二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '副中队长' },
+                { id: 23, name: '秦三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 24, name: '尤四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 25, name: '许五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 26, name: '何六六', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 27, name: '罗七七', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 28, name: '马八八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 29, name: '牛九九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 30, name: '秦十十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+            ],
+            'guan-kou': [
+                { id: 31, name: '赵一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
+                { id: 32, name: '钱二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '副中队长' },
+                { id: 33, name: '孙三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 34, name: '李四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 35, name: '周五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 36, name: '吴六六', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 37, name: '郑七七', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 38, name: '王八八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 39, name: '陈九九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 40, name: '林十十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+            ],
+            'dong-yang': [
+                { id: 41, name: '黄一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
+                { id: 42, name: '何二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '副中队长' },
+                { id: 43, name: '罗三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 44, name: '马四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 45, name: '牛五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+            ],
+            'economic': [
+                { id: 46, name: '秦一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
+                { id: 47, name: '尤二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '副中队长' },
+                { id: 48, name: '许三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 49, name: '何四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 50, name: '罗五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+            ],
+            'city': [
+                { id: 51, name: '马一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
+                { id: 52, name: '牛二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '副中队长' },
+                { id: 53, name: '秦三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 54, name: '尤四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 55, name: '许五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 56, name: '何六六', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 57, name: '罗七七', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+            ],
+            'construction-1': [
+                { id: 58, name: '杨一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
+                { id: 59, name: '朱二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '副中队长' },
+                { id: 60, name: '秦三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 61, name: '尤四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 62, name: '许五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+            ],
+            'construction-2': [
+                { id: 63, name: '赵一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
+                { id: 64, name: '钱二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '副中队长' },
+                { id: 65, name: '孙三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 66, name: '李四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 67, name: '周五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+            ],
+            'demolition-1': [
+                { id: 68, name: '吴一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
+                { id: 69, name: '郑二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '副中队长' },
+                { id: 70, name: '王三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 71, name: '陈四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 72, name: '林五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+            ],
+            'demolition-2': [
+                { id: 73, name: '黄一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
+                { id: 74, name: '何二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '副中队长' },
+                { id: 75, name: '罗三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 76, name: '马四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 77, name: '牛五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+            ]
+        };
+
+        // 当前选中的队员
+        let selectedPersonnel = null;
+
+        // DOM 元素
+        const moduleTabs = document.querySelectorAll('#module-tabs button');
+        const scenesModule = document.getElementById('scenes-module');
+        const personnelModule = document.getElementById('personnel-module');
+        const streetTabs = document.querySelectorAll('#street-tabs button');
+        const streetContents = document.querySelectorAll('.street-content');
+        const teamSelect = document.getElementById('team-select');
+        const personnelList = document.getElementById('personnel-list');
+        const commandModal = document.getElementById('command-modal');
+        const closeModal = document.getElementById('close-modal');
+        const modalAvatar = document.getElementById('modal-avatar');
+        const modalName = document.getElementById('modal-name');
+        const modalTeam = document.getElementById('modal-team');
+        const modalStatus = document.getElementById('modal-status');
+        const commandBtns = document.querySelectorAll('.command-btn');
+        const currentTimeEl = document.getElementById('current-time');
+
+        // 更新当前时间
+        function updateCurrentTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            currentTimeEl.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // 初始化时间
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+
+        // 模块切换
+        moduleTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetModule = tab.dataset.module;
+
+                // 更新标签样式
+                moduleTabs.forEach(t => {
+                    t.classList.remove('border-primary', 'text-primary');
+                    t.classList.add('border-transparent', 'hover:text-gray-300', 'hover:border-gray-300');
+                });
+                tab.classList.remove('border-transparent', 'hover:text-gray-300', 'hover:border-gray-300');
+                tab.classList.add('border-primary', 'text-primary');
+
+                // 显示/隐藏模块
+                if (targetModule === 'scenes') {
+                    scenesModule.classList.remove('hidden');
+                    personnelModule.classList.add('hidden');
+                } else {
+                    scenesModule.classList.add('hidden');
+                    personnelModule.classList.remove('hidden');
+                    // 加载执法人员数据
+                    loadPersonnel(teamSelect.value);
+                }
+            });
+        });
+
+        // 街道分类切换
+        streetTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetStreet = tab.dataset.street;
+
+                // 更新标签样式
+                streetTabs.forEach(t => {
+                    t.classList.remove('border-primary', 'text-primary');
+                    t.classList.add('border-transparent', 'hover:text-gray-300', 'hover:border-gray-300');
+                });
+                tab.classList.remove('border-transparent', 'hover:text-gray-300', 'hover:border-gray-300');
+                tab.classList.add('border-primary', 'text-primary');
+
+                // 显示/隐藏内容
+                streetContents.forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById(`${targetStreet}-content`).style.display = 'block';
+            });
+        });
+
+        // 加载执法人员数据
+        function loadPersonnel(teamId) {
+            const teamData = personnelData[teamId] || [];
+            personnelList.innerHTML = '';
+
+            teamData.forEach(person => {
+                const card = document.createElement('div');
+                card.className = 'personnel-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer p-4 text-center';
+                card.dataset.personnelId = person.id;
+                
+                const statusClass = person.status === 'online' ? 'bg-green-500' : person.status === 'busy' ? 'bg-yellow-500' : 'bg-gray-500';
+                const statusText = person.status === 'online' ? '在线' : person.status === 'busy' ? '忙碌' : '离线';
+
+                card.innerHTML = `
+                    <div class="relative inline-block">
+                        <img src="${person.avatar}" alt="${person.name}" class="w-16 h-16 rounded-full object-cover mx-auto mb-2">
+                        <span class="absolute bottom-2 right-2 w-3 h-3 ${statusClass} rounded-full border-2 border-dark"></span>
+                    </div>
+                    <h3 class="font-semibold text-sm mb-1">${person.name}</h3>
+                    <p class="text-xs text-gray-400">${person.position}</p>
+                `;
+
+                card.addEventListener('click', () => {
+                    openCommandModal(person, teamId);
+                });
+
+                personnelList.appendChild(card);
+            });
+        }
+
+        // 打开指令模态框
+        function openCommandModal(person, teamId) {
+            selectedPersonnel = person;
+            const teamName = teamSelect.options[teamSelect.selectedIndex].text;
+            
+            modalAvatar.src = person.avatar;
+            modalName.textContent = person.name;
+            modalTeam.textContent = teamName;
+            
+            const statusClass = person.status === 'online' ? 'text-green-400' : person.status === 'busy' ? 'text-yellow-400' : 'text-gray-400';
+            const statusText = person.status === 'online' ? '在线' : person.status === 'busy' ? '忙碌' : '离线';
+            modalStatus.innerHTML = `<span class="inline-block w-2 h-2 ${statusClass.replace('text-', 'bg-')} rounded-full mr-1"></span>${statusText}`;
+
+            commandModal.classList.remove('hidden');
+        }
+
+        // 关闭指令模态框
+        closeModal.addEventListener('click', () => {
+            commandModal.classList.add('hidden');
+        });
+
+        // 点击模态框外部关闭
+        commandModal.addEventListener('click', (e) => {
+            if (e.target === commandModal) {
+                commandModal.classList.add('hidden');
+            }
+        });
+
+        // 发送指令
+        commandBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const command = btn.dataset.command;
+                if (selectedPersonnel) {
+                    sendCommand(selectedPersonnel, command);
+                }
+            });
+        });
+
+        // 发送指令到队员
+        function sendCommand(personnel, command) {
+            // 这里可以添加实际的指令发送逻辑
+            console.log(`向 ${personnel.name} 发送指令: ${command}`);
+            
+            // 显示成功提示
+            const commandText = {
+                'task': '执行任务',
+                'report': '汇报情况',
+                'stop': '停止任务',
+                'return': '立即返回',
+                'call': '语音通话'
+            }[command];
+
+            alert(`已向 ${personnel.name} 发送"${commandText}"指令`);
+            commandModal.classList.add('hidden');
+        }
+
+        // 中队选择变化
+        teamSelect.addEventListener('change', () => {
+            loadPersonnel(teamSelect.value);
+        });
+
+        // 场景卡片点击事件
+        document.querySelectorAll('.scene-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const sceneId = card.dataset.scene;
+                console.log(`切换到场景: ${sceneId}`);
+                // 这里可以添加实际的场景切换逻辑
+            });
+        });
+    </script>
+</body>
+</html>
