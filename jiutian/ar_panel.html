@@ -1,0 +1,557 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九天AR鹰眼控制台</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9',
+                        secondary: '#0284c7',
+                        dark: '#0f172a',
+                        darker: '#020617',
+                        light: '#e2e8f0',
+                        accent: '#38bdf8'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow': '0 0 15px rgba(56, 189, 248, 0.5)',
+                        'card': '0 4px 20px rgba(0, 0, 0, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-glow {
+                text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+            }
+            .border-glow {
+                box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+            }
+            .bg-grid {
+                background-image: 
+                    linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+                background-size: 20px 20px;
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+            }
+            .camera-view {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            }
+            .status-pulse {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+        }
+    </style>
+</head>
+<body class="bg-darker text-light min-h-screen bg-grid overflow-hidden">
+    <div class="container mx-auto px-4 py-4 h-screen flex flex-col">
+        <!-- 控制台标题 -->
+        <header class="mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mr-3 border-glow">
+                        <i class="fa fa-eye text-xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-glow">九天AR鹰眼控制台</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-2 status-pulse"></span>
+                        <span class="text-sm text-green-400">系统运行正常</span>
+                    </div>
+                    <div class="text-sm text-gray-400">
+                        <span id="current-time">00:00:00</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <div class="flex-1 flex justify-center items-start overflow-auto">
+            <!-- 场景选择 -->
+            <div class="w-full max-w-7xl w-full">
+                <div class="bg-dark rounded-lg shadow-card p-4">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center">
+                        <i class="fa fa-th-large mr-2 text-primary"></i>
+                        场景选择
+                    </h2>
+                    
+                    <!-- 街道分类标签 -->
+                    <div class="mb-6 border-b border-gray-700">
+                        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="street-tabs" role="tablist">
+                            <li class="mr-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 border-transparent hover:text-gray-300 hover:border-gray-300 rounded-t-lg" id="huai-chuan-tab" data-street="huai-chuan" type="button" role="tab">淮川街道</button>
+                            </li>
+                            <li class="mr-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 border-transparent hover:text-gray-300 hover:border-gray-300 rounded-t-lg" id="ji-li-tab" data-street="ji-li" type="button" role="tab">集里街道</button>
+                            </li>
+                            <li class="mr-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 border-transparent hover:text-gray-300 hover:border-gray-300 rounded-t-lg" id="he-hua-tab" data-street="he-hua" type="button" role="tab">荷花街道</button>
+                            </li>
+                            <li class="mr-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 border-primary text-primary rounded-t-lg" id="guan-kou-tab" data-street="guan-kou" type="button" role="tab" aria-selected="true">关口街道</button>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 场景卡片容器 -->
+                    <div class="street-content" id="guan-kou-content">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- 锦城大道场景卡片 -->
+                        <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="jincheng">
+                            <div class="relative">
+                                <img src="https://p26-doubao-search-sign.byteimg.com/labis/2a4c3fd8a1ddfeead2e161befb49dc25~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&amp;x-expires=1787158028&amp;x-signature=3LYei1%2Bsoj1a8XFw86EYsvLa0H8%3D" alt="锦城大道" class="w-full h-40 object-cover">
+                                <div class="absolute top-2 right-2 bg-dark/70 text-xs px-2 py-1 rounded">
+                                    实时
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-semibold">锦城大道</h3>
+                                    <span class="text-xs bg-green-900/50 text-green-400 px-2 py-0.5 rounded-full">
+                                        <i class="fa fa-circle text-[8px] mr-1"></i>在线
+                                    </span>
+                                </div>
+                                <p class="text-xs text-gray-400 mb-3 line-clamp-2 h-10 overflow-hidden">城市主干道，交通流量大，视野开阔</p>
+                                <div class="flex justify-between text-xs text-gray-500">
+                                    <span>ID: SC-2023-001</span>
+                                    <span>更新: 刚刚</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 天空剧院场景卡片 -->
+                        <div class="scene-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer h-[240px]" data-scene="skytheater">
+                            <div class="relative">
+                                <img src="https://p11-doubao-search-sign.byteimg.com/labis/ba2f45c89ff977da5cacb54dcab3a1df~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&amp;x-expires=1787158028&amp;x-signature=rfV7WV6l%2FZKJNlcJt0Ic%2FqzCczY%3D" alt="天空剧院" class="w-full h-40 object-cover">
+                                <div class="absolute top-2 right-2 bg-dark/70 text-xs px-2 py-1 rounded">
+                                    实时
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-semibold">天空剧院</h3>
+                                    <span class="text-xs bg-green-900/50 text-green-400 px-2 py-0.5 rounded-full">
+                                        <i class="fa fa-circle text-[8px] mr-1"></i>在线
+                                    </span>
+                                </div>
+                                <p class="text-xs text-gray-400 mb-3 line-clamp-2 h-10 overflow-hidden">大型户外演出场地，夜间灯光效果佳</p>
+                                <div class="flex justify-between text-xs text-gray-500">
+                                    <span>ID: SC-2023-002</span>
+                                    <span>更新: 刚刚</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 占位场景卡片 3 -->
+                        <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                            <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-500">场景 3</h3>
+                            <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                        </div>
+                        
+                        <!-- 占位场景卡片 4 -->
+                        <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                            <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-500">场景 4</h3>
+                            <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                        </div>
+                        
+                        <!-- 占位场景卡片 5 -->
+                        <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                            <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-500">场景 5</h3>
+                            <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                        </div>
+                        
+                        <!-- 占位场景卡片 6 -->
+                        <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                            <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-500">场景 6</h3>
+                            <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                        </div>
+                        
+                        <!-- 占位场景卡片 7 -->
+                        <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                            <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-500">场景 7</h3>
+                            <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                        </div>
+                        
+                        <!-- 占位场景卡片 8 -->
+                        <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                            <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-500">场景 8</h3>
+                            <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 淮川街道场景 -->
+                    <div class="street-content hidden" id="huai-chuan-content">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- 淮川街道占位场景卡片 1-8 -->
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">淮川场景 1</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">淮川场景 2</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">淮川场景 3</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">淮川场景 4</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">淮川场景 5</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">淮川场景 6</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">淮川场景 7</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">淮川场景 8</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 集里街道场景 -->
+                    <div class="street-content hidden" id="ji-li-content">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- 集里街道占位场景卡片 1-8 -->
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">集里场景 1</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">集里场景 2</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">集里场景 3</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">集里场景 4</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">集里场景 5</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">集里场景 6</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">集里场景 7</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">集里场景 8</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 荷花街道场景 -->
+                    <div class="street-content hidden" id="he-hua-content">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- 荷花街道占位场景卡片 1-8 -->
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">荷花场景 1</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">荷花场景 2</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">荷花场景 3</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">荷花场景 4</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">荷花场景 5</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">荷花场景 6</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">荷花场景 7</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                            <div class="scene-card card-hover bg-dark/30 rounded-lg overflow-hidden border border-gray-800 flex flex-col items-center justify-center p-4 h-[240px]">
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                                    <i class="fa fa-plus text-gray-600 text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-500">荷花场景 8</h3>
+                                <p class="text-xs text-gray-600 mt-2 text-center">即将上线</p>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    
+
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部版权信息 -->
+        <footer class="mt-auto py-4 text-center text-xs text-gray-500">
+            <p>© 2026 浏阳市城市管理和综合执法局 版权所有</p>
+        </footer>
+    </div>
+
+    <script>
+        // 街道分类切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('#street-tabs button');
+            const contents = document.querySelectorAll('.street-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // 移除所有标签的选中状态
+                    tabs.forEach(t => {
+                        t.classList.remove('border-primary', 'text-primary');
+                        t.classList.add('border-transparent');
+                        t.setAttribute('aria-selected', 'false');
+                    });
+                    
+                    // 添加当前标签的选中状态
+                    tab.classList.add('border-primary', 'text-primary');
+                    tab.classList.remove('border-transparent');
+                    tab.setAttribute('aria-selected', 'true');
+                    
+                    // 隐藏所有内容
+                    contents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // 显示当前内容
+                    const streetId = tab.getAttribute('data-street');
+                    const currentContent = document.getElementById(`${streetId}-content`);
+                    if (currentContent) {
+                        currentContent.classList.remove('hidden');
+                        
+                        // 添加切换动画
+                        gsap.fromTo(currentContent, 
+                            { opacity: 0, y: 20 },
+                            { opacity: 1, y: 0, duration: 0.5 }
+                        );
+                    }
+                });
+            });
+        });
+        
+        // 场景数据
+        const scenes = {
+            jincheng: {
+                id: 'SC-2023-001',
+                name: '锦城大道',
+                description: '城市主干道，交通流量大，视野开阔',
+                image: 'https://p26-doubao-search-sign.byteimg.com/labis/2a4c3fd8a1ddfeead2e161befb49dc25~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1787158028&x-signature=3LYei1%2Bsoj1a8XFw86EYsvLa0H8%3D',
+                resolution: '1920×1080',
+                fps: '30 FPS',
+                latency: '42ms'
+            },
+            skytheater: {
+                id: 'SC-2023-002',
+                name: '天空剧院',
+                description: '大型户外演出场地，夜间灯光效果佳',
+                image: 'https://p11-doubao-search-sign.byteimg.com/labis/ba2f45c89ff977da5cacb54dcab3a1df~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1787158028&x-signature=rfV7WV6l%2FZKJNlcJt0Ic%2FqzCczY%3D',
+                resolution: '2K',
+                fps: '60 FPS',
+                latency: '38ms'
+            }
+        };
+
+        // 当前选中的场景
+        let currentScene = null;
+
+        // 更新当前时间
+        function updateCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // 初始化时间显示并每秒更新
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+
+        // 切换场景函数
+        function switchScene(sceneKey) {
+            const scene = scenes[sceneKey];
+            if (!scene) return;
+
+            // 更新当前场景
+            currentScene = sceneKey;
+
+            // 更新场景卡片选中状态
+            document.querySelectorAll('.scene-card').forEach(card => {
+                if (card.dataset.scene === sceneKey) {
+                    card.classList.add('border-primary', 'border-glow');
+                    
+                    // 显示切换成功提示
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 right-4 bg-green-900/80 text-green-200 px-4 py-2 rounded-lg z-50';
+                    notification.textContent = `已切换至: ${scene.name}`;
+                    document.body.appendChild(notification);
+                    
+                    // 3秒后移除提示
+                    setTimeout(() => {
+                        gsap.to(notification, {
+                            opacity: 0,
+                            y: -20,
+                            duration: 0.5,
+                            onComplete: () => notification.remove()
+                        });
+                    }, 3000);
+                } else {
+                    card.classList.remove('border-primary', 'border-glow');
+                }
+            });
+            
+            // 模拟摄像头切换操作
+            console.log(`切换摄像头至场景: ${scene.name} (${scene.id})`);
+        }
+
+        // 为场景卡片添加点击事件
+        document.querySelectorAll('.scene-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const sceneKey = card.dataset.scene;
+                switchScene(sceneKey);
+            });
+        });
+
+        // 全屏按钮点击事件已移除，因为不再需要全屏显示摄像头
+    </script>
+
+</body></html>
