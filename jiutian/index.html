@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>九天智能城管控制台</title>
+    <title>九天智能执法控制台</title>
     <!-- Tailwind CSS v3 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -98,7 +98,7 @@
                     <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mr-3 border-glow">
                         <i class="fa fa-eye text-xl"></i>
                     </div>
-                    <h1 class="text-3xl font-bold text-glow">九天智能城管控制台</h1>
+                    <h1 class="text-3xl font-bold text-glow">九天智能执法控制台</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="flex items-center">
@@ -127,6 +127,11 @@
                             <li class="mr-2" role="presentation">
                                 <button class="inline-block p-4 border-b-2 border-transparent hover:text-gray-300 hover:border-gray-300 rounded-t-lg" id="personnel-tab" data-module="personnel" type="button" role="tab">
                                     <i class="fa fa-users mr-2"></i>执法人员
+                                </button>
+                            </li>
+                            <li class="mr-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 border-transparent hover:text-gray-300 hover:border-gray-300 rounded-t-lg" id="records-tab" data-module="records" type="button" role="tab">
+                                    <i class="fa fa-file-text-o mr-2"></i>执法记录
                                 </button>
                             </li>
                         </ul>
@@ -474,9 +479,15 @@
                                             <option value="demolition-1">拆违控违一中队</option>
                                             <option value="demolition-2">拆违控违二中队</option>
                                         </select>
-                                        <div class="flex items-center space-x-2">
-                                            <input id="multi-select-toggle" type="checkbox" class="w-4 h-4 text-primary bg-dark border-gray-600 rounded focus:ring-primary">
-                                            <label for="multi-select-toggle" class="text-sm text-gray-300">多选模式</label>
+                                        <div class="flex items-center space-x-3">
+                                            <div class="flex items-center space-x-2">
+                                                <input id="multi-select-toggle" type="checkbox" class="w-4 h-4 text-primary bg-dark border-gray-600 rounded focus:ring-primary">
+                                                <label for="multi-select-toggle" class="text-sm text-gray-300">多选模式</label>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <input id="select-all-toggle" type="checkbox" class="w-4 h-4 text-primary bg-dark border-gray-600 rounded focus:ring-primary">
+                                                <label for="select-all-toggle" class="text-sm text-gray-300">全选</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -504,6 +515,48 @@
                         <!-- 队员列表 -->
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" id="personnel-list">
                             <!-- 队员卡片将通过JS动态生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 执法记录模块 -->
+                    <div id="records-module" class="hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-base font-semibold text-gray-100">执法记录</h3>
+                            <span class="text-xs text-gray-400">共 <span id="records-count">0</span> 条</span>
+                        </div>
+                        <div id="records-list-container">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="records-list">
+                                <!-- 执法记录卡片将通过JS动态生成 -->
+                            </div>
+                        </div>
+                        <div id="record-detail-container" class="hidden mt-2">
+                            <div class="flex items-center justify-between mb-3">
+                                <button id="record-detail-back" class="inline-flex items-center text-xs px-3 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-200">
+                                    <i class="fa fa-arrow-left mr-1"></i>
+                                    返回列表
+                                </button>
+                                <span id="record-detail-type" class="text-xs px-2 py-0.5 rounded-full"></span>
+                            </div>
+                            <div class="bg-dark/60 rounded-lg border border-gray-700 p-4 md:p-5 flex flex-col md:flex-row gap-4">
+                                <div class="w-full md:w-2/5 space-y-3">
+                                    <div id="record-detail-image-wrapper" class="w-full rounded-lg overflow-hidden bg-black/40 hidden">
+                                        <img id="record-detail-image" src="" alt="执法记录图片" class="w-full h-40 md:h-48 object-cover">
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <img id="record-detail-avatar" src="" alt="执法人员头像" class="w-12 h-12 rounded-full object-cover">
+                                        <div>
+                                            <div id="record-detail-officer" class="text-sm font-semibold text-gray-100"></div>
+                                            <div class="text-xs text-gray-400">执法人员</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex-1 space-y-2 text-sm">
+                                    <div id="record-detail-time" class="text-gray-300"></div>
+                                    <div id="record-detail-location" class="text-gray-300"></div>
+                                    <div id="record-detail-content" class="text-gray-100 leading-relaxed mt-1"></div>
+                                    <div id="record-detail-media" class="text-xs text-gray-400 mt-2"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -557,6 +610,261 @@
     </div>
 
     <script>
+        // 执法记录类型
+        const recordTypes = ['记录', '检查', '行政处罚', '奖励', '其它'];
+
+        function getRecordTypeClass(type) {
+            if (type === '记录') return 'bg-sky-700 text-sky-100';
+            if (type === '检查') return 'bg-amber-700 text-amber-100';
+            if (type === '行政处罚') return 'bg-red-700 text-red-100';
+            if (type === '奖励') return 'bg-emerald-700 text-emerald-100';
+            return 'bg-gray-700 text-gray-200';
+        }
+
+        const teamDisplayNames = {
+            'huai-chuan': '淮川中队',
+            'ji-li': '集里中队',
+            'he-hua': '荷花中队',
+            'guan-kou': '关口中队',
+            'dong-yang': '洞阳中队',
+            'economic': '经开区中队',
+            'city': '市容中队',
+            'construction-1': '建设执法一中队',
+            'construction-2': '建设执法二中队',
+            'demolition-1': '拆违控违一中队',
+            'demolition-2': '拆违控违二中队'
+        };
+
+        const enforcementRecords = [
+            {
+                id: 1,
+                officer: '张三',
+                time: '2026-02-20 09:15',
+                location: '淮川街道人民路口',
+                content: '对沿街占道经营摊位进行劝导，督促商户规范摆放。',
+                images: 1,
+                videos: 0,
+                type: '检查'
+            },
+            {
+                id: 2,
+                officer: '李四',
+                time: '2026-02-20 10:32',
+                location: '集里街道文明路',
+                content: '查处无证流动摊贩，依法暂扣相关工具并进行告知教育。',
+                images: 2,
+                videos: 1,
+                type: '行政处罚'
+            },
+            {
+                id: 3,
+                officer: '王五',
+                time: '2026-02-20 11:05',
+                location: '荷花街道荷花广场',
+                content: '配合园林部门清理绿化带乱堆乱放，恢复市容整洁。',
+                images: 1,
+                videos: 0,
+                type: '记录'
+            },
+            {
+                id: 4,
+                officer: '赵六',
+                time: '2026-02-20 13:20',
+                location: '关口街道关口大道',
+                content: '检查在建工地围挡设置情况，督促按标准完善文明施工标识。',
+                images: 3,
+                videos: 0,
+                type: '检查'
+            },
+            {
+                id: 5,
+                officer: '周强',
+                time: '2026-02-20 14:10',
+                location: '洞阳街道工业园路段',
+                content: '对货车乱倒建筑垃圾行为进行取证，责令当事人限期清理。',
+                images: 2,
+                videos: 1,
+                type: '行政处罚'
+            },
+            {
+                id: 6,
+                officer: '刘洋',
+                time: '2026-02-19 09:45',
+                location: '经开区中轴大道',
+                content: '巡查沿线店招店牌设置情况，发现一处破损招牌并通知整改。',
+                images: 1,
+                videos: 0,
+                type: '记录'
+            },
+            {
+                id: 7,
+                officer: '陈杰',
+                time: '2026-02-19 10:28',
+                location: '市容中队辖区府前路',
+                content: '对乱贴乱画“牛皮癣”广告开展联合清理行动。',
+                images: 4,
+                videos: 0,
+                type: '检查'
+            },
+            {
+                id: 8,
+                officer: '杨柳',
+                time: '2026-02-19 11:12',
+                location: '淮川街道步行街',
+                content: '发现一商户主动配合整改占道展示行为，予以表扬记录。',
+                images: 1,
+                videos: 0,
+                type: '奖励'
+            },
+            {
+                id: 9,
+                officer: '黄磊',
+                time: '2026-02-19 15:03',
+                location: '集里街道农贸市场周边',
+                content: '规范市场周边车辆停放秩序，清理占用消防通道的摊点。',
+                images: 2,
+                videos: 0,
+                type: '记录'
+            },
+            {
+                id: 10,
+                officer: '唐伟',
+                time: '2026-02-19 16:40',
+                location: '荷花街道学校路口',
+                content: '联合交警部门整治校门口早晚高峰乱停乱放现象。',
+                images: 3,
+                videos: 1,
+                type: '检查'
+            },
+            {
+                id: 11,
+                officer: '邹敏',
+                time: '2026-02-18 09:05',
+                location: '关口街道老城区巷道',
+                content: '处理居民举报露天烧烤油烟扰民问题，现场督促整改。',
+                images: 2,
+                videos: 1,
+                type: '行政处罚'
+            },
+            {
+                id: 12,
+                officer: '何青',
+                time: '2026-02-18 10:18',
+                location: '洞阳街道社区广场',
+                content: '检查广场临时活动搭建情况，提醒主办方注意安全与卫生。',
+                images: 1,
+                videos: 0,
+                type: '记录'
+            },
+            {
+                id: 13,
+                officer: '罗兰',
+                time: '2026-02-18 14:26',
+                location: '经开区物流园周边',
+                content: '整治占用人行道堆放货物行为，责令立即清理通道。',
+                images: 2,
+                videos: 0,
+                type: '行政处罚'
+            },
+            {
+                id: 14,
+                officer: '顾明',
+                time: '2026-02-18 15:55',
+                location: '市容中队辖区主干道',
+                content: '记录夜间照明设施巡查情况，发现两处路灯损坏已报修。',
+                images: 1,
+                videos: 0,
+                type: '记录'
+            },
+            {
+                id: 15,
+                officer: '邓林',
+                time: '2026-02-17 09:20',
+                location: '淮川街道老街片区',
+                content: '开展老旧小区环境综合整治回访，居民满意度较高。',
+                images: 3,
+                videos: 0,
+                type: '奖励'
+            },
+            {
+                id: 16,
+                officer: '贺军',
+                time: '2026-02-17 10:47',
+                location: '集里街道主干道',
+                content: '查处占用非机动车道设置广告牌行为，依法拆除。',
+                images: 2,
+                videos: 1,
+                type: '行政处罚'
+            },
+            {
+                id: 17,
+                officer: '熊涛',
+                time: '2026-02-17 13:35',
+                location: '荷花街道滨河路',
+                content: '对沿河违规搭建临时棚亭进行登记，拟联合多部门处理。',
+                images: 2,
+                videos: 0,
+                type: '检查'
+            },
+            {
+                id: 18,
+                officer: '于锋',
+                time: '2026-02-17 15:02',
+                location: '关口街道农贸市场内',
+                content: '检查市场内部卫生保洁和垃圾分类情况，提出整改建议。',
+                images: 1,
+                videos: 0,
+                type: '记录'
+            },
+            {
+                id: 19,
+                officer: '石磊',
+                time: '2026-02-16 09:58',
+                location: '洞阳街道主街',
+                content: '举报人反映店外音箱噪声扰民，已现场责令降低音量。',
+                images: 1,
+                videos: 1,
+                type: '行政处罚'
+            },
+            {
+                id: 20,
+                officer: '蒋岚',
+                time: '2026-02-16 11:23',
+                location: '经开区公园周边',
+                content: '巡查发现志愿者积极维护环境秩序，记录表扬信息。',
+                images: 2,
+                videos: 0,
+                type: '奖励'
+            }
+        ];
+
+        const recordImages = Array.from({ length: 12 }, (_, index) => {
+            const num = (index + 1).toString().padStart(2, '0');
+            return `record/${num}.png`;
+        });
+
+        let personnelMap = null;
+
+        function getPersonnelMap() {
+            if (personnelMap) {
+                return personnelMap;
+            }
+            const map = {};
+            Object.keys(personnelData || {}).forEach(teamId => {
+                const team = personnelData[teamId] || [];
+                team.forEach(person => {
+                    const teamName = teamDisplayNames[teamId] || '';
+                    map[person.name] = {
+                        ...person,
+                        teamId,
+                        teamName
+                    };
+                });
+            });
+            personnelMap = map;
+            return personnelMap;
+        }
+
         // 执法人员数据
         const personnelData = {
             'huai-chuan': [
@@ -754,16 +1062,18 @@
             return `${cityStreetNames[index]}附近`;
         }
 
-        // 当前选中的队员
+        // 当前选中的队员 / 执法记录
         let selectedPersonnel = null;
         let selectedSceneCard = null;
-        let isMultiSelectMode = false;
+        let selectedRecord = null;
+        let isMultiSelectMode = true;
         let selectedPersonnelList = [];
 
         // DOM 元素
         const moduleTabs = document.querySelectorAll('#module-tabs button');
         const scenesModule = document.getElementById('scenes-module');
         const personnelModule = document.getElementById('personnel-module');
+        const recordsModule = document.getElementById('records-module');
         const streetTabs = document.querySelectorAll('#street-tabs button');
         const streetContents = document.querySelectorAll('.street-content');
         const teamSelect = document.getElementById('team-select');
@@ -778,9 +1088,24 @@
         const commandBtns = document.querySelectorAll('.command-btn');
         const currentTimeEl = document.getElementById('current-time');
         const multiSelectToggle = document.getElementById('multi-select-toggle');
+        const selectAllToggle = document.getElementById('select-all-toggle');
         const multiCommandBar = document.getElementById('multi-command-bar');
         const multiSelectedCountEl = document.getElementById('multi-selected-count');
         const multiCommandBtns = document.querySelectorAll('.multi-command-btn');
+        const recordsListContainer = document.getElementById('records-list-container');
+        const recordsListEl = document.getElementById('records-list');
+        const recordsCountEl = document.getElementById('records-count');
+        const recordDetailContainer = document.getElementById('record-detail-container');
+        const recordDetailBackBtn = document.getElementById('record-detail-back');
+        const recordDetailImageWrapper = document.getElementById('record-detail-image-wrapper');
+        const recordDetailImage = document.getElementById('record-detail-image');
+        const recordDetailAvatar = document.getElementById('record-detail-avatar');
+        const recordDetailOfficer = document.getElementById('record-detail-officer');
+        const recordDetailType = document.getElementById('record-detail-type');
+        const recordDetailTime = document.getElementById('record-detail-time');
+        const recordDetailLocation = document.getElementById('record-detail-location');
+        const recordDetailContent = document.getElementById('record-detail-content');
+        const recordDetailMedia = document.getElementById('record-detail-media');
 
         // 更新当前时间
         function updateCurrentTime() {
@@ -795,6 +1120,11 @@
         updateCurrentTime();
         setInterval(updateCurrentTime, 1000);
 
+        // 初始化多选模式默认开启
+        if (multiSelectToggle) {
+            multiSelectToggle.checked = true;
+        }
+
         function updateMultiSelectedCount() {
             if (!isMultiSelectMode) {
                 multiCommandBar.classList.add('hidden');
@@ -807,6 +1137,120 @@
             } else {
                 multiCommandBar.classList.add('hidden');
             }
+        }
+
+        // 渲染执法记录列表
+        function renderRecords() {
+            if (!recordsListEl || !recordsCountEl) return;
+            recordsCountEl.textContent = enforcementRecords.length.toString();
+            recordsListEl.innerHTML = '';
+
+            const personnelMapForRecords = getPersonnelMap();
+
+            enforcementRecords.forEach(record => {
+                const item = document.createElement('div');
+                item.className = 'record-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer p-4 flex flex-col justify-between min-h-[260px]';
+
+                const hasImage = record.images && record.images > 0;
+                const imageUrl = hasImage
+                    ? recordImages[(record.id - 1) % recordImages.length]
+                    : '';
+
+                const personnel = personnelMapForRecords[record.officer];
+                const avatarUrl = personnel && personnel.avatar ? personnel.avatar : getRandomAvatar();
+                const teamName = personnel && personnel.teamName ? personnel.teamName : '';
+                const typeClass = getRecordTypeClass(record.type);
+
+                item.innerHTML = `
+                    ${hasImage ? `
+                        <div class="mb-2 rounded-md overflow-hidden bg-black/40">
+                            <img src="${imageUrl}" alt="执法记录图片" class="w-full h-24 md:h-28 object-cover">
+                        </div>
+                    ` : ''}
+                    <div class="flex justify-between items-center mb-1">
+                        <div class="flex items-center space-x-2 min-w-0">
+                            <img src="${avatarUrl}" alt="${record.officer}" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
+                            <div class="min-w-0">
+                                <div class="text-sm font-semibold text-gray-100 truncate">${record.officer}</div>
+                                ${teamName ? `<div class="text-xs text-gray-400 truncate">${teamName}</div>` : ''}
+                            </div>
+                        </div>
+                        <span class="text-xs px-2 py-0.5 rounded-full ${typeClass} flex-shrink-0">${record.type}</span>
+                    </div>
+                    <div class="text-xs text-gray-400 mb-1 truncate">时间：${record.time}</div>
+                    <div class="text-xs text-gray-400 mb-1 truncate">地点：${record.location}</div>
+                    <div class="text-xs text-gray-300 mt-1 break-words">内容：${record.content}</div>
+                    <div class="mt-2 text-xs text-gray-500 flex items-center space-x-3">
+                        <span>文字</span>
+                        <span>图片 ${record.images} 张</span>
+                        <span>视频 ${record.videos} 段</span>
+                    </div>
+                `;
+
+                item.addEventListener('click', () => {
+                    openRecordDetail(record);
+                });
+
+                recordsListEl.appendChild(item);
+            });
+        }
+
+        function openRecordDetail(record) {
+            if (!recordDetailContainer || !recordsListContainer) return;
+
+            selectedRecord = record;
+
+            const personnelMapForRecords = getPersonnelMap();
+            const personnel = personnelMapForRecords[record.officer];
+            const avatarUrl = personnel && personnel.avatar ? personnel.avatar : getRandomAvatar();
+
+            const hasImage = record.images && record.images > 0;
+            const imageUrl = hasImage
+                ? recordImages[(record.id - 1) % recordImages.length]
+                : '';
+
+            if (hasImage && recordDetailImageWrapper && recordDetailImage) {
+                recordDetailImage.src = imageUrl;
+                recordDetailImageWrapper.classList.remove('hidden');
+            } else if (recordDetailImageWrapper) {
+                recordDetailImageWrapper.classList.add('hidden');
+            }
+
+            const typeClass = getRecordTypeClass(record.type);
+
+            if (recordDetailAvatar) {
+                recordDetailAvatar.src = avatarUrl;
+            }
+            if (recordDetailOfficer) {
+                recordDetailOfficer.textContent = record.officer;
+            }
+            if (recordDetailType) {
+                recordDetailType.textContent = record.type;
+                recordDetailType.className = `text-xs px-2 py-0.5 rounded-full ${typeClass}`;
+            }
+            if (recordDetailTime) {
+                recordDetailTime.textContent = `时间：${record.time}`;
+            }
+            if (recordDetailLocation) {
+                recordDetailLocation.textContent = `地点：${record.location}`;
+            }
+            if (recordDetailContent) {
+                recordDetailContent.textContent = `内容：${record.content}`;
+            }
+            if (recordDetailMedia) {
+                recordDetailMedia.textContent = `图片 ${record.images} 张 · 视频 ${record.videos} 段`;
+            }
+
+            recordsListContainer.classList.add('hidden');
+            recordDetailContainer.classList.remove('hidden');
+        }
+
+        if (recordDetailBackBtn && recordDetailContainer && recordsListContainer) {
+            recordDetailBackBtn.addEventListener('click', () => {
+                recordDetailContainer.classList.add('hidden');
+                recordsListContainer.classList.remove('hidden');
+                selectedRecord = null;
+            });
         }
 
         // 模块切换
@@ -826,11 +1270,21 @@
                 if (targetModule === 'scenes') {
                     scenesModule.classList.remove('hidden');
                     personnelModule.classList.add('hidden');
-                } else {
+                    recordsModule.classList.add('hidden');
+                } else if (targetModule === 'personnel') {
                     scenesModule.classList.add('hidden');
                     personnelModule.classList.remove('hidden');
-                    // 加载执法人员数据
+                    recordsModule.classList.add('hidden');
                     loadPersonnel(teamSelect.value);
+                } else if (targetModule === 'records') {
+                    scenesModule.classList.add('hidden');
+                    personnelModule.classList.add('hidden');
+                    recordsModule.classList.remove('hidden');
+                    if (recordDetailContainer && recordsListContainer) {
+                        recordDetailContainer.classList.add('hidden');
+                        recordsListContainer.classList.remove('hidden');
+                    }
+                    renderRecords();
                 }
             });
         });
@@ -865,6 +1319,9 @@
             const teamData = personnelData[teamId] || [];
             personnelList.innerHTML = '';
             selectedPersonnelList = [];
+            if (selectAllToggle) {
+                selectAllToggle.checked = false;
+            }
             document.querySelectorAll('.personnel-card-selected').forEach(card => {
                 card.classList.remove('personnel-card-selected');
             });
@@ -915,11 +1372,42 @@
         multiSelectToggle.addEventListener('change', () => {
             isMultiSelectMode = multiSelectToggle.checked;
             selectedPersonnelList = [];
+            if (selectAllToggle) {
+                selectAllToggle.checked = false;
+            }
             document.querySelectorAll('.personnel-card-selected').forEach(card => {
                 card.classList.remove('personnel-card-selected');
             });
             updateMultiSelectedCount();
         });
+
+        if (selectAllToggle) {
+            selectAllToggle.addEventListener('change', () => {
+                // 确保处于多选模式
+                if (!isMultiSelectMode) {
+                    isMultiSelectMode = true;
+                    if (multiSelectToggle) {
+                        multiSelectToggle.checked = true;
+                    }
+                }
+
+                selectedPersonnelList = [];
+                document.querySelectorAll('.personnel-card').forEach(card => {
+                    card.classList.remove('personnel-card-selected');
+                });
+
+                if (selectAllToggle.checked) {
+                    const teamId = teamSelect.value;
+                    const teamData = personnelData[teamId] || [];
+                    selectedPersonnelList = teamData.slice();
+                    document.querySelectorAll('.personnel-card').forEach(card => {
+                        card.classList.add('personnel-card-selected');
+                    });
+                }
+
+                updateMultiSelectedCount();
+            });
+        }
 
         // 打开指令模态框
         function openCommandModal(person, teamId) {
