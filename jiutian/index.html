@@ -58,6 +58,17 @@
                 box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
                 background-color: rgba(15, 23, 42, 0.9);
             }
+            .personnel-card-selected {
+                border-color: #0ea5e9;
+                box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
+                background-color: rgba(15, 23, 42, 0.9);
+            }
+            .personnel-check-icon {
+                display: none;
+            }
+            .personnel-card-selected .personnel-check-icon {
+                display: flex;
+            }
             .camera-view {
                 background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             }
@@ -445,22 +456,49 @@
 
                     <!-- 执法人员模块 -->
                     <div id="personnel-module" class="hidden">
-                        <!-- 中队选择下拉框 -->
-                        <div class="mb-6">
-                            <label for="team-select" class="block text-sm font-medium text-gray-400 mb-2">选择中队</label>
-                            <select id="team-select" class="bg-dark border border-gray-700 text-light rounded-lg block w-full p-2.5 focus:outline-none focus:border-primary">
-                                <option value="huai-chuan">淮川中队</option>
-                                <option value="ji-li">集里中队</option>
-                                <option value="he-hua">荷花中队</option>
-                                <option value="guan-kou">关口中队</option>
-                                <option value="dong-yang">洞阳中队</option>
-                                <option value="economic">经开区中队</option>
-                                <option value="city">市容中队</option>
-                                <option value="construction-1">建设执法一中队</option>
-                                <option value="construction-2">建设执法二中队</option>
-                                <option value="demolition-1">拆违控违一中队</option>
-                                <option value="demolition-2">拆违控违二中队</option>
-                            </select>
+                        <div class="flex flex-wrap items-center justify-between mb-4 gap-4">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <div class="flex flex-col">
+                                    <label for="team-select" class="text-sm font-medium text-gray-400 mb-1">选择中队</label>
+                                    <div class="flex items-center gap-3">
+                                        <select id="team-select" class="bg-dark border border-gray-700 text-light rounded-lg px-3 py-2 focus:outline-none focus:border-primary">
+                                            <option value="huai-chuan">淮川中队</option>
+                                            <option value="ji-li">集里中队</option>
+                                            <option value="he-hua">荷花中队</option>
+                                            <option value="guan-kou">关口中队</option>
+                                            <option value="dong-yang">洞阳中队</option>
+                                            <option value="economic">经开区中队</option>
+                                            <option value="city">市容中队</option>
+                                            <option value="construction-1">建设执法一中队</option>
+                                            <option value="construction-2">建设执法二中队</option>
+                                            <option value="demolition-1">拆违控违一中队</option>
+                                            <option value="demolition-2">拆违控违二中队</option>
+                                        </select>
+                                        <div class="flex items-center space-x-2">
+                                            <input id="multi-select-toggle" type="checkbox" class="w-4 h-4 text-primary bg-dark border-gray-600 rounded focus:ring-primary">
+                                            <label for="multi-select-toggle" class="text-sm text-gray-300">多选模式</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="multi-command-bar" class="hidden flex flex-wrap items-center space-x-2 text-sm">
+                                <span class="text-gray-400">已选择 <span id="multi-selected-count">0</span> 人</span>
+                                <button class="multi-command-btn bg-primary hover:bg-secondary text-white py-1 px-3 rounded-lg flex items-center justify-center" data-command="task">
+                                    <i class="fa fa-check-circle mr-1"></i>执行任务
+                                </button>
+                                <button class="multi-command-btn bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-lg flex items-center justify-center" data-command="report">
+                                    <i class="fa fa-file-text mr-1"></i>汇报情况
+                                </button>
+                                <button class="multi-command-btn bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-3 rounded-lg flex items-center justify-center" data-command="stop">
+                                    <i class="fa fa-stop-circle mr-1"></i>停止任务
+                                </button>
+                                <button class="multi-command-btn bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-lg flex items-center justify-center" data-command="return">
+                                    <i class="fa fa-arrow-left-circle mr-1"></i>立即返回
+                                </button>
+                                <button class="multi-command-btn bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded-lg flex items-center justify-center" data-command="call">
+                                    <i class="fa fa-phone mr-1"></i>语音通话
+                                </button>
+                            </div>
                         </div>
                         
                         <!-- 队员列表 -->
@@ -494,6 +532,7 @@
                         <h4 id="modal-name" class="text-lg font-medium"></h4>
                         <p id="modal-team" class="text-sm text-gray-400"></p>
                         <p id="modal-status" class="text-xs mt-1"></p>
+                        <p id="modal-location" class="text-xs text-gray-500 mt-1 hidden"></p>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -531,6 +570,16 @@
                 { id: 8, name: '吴十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
                 { id: 9, name: '郑十一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
                 { id: 10, name: '王十二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 78, name: '刘一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 79, name: '刘二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 80, name: '刘三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 81, name: '刘四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 82, name: '刘五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 83, name: '刘六六', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 84, name: '刘七七', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 85, name: '刘八八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 86, name: '刘九九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 87, name: '刘十十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
             ],
             'ji-li': [
                 { id: 11, name: '陈一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
@@ -543,6 +592,11 @@
                 { id: 18, name: '秦八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
                 { id: 19, name: '尤九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
                 { id: 20, name: '许十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 88, name: '宋一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 89, name: '宋二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 90, name: '宋三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 91, name: '宋四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 92, name: '宋五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
             ],
             'he-hua': [
                 { id: 21, name: '杨一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
@@ -555,6 +609,14 @@
                 { id: 28, name: '马八八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
                 { id: 29, name: '牛九九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
                 { id: 30, name: '秦十十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 98, name: '梁一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 99, name: '梁二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 100, name: '梁三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 101, name: '梁四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 102, name: '梁五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 103, name: '梁六六', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 106, name: '梁九九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 107, name: '梁十十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
             ],
             'guan-kou': [
                 { id: 31, name: '赵一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
@@ -567,6 +629,15 @@
                 { id: 38, name: '王八八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
                 { id: 39, name: '陈九九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
                 { id: 40, name: '林十十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 108, name: '郭一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 109, name: '郭二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 110, name: '郭三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 111, name: '郭四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 113, name: '郭六六', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 114, name: '郭七七', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 115, name: '郭八八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 116, name: '郭九九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 117, name: '郭十十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
             ],
             'dong-yang': [
                 { id: 41, name: '黄一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
@@ -574,6 +645,16 @@
                 { id: 43, name: '罗三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
                 { id: 44, name: '马四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
                 { id: 45, name: '牛五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 118, name: '韩一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 119, name: '韩二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 120, name: '韩三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 121, name: '韩四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 122, name: '韩五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 123, name: '韩六六', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 124, name: '韩七七', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 125, name: '韩八八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 126, name: '韩九九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 127, name: '韩十十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
             ],
             'economic': [
                 { id: 46, name: '秦一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
@@ -581,6 +662,16 @@
                 { id: 48, name: '许三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
                 { id: 49, name: '何四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
                 { id: 50, name: '罗五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 128, name: '谢一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 129, name: '谢二二', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 130, name: '谢三三', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 131, name: '谢四四', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 132, name: '谢五五', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 133, name: '谢六六', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'busy', position: '队员' },
+                { id: 134, name: '谢七七', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 135, name: '谢八八', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
+                { id: 136, name: '谢九九', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'offline', position: '队员' },
+                { id: 137, name: '谢十十', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '队员' },
             ],
             'city': [
                 { id: 51, name: '马一一', avatar: 'https://p3-doubao-search-sign.byteimg.com/tos-cn-i-blm3f6vysv/a897f459b6a34f42a9d2a8a3c3c3a3c3~tplv-blm3f6vysv-resize-l:1024:1024.jpeg', status: 'online', position: '中队长' },
@@ -637,9 +728,37 @@
             });
         });
 
+        const cityStreetNames = [
+            '人民中路',
+            '解放路',
+            '花炮大道',
+            '沿江路',
+            '道吾路',
+            '车站路'
+        ];
+
+        function getPersonnelLocation(person, teamId) {
+            if (person.status === 'offline') {
+                return '';
+            }
+            if (person.status === 'busy') {
+                const index = person.id % cityStreetNames.length;
+                return `${cityStreetNames[index]}附近`;
+            }
+            const ratioBase = 10;
+            const value = person.id % ratioBase;
+            if (value < 7) {
+                return '城管大楼';
+            }
+            const index = person.id % cityStreetNames.length;
+            return `${cityStreetNames[index]}附近`;
+        }
+
         // 当前选中的队员
         let selectedPersonnel = null;
         let selectedSceneCard = null;
+        let isMultiSelectMode = false;
+        let selectedPersonnelList = [];
 
         // DOM 元素
         const moduleTabs = document.querySelectorAll('#module-tabs button');
@@ -655,8 +774,13 @@
         const modalName = document.getElementById('modal-name');
         const modalTeam = document.getElementById('modal-team');
         const modalStatus = document.getElementById('modal-status');
+        const modalLocation = document.getElementById('modal-location');
         const commandBtns = document.querySelectorAll('.command-btn');
         const currentTimeEl = document.getElementById('current-time');
+        const multiSelectToggle = document.getElementById('multi-select-toggle');
+        const multiCommandBar = document.getElementById('multi-command-bar');
+        const multiSelectedCountEl = document.getElementById('multi-selected-count');
+        const multiCommandBtns = document.querySelectorAll('.multi-command-btn');
 
         // 更新当前时间
         function updateCurrentTime() {
@@ -670,6 +794,20 @@
         // 初始化时间
         updateCurrentTime();
         setInterval(updateCurrentTime, 1000);
+
+        function updateMultiSelectedCount() {
+            if (!isMultiSelectMode) {
+                multiCommandBar.classList.add('hidden');
+                return;
+            }
+            const count = selectedPersonnelList.length;
+            multiSelectedCountEl.textContent = count.toString();
+            if (count > 0) {
+                multiCommandBar.classList.remove('hidden');
+            } else {
+                multiCommandBar.classList.add('hidden');
+            }
+        }
 
         // 模块切换
         moduleTabs.forEach(tab => {
@@ -726,31 +864,62 @@
         function loadPersonnel(teamId) {
             const teamData = personnelData[teamId] || [];
             personnelList.innerHTML = '';
+            selectedPersonnelList = [];
+            document.querySelectorAll('.personnel-card-selected').forEach(card => {
+                card.classList.remove('personnel-card-selected');
+            });
+            updateMultiSelectedCount();
 
             teamData.forEach(person => {
                 const card = document.createElement('div');
-                card.className = 'personnel-card card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer p-4 text-center';
+                card.className = 'personnel-card relative card-hover bg-dark/50 rounded-lg overflow-hidden border border-gray-700 hover:border-primary cursor-pointer p-4 text-center';
                 card.dataset.personnelId = person.id;
                 
                 const statusClass = person.status === 'online' ? 'bg-green-500' : person.status === 'busy' ? 'bg-yellow-500' : 'bg-gray-500';
-                const statusText = person.status === 'online' ? '在线' : person.status === 'busy' ? '忙碌' : '离线';
+                const statusText = person.status === 'online' ? '在线' : person.status === 'busy' ? '执勤' : '离线';
+                const locationText = getPersonnelLocation(person, teamId);
 
                 card.innerHTML = `
+                    <span class="personnel-check-icon absolute top-2 left-2 w-5 h-5 rounded-full bg-primary text-xs text-white flex items-center justify-center">
+                        <i class="fa fa-check"></i>
+                    </span>
                     <div class="relative inline-block">
                         <img src="${person.avatar}" alt="${person.name}" class="w-16 h-16 rounded-full object-cover mx-auto mb-2">
                         <span class="absolute bottom-2 right-2 w-3 h-3 ${statusClass} rounded-full border-2 border-dark"></span>
                     </div>
                     <h3 class="font-semibold text-sm mb-1">${person.name}</h3>
                     <p class="text-xs text-gray-400">${person.position}</p>
+                    ${locationText ? `<p class="text-xs text-gray-500 mt-1">${locationText}</p>` : ''}
                 `;
 
                 card.addEventListener('click', () => {
-                    openCommandModal(person, teamId);
+                    if (isMultiSelectMode) {
+                        const existingIndex = selectedPersonnelList.findIndex(p => p.id === person.id);
+                        if (existingIndex >= 0) {
+                            selectedPersonnelList.splice(existingIndex, 1);
+                            card.classList.remove('personnel-card-selected');
+                        } else {
+                            selectedPersonnelList.push(person);
+                            card.classList.add('personnel-card-selected');
+                        }
+                        updateMultiSelectedCount();
+                    } else {
+                        openCommandModal(person, teamId);
+                    }
                 });
 
                 personnelList.appendChild(card);
             });
         }
+
+        multiSelectToggle.addEventListener('change', () => {
+            isMultiSelectMode = multiSelectToggle.checked;
+            selectedPersonnelList = [];
+            document.querySelectorAll('.personnel-card-selected').forEach(card => {
+                card.classList.remove('personnel-card-selected');
+            });
+            updateMultiSelectedCount();
+        });
 
         // 打开指令模态框
         function openCommandModal(person, teamId) {
@@ -762,8 +931,17 @@
             modalTeam.textContent = teamName;
             
             const statusClass = person.status === 'online' ? 'text-green-400' : person.status === 'busy' ? 'text-yellow-400' : 'text-gray-400';
-            const statusText = person.status === 'online' ? '在线' : person.status === 'busy' ? '忙碌' : '离线';
+            const statusText = person.status === 'online' ? '在线' : person.status === 'busy' ? '执勤' : '离线';
             modalStatus.innerHTML = `<span class="inline-block w-2 h-2 ${statusClass.replace('text-', 'bg-')} rounded-full mr-1"></span>${statusText}`;
+
+            const locationText = getPersonnelLocation(person, teamId);
+            if (locationText) {
+                modalLocation.textContent = locationText;
+                modalLocation.classList.remove('hidden');
+            } else {
+                modalLocation.textContent = '';
+                modalLocation.classList.add('hidden');
+            }
 
             commandModal.classList.remove('hidden');
         }
@@ -780,6 +958,16 @@
             }
         });
 
+        function getCommandText(command) {
+            return {
+                task: '执行任务',
+                report: '汇报情况',
+                stop: '停止任务',
+                return: '立即返回',
+                call: '语音通话'
+            }[command];
+        }
+
         // 发送指令
         commandBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -790,30 +978,66 @@
             });
         });
 
-        // 发送指令到队员
-        function sendCommand(personnel, command) {
-            // 这里可以添加实际的指令发送逻辑
-            console.log(`向 ${personnel.name} 发送指令: ${command}`);
-            
-            // 显示成功提示
-            const commandText = {
-                'task': '执行任务',
-                'report': '汇报情况',
-                'stop': '停止任务',
-                'return': '立即返回',
-                'call': '语音通话'
-            }[command];
+        multiCommandBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const command = btn.dataset.command;
+                if (!selectedPersonnelList.length) {
+                    alert('请先选择要下发指令的队员');
+                    return;
+                }
+                sendBatchCommand(selectedPersonnelList, command);
+            });
+        });
 
+        function sendCommand(personnel, command) {
+            console.log(`向 ${personnel.name} 发送指令: ${command}`);
+            const commandText = getCommandText(command);
             alert(`已向 ${personnel.name} 发送"${commandText}"指令`);
             commandModal.classList.add('hidden');
         }
 
-        // 中队选择变化
+        function sendBatchCommand(list, command) {
+            const commandText = getCommandText(command);
+            const names = list.map(p => p.name).join('、');
+            list.forEach(p => {
+                console.log(`向 ${p.name} 发送指令: ${command}`);
+            });
+            alert(`已向 ${names} 发送"${commandText}"指令`);
+        }
+
+        // 显示通用toast提示
+        function showToast(message, duration = 1000) {
+            // 创建toast容器
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: #fff;
+                padding: 10px 18px;
+                border-radius: 9999px;
+                z-index: 9999;
+                font-size: 14px;
+                max-width: 80%;
+                text-align: center;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            `;
+            toast.textContent = message;
+
+            document.body.appendChild(toast);
+
+            // 一段时间后移除toast
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, duration);
+        }
+
         teamSelect.addEventListener('change', () => {
             loadPersonnel(teamSelect.value);
         });
 
-        // 场景卡片点击事件
         document.querySelectorAll('.scene-card').forEach(card => {
             card.addEventListener('click', () => {
                 if (selectedSceneCard) {
@@ -824,6 +1048,13 @@
 
                 const sceneId = card.dataset.scene;
                 console.log(`切换到场景: ${sceneId}`);
+
+                // 获取场景名称，用于toast展示
+                const titleEl = card.querySelector('h3');
+                const sceneName = titleEl ? titleEl.textContent.trim() : sceneId;
+
+                // 显示切换场景toast提示
+                showToast(`切换到场景：${sceneName}`);
             });
         });
     </script>
