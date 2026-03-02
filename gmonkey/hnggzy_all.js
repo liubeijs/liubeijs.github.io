@@ -5,6 +5,7 @@
 // @description  拦截湖南公共资源交易平台的所有相关接口并展示数据
 // @author       Jiexin Li (LB)
 // @match        https://www.hnsggzy.com/*
+// @match        https://hnsbenji.hnsggzy.com/*
 // @grant        GM_addStyle
 // @grant        GM_notification
 // @grant        GM_info
@@ -193,13 +194,13 @@
         },
         {
             index: 4,
-            name: '开标信息',
+            name: '开标报价',
             pattern: '/tradeApi/constructionSite/selectbyconstructionsectionid',
             data: null,
             enabled: false,
             btn_title: '更新',
             updateData() {
-                console.log('开标信息数据更新TABLE!!!');
+                console.log('开标报价数据更新TABLE!!!');
                 const bids = convertBidData(this.data.data.constructionBid, true);
                 //console.log('bids:', bids);
             },
@@ -231,7 +232,7 @@
         },
         {
             index: 5,
-            name: '中标候选',
+            name: '中标公示',
             pattern: '/tradeApi/constructionNotice/selectWinningBidNotice',
             data: null,
             enabled: false,
@@ -465,7 +466,7 @@
                 if (bid && bid.project_base_price && bid.project_max_price) {
                     bid_down_ratio = (1.0 - bid.project_base_price / bid.project_max_price) * 100;
                 }
-                infoElement.textContent = `投标数量：${CUR_PROJECTS[CUR_HNGGZY_ID]?.bids_count} 基准价：${bid_down_ratio.toFixed(3)}%`;
+                infoElement.innerHTML = `<b>投标数量</b>：${CUR_PROJECTS[CUR_HNGGZY_ID]?.bids_count} <b>基准价</b>：${bid_down_ratio.toFixed(3)}%`;
             }
         }
     }
@@ -842,7 +843,7 @@
                         alert('当前<招标计划>已存在简道云，无需重复创建!');
                     } else if (api.name === '项目信息' && CUR_PROJECTS[CUR_HNGGZY_ID]) {
                         alert('当前<项目>已存在简道云，无需重复创建!');
-                    } else if (api.name === '中标候选') {
+                    } else if (api.name === '中标公示') {
                         api.postJianDaoYun();
                     } else {
                         if (confirm(`确定在简道云${api.btn_title}<${api.name}>${CUR_PROJECTS[CUR_HNGGZY_ID]?.project_name || '?'}吗？`)) {
@@ -882,9 +883,13 @@
             <div style="display: flex; align-items: center;">
                 【简道云】<b>项目ID</b>：<span id="project-id"></span>
                 <b style="margin-left: 20px;">项目名称</b>：<span id="project-name"></span>
-                <span id="bar-other-info"></span>
+                &nbsp;<span id="bar-other-info"></span>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
+                <label style="display: flex; align-items: center; gap: 4px; font-size: 14px; cursor: pointer;">
+                    <input type="checkbox" id="record-switch" style="cursor: pointer;">
+                    录入
+                </label>
                 <button id="analyze-btn" style="padding: 4px 12px; background: #67C23A; color: white; border: none; border-radius: 4px; cursor: pointer;">分析</button>
                 <button id="bid-list-btn" style="padding: 4px 12px; background:rgb(198, 185, 43); color: white; border: none; border-radius: 4px; cursor: pointer;">报价</button>
                 <button id="jiandaoyun-project-btn" style="padding: 4px 12px; background: #409EFF; color: white; border: none; border-radius: 4px; cursor: pointer;">简道云</button>
@@ -895,8 +900,14 @@
         const buttonContainer = document.createElement('div');
         buttonContainer.id = 'api-buttons';
         buttonContainer.style.top = '40px'; // 调整按钮容器位置，避免被项目信息条遮挡
+        buttonContainer.style.display = 'none'; // 默认隐藏
         API_CONFIG.forEach(api => {
             buttonContainer.appendChild(createApiButton(api));
+        });
+
+        // 监听录入开关变化
+        projectInfoBar.querySelector('#record-switch').addEventListener('change', function(e) {
+            buttonContainer.style.display = e.target.checked ? 'flex' : 'none';
         });
 
         // 创建数据查看器
@@ -931,12 +942,7 @@
                 });
         });
 
-        // 创建重置按钮
-        const resetButton = document.createElement('button');
-        resetButton.id = 'reset-button';
-        resetButton.textContent = '重置';
-        resetButton.addEventListener('click', resetAllData);
-        buttonContainer.appendChild(resetButton);
+
 
         body.appendChild(projectInfoBar);
         body.appendChild(buttonContainer);
@@ -994,7 +1000,7 @@
                         showNotification('暂无数据', '当前页面没有投标报价数据', 'a');
                     }
                 } else {
-                    showNotification('暂无数据', '请先加载[开标信息]', 'a');
+                    showNotification('暂无数据', '请先加载[开标报价]', 'a');
                 }
             });
         }
@@ -1030,7 +1036,7 @@
                         const url = `https://pages.liubeijs.com/cal65.html?maxPrice=${topPrice}&bids=${bids}`;
                         window.open(url, '_blank');
                     } else {
-                        showNotification('暂无数据', '请先加载[开标参数][开标信息]', 'a');
+                        showNotification('暂无数据', '请先加载[开标参数][开标报价]', 'a');
                     }
                     
                 }
@@ -1218,6 +1224,7 @@
 
     // 更新按钮状态
     function updateUIAfterApiLoaded(url, data) {
+        console.log('【GMonkey】API Loaded:', url);
 
         // 处理中标候选人和中标结果的特殊情况
         if (url.includes('/tradeApi/constructionNotice/selectWinningBidNotice/')) {
@@ -1226,7 +1233,7 @@
 
             if (isCandidate || isResult) {
                 const apiIndex = API_CONFIG.findIndex(api =>
-                    api.name === (isCandidate ? '中标候选' : '中标结果')
+                    api.name === (isCandidate ? '中标公示' : '中标结果')
                 );
 
                 if (apiIndex !== -1) {
