@@ -128,7 +128,10 @@
                     <div id="companyStats" class="mt-2" style="font-size: 0.9em;"></div>
                 </div>
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-outline-secondary active" id="sortByRatio">
+                    <button class="btn btn-sm btn-outline-secondary active" id="sortById">
+                        <i class="bi bi-sort-numeric-down"></i> 按序号排序
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" id="sortByRatio">
                         <i class="bi bi-sort-numeric-down"></i> 按下浮率排序
                     </button>
                     <button class="btn btn-sm btn-outline-secondary" id="sortBySelectResult">
@@ -702,10 +705,10 @@ function parse6Params(paramStr) {
                         window.bid_6param = project.bid_6param;
                         window.project_pub_url = project.project_pub_url;
 
-                        // 对投标数据按下浮率排序（从高到低）
+                        // 对投标数据按序号排序（从小到大）
                         sortedBids = project.project_bids
                             .filter(bid => bid.bid_price !== null)
-                            .sort((a, b) => b.bid_down_ratio - a.bid_down_ratio);
+                            .sort((a, b) => (parseInt(a.bid_id) || 0) - (parseInt(b.bid_id) || 0));
 
                         renderBidList(sortedBids);
                         createScatterChart(sortedBids, project.project_max_price);
@@ -729,6 +732,13 @@ function parse6Params(paramStr) {
             }
 
             // 修改排序事件处理
+            $('#sortById').click(function() {
+                $(this).addClass('active').siblings().removeClass('active');
+                sortedBids.sort((a, b) => (parseInt(a.bid_id) || 0) - (parseInt(b.bid_id) || 0));
+                renderBidList(sortedBids);
+                createScatterChart(sortedBids);
+            });
+
             $('#sortBySelectResult').click(function() {
                 $(this).addClass('active').siblings().removeClass('active');
                 sortedBids.sort((a, b) => {
