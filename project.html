@@ -115,6 +115,10 @@
                         <th>最高限价</th>
                         <td id="maxPrice"></td>
                     </tr>
+                    <tr>
+                        <th>开标时间</th>
+                        <td id="bidOpenTime"></td>
+                    </tr>
                 </table>
             </div>
         </div>
@@ -698,6 +702,19 @@ function parse6Params(paramStr) {
                             style: 'currency',
                             currency: 'CNY'
                         }));
+                        
+                        // 格式化并显示开标时间
+                        if (project.bid_openning_time) {
+                            const openTime = new Date(project.bid_openning_time);
+                            const formattedTime = openTime.toLocaleDateString('zh-CN', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit'
+                            }).replace(/\//g, '-'); // 确保格式为 YYYY-MM-DD
+                            $('#bidOpenTime').text(formattedTime);
+                        } else {
+                            $('#bidOpenTime').text('-');
+                        }
                         
                         // 保存六参数/招标公示到全局变量
                         window.bid_6param = project.bid_6param;
