@@ -134,9 +134,6 @@
                     <button class="btn btn-sm btn-outline-secondary" id="sortByRatio">
                         <i class="bi bi-sort-numeric-down"></i> 按下浮率排序
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" id="sortBySelectResult">
-                        <i class="bi bi-sort-alpha-down"></i> 按入围情况排序
-                    </button>
                     <button class="btn btn-sm btn-outline-secondary" id="sortByRegion">
                         <i class="bi bi-geo-alt"></i> 按区域排序
                     </button>
@@ -397,8 +394,7 @@ function parse6Params(paramStr) {
                         const companyInfo = companyMap[bid.bid_corp_name];
                         return {
                             ...bid,
-                            corp_addr: companyInfo?.corp_addr || {},
-                            bid_select_result: companyInfo?.bid_select_result || '-'
+                            corp_addr: companyInfo?.corp_addr || {}
                         };
                     });
 
@@ -735,28 +731,6 @@ function parse6Params(paramStr) {
             $('#sortById').click(function() {
                 $(this).addClass('active').siblings().removeClass('active');
                 sortedBids.sort((a, b) => (parseInt(a.bid_id) || 0) - (parseInt(b.bid_id) || 0));
-                renderBidList(sortedBids);
-                createScatterChart(sortedBids);
-            });
-
-            $('#sortBySelectResult').click(function() {
-                $(this).addClass('active').siblings().removeClass('active');
-                sortedBids.sort((a, b) => {
-                    const resultA = a.bid_select_result || '';
-                    const resultB = b.bid_select_result || '';
-                
-                    // 按照入围情况排序，有值的排前面
-                    if (!resultA && !resultB) return 0;
-                    if (!resultA) return 1;
-                    if (!resultB) return -1;
-                
-                    // 如果都相同，按投标报价从低到高排序
-                    if (resultA === resultB) {
-                        return a.bid_price - b.bid_price;
-                    }
-                
-                    return resultA.localeCompare(resultB);
-                });
                 renderBidList(sortedBids);
                 createScatterChart(sortedBids);
             });
