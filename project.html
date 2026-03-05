@@ -363,21 +363,21 @@ function parse6Params(paramStr) {
                 const companyNames = sortedBids.map(bid => bid.bid_corp_name);
                 
                 // 调用API获取公司信息（使用POST方法）
-                const response = await fetch('https://sf.liubeijs.com/api/corps/batch', {
+                const response = await fetch('https://liubeijs.com/api/corps', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        names: companyNames
+                        corp_names: companyNames
                     })
                 });
                 const result = await response.json();
 
-                if (response.ok && result.data) {
+                if (response.ok && result) {
                     // 创建公司信息映射
                     const companyMap = {};
-                    result.data.forEach(company => {
+                    result.forEach(company => {
                         companyMap[company.corp_name] = company;
                     });
 
@@ -613,9 +613,9 @@ function parse6Params(paramStr) {
                 });
             }
 
-            // 获取URL参数中的project_id
+            // 获取URL参数中的hnggzy_id作为projectId
             const urlParams = new URLSearchParams(window.location.search);
-            const projectId = urlParams.get('project_id');
+            const projectId = urlParams.get('hnggzy_id');
 
             if (!projectId) {
                 alert('请提供项目ID！');
@@ -656,7 +656,7 @@ function parse6Params(paramStr) {
                 $('#projectTitle').html('<div class="spinner-border spinner-border-sm me-2" role="status"></div>项目信息加载中...');
                 
                 $.ajax({
-                    url: `https://sf.liubeijs.com/api/project/${projectId}`,
+                    url: `https://liubeijs.com/api/project?hnggzy_id=${projectId}`,
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
