@@ -663,7 +663,12 @@ function parse6Params(paramStr) {
                         'Content-Type': 'application/json'
                     },
                     success: function(response) {
-                        const project = response.data;
+                        // 兼容直接返回对象和返回 {data: ...} 的情况
+                        let project = response.data || response;
+                        // 如果是数组，取第一个元素
+                        if (Array.isArray(project)) {
+                            project = project[0];
+                        }
                         
                         // 更新项目基本信息
                         $('#projectTitle').text(project.project_name);
