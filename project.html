@@ -362,6 +362,8 @@ function parse6Params(paramStr) {
                 // 获取所有投标单位名称
                 const companyNames = sortedBids.map(bid => bid.bid_corp_name);
                 
+                console.log(companyNames);
+
                 // 增加对本地调试的支持
                 const baseUrl = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') 
                     ? 'http://localhost' 
@@ -378,6 +380,7 @@ function parse6Params(paramStr) {
                     })
                 });
                 const result = await response.json();
+                console.log(result);
 
                 if (response.ok && result) {
                     // 创建公司信息映射
