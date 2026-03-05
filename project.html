@@ -131,8 +131,8 @@
                     <button class="btn btn-sm btn-outline-secondary active" id="sortByRatio">
                         <i class="bi bi-sort-numeric-down"></i> 按下浮率排序
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" id="sortByType">
-                        <i class="bi bi-sort-alpha-down"></i> 按单位类型排序
+                    <button class="btn btn-sm btn-outline-secondary" id="sortBySelectResult">
+                        <i class="bi bi-sort-alpha-down"></i> 按入围情况排序
                     </button>
                     <button class="btn btn-sm btn-outline-secondary" id="sortByRegion">
                         <i class="bi bi-geo-alt"></i> 按区域排序
@@ -148,7 +148,7 @@
                             <th>投标价格</th>
                             <th>下浮率</th>
                             <th>所在区域</th>
-                            <th>企业类型</th>
+                            <th>入围情况</th>
                             <th>状态</th>
                         </tr>
                     </thead>
@@ -331,7 +331,7 @@ function parse6Params(paramStr) {
                             })}</td>
                             <td>${(bid.bid_down_ratio * 100).toFixed(2)}%</td>
                             <td>${bid.corp_addr?.province || '-'}</td>
-                            <td>${bid.corp_type || '-'}</td>
+                            <td>${bid.bid_select_result || '-'}</td>
                             <td>${bid.bid_stat || '-'}</td>
                         </tr>
                     `;
@@ -395,7 +395,7 @@ function parse6Params(paramStr) {
                         return {
                             ...bid,
                             corp_addr: companyInfo?.corp_addr || {},
-                            corp_type: companyInfo?.corp_type || '-'
+                            bid_select_result: companyInfo?.bid_select_result || '-'
                         };
                     });
 
@@ -722,22 +722,23 @@ function parse6Params(paramStr) {
             }
 
             // 修改排序事件处理
-            $('#sortByType').click(function() {
+            $('#sortBySelectResult').click(function() {
                 $(this).addClass('active').siblings().removeClass('active');
                 sortedBids.sort((a, b) => {
-                    const typeA = getCompanyType(a);
-                    const typeB = getCompanyType(b);
+                    const resultA = a.bid_select_result || '';
+                    const resultB = b.bid_select_result || '';
                 
-                    // 将"中标人"类型放在第一位
-                    if (typeA === '中标人') return -1;
-                    if (typeB === '中标人') return 1;
+                    // 按照入围情况排序，有值的排前面
+                    if (!resultA && !resultB) return 0;
+                    if (!resultA) return 1;
+                    if (!resultB) return -1;
                 
-                    // 如果类型相同，按投标报价从低到高排序
-                    if (typeA === typeB) {
+                    // 如果都相同，按投标报价从低到高排序
+                    if (resultA === resultB) {
                         return a.bid_price - b.bid_price;
                     }
                 
-                    return typeA.localeCompare(typeB);
+                    return resultA.localeCompare(resultB);
                 });
                 renderBidList(sortedBids);
                 createScatterChart(sortedBids);
