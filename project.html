@@ -663,7 +663,7 @@ function parse6Params(paramStr) {
                         'Content-Type': 'application/json'
                     },
                     success: function(response) {
-                        const project = response.data[0];
+                        const project = response.data;
                         
                         // 更新项目基本信息
                         $('#projectTitle').text(project.project_name);
