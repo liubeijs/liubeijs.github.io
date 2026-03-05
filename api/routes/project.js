@@ -8,7 +8,55 @@ const API_CONFIG = {
   token: 'q1Lzhl8iknug9WFoQR2ijO1bHxZ6bwPI'
 };
 
-// 获取项目信息
+// 获取项目信息 (通过 query 参数)
+router.get('/project', async (req, res) => {
+  try {
+    const projectId = req.query.hnggzy_id;
+    if (!projectId) {
+      return res.status(400).json({ error: '缺少 hnggzy_id 参数' });
+    }
+    
+    // 构建请求参数
+    const requestData = {
+      app_id: "63324ce70ae4b40008f38909",
+      entry_id: "64979d25210a5200083fbf9d",
+      fields: ["project_id", "project_name", "project_max_price", "bid_6param", "project_bids", "project_pub_url"],
+      filter: {
+        rel: "and",
+        cond: [{
+          field: "project_id",
+          type: "text",
+          method: "eq",
+          value: projectId
+        }]
+      },
+      limit: 1
+    };
+
+    // 发送请求到简道云API
+    const response = await axios({
+      method: 'post',
+      url: `${API_CONFIG.baseURL}/app/entry/data/list`,
+      headers: {
+        'Authorization': `Bearer ${API_CONFIG.token}`,
+        'Content-Type': 'application/json'
+      },
+      data: requestData
+    });
+
+    // 返回结果
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error fetching project data:', error);
+    res.status(500).json({
+      error: '获取项目信息失败',
+      message: error.message
+    });
+  }
+});
+
+// 获取项目信息 (通过 path 参数)
 router.get('/project/:projectId', async (req, res) => {
   try {
     const projectId = req.params.projectId;
@@ -279,9 +327,44 @@ router.post('/corps/batch', async (req, res) => {
   }
 });
 
-// 创建公司信息
+// 创建公司信息 或 批量查询公司信息
 router.post('/corps', async (req, res) => {
   try {
+    // 检查是否为批量查询请求 (兼容 project.html 的调用方式)
+    if (req.body.corp_names && Array.isArray(req.body.corp_names)) {
+      const companyNames = req.body.corp_names;
+      
+      // 构建请求参数
+      const requestData = {
+        app_id: "67fb6672450241050858e140",
+        entry_id: "680a510711e47823ae1f678f",
+        fields: ["corp_eid", "corp_name", "credit_code", "corp_addr", "corp_type", "comment"],
+        filter: {
+          rel: "and",
+          cond: [{
+            field: "corp_name",
+            method: "eq",
+            value: companyNames
+          }]
+        },
+        limit: 500
+      };
+
+      // 发送请求到简道云API
+      const response = await axios({
+        method: 'post',
+        url: `${API_CONFIG.baseURL}/app/entry/data/list`,
+        headers: {
+          'Authorization': `Bearer ${API_CONFIG.token}`,
+          'Content-Type': 'application/json'
+        },
+        data: requestData
+      });
+
+      return res.json(response.data);
+    }
+
+    // 原有的创建公司信息逻辑
     const requestData = {
       app_id: "67fb6672450241050858e140",
       entry_id: "680a510711e47823ae1f678f",
