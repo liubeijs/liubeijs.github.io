@@ -492,13 +492,13 @@ function parse6Params(paramStr) {
         // 信用评分分析功能
         async function analyzeScores() {
             try {
-                if (!bid.bid_openning_time) {
+                if (!window.bid_openning_time) {
                     console.log('未找到开标时间，跳过信用评分分析');
                     return;
                 }
 
                 // 计算 score_time
-                const openTime = new Date(bid.bid_openning_time);
+                const openTime = new Date(window.bid_openning_time);
                 let targetDate = new Date(openTime);
                 
                 // 如果是本月15日及之前，使用上个月
@@ -513,7 +513,7 @@ function parse6Params(paramStr) {
                 const month = String(targetDate.getMonth() + 1).padStart(2, '0');
                 const scoreTime = `${year}-${month}`;
                 
-                console.log(`计算信用评分月份: 开标时间=${bid.bid_openning_time}, 评分月份=${scoreTime}`);
+                console.log(`计算信用评分月份: 开标时间=${window.bid_openning_time}, 评分月份=${scoreTime}`);
 
                 // 获取所有投标单位名称
                 const companyNames = sortedBids.map(bid => bid.bid_corp_name);
@@ -796,6 +796,7 @@ function parse6Params(paramStr) {
                         // 保存六参数/招标公示到全局变量
                         window.bid_6param = project.bid_6param;
                         window.project_pub_url = project.project_pub_url;
+                        window.bid_openning_time = project.bid_openning_time;
 
                         // 对投标数据按序号排序（从小到大）
                         sortedBids = project.project_bids
