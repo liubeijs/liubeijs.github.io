@@ -760,8 +760,17 @@ function parse6Params(paramStr) {
                     if (provinceA !== provinceB) {
                         return provinceA.localeCompare(provinceB);
                     }
+
+                    // 如果都是湖南省，按城市排序
+                    if (provinceA === '湖南省') {
+                        const cityA = a.corp_addr?.city || '';
+                        const cityB = b.corp_addr?.city || '';
+                        if (cityA !== cityB) {
+                             return cityA.localeCompare(cityB);
+                        }
+                    }
                     
-                    // 如果省份相同，按投标价格从低到高排序
+                    // 如果省份相同（且城市相同或非湖南省），按投标价格从低到高排序
                     return a.bid_price - b.bid_price;
                 });
 
