@@ -335,7 +335,9 @@ function parse6Params(paramStr) {
                                 currency: 'CNY'
                             })}</td>
                             <td>${(bid.bid_down_ratio * 100).toFixed(2)}%</td>
-                            <td>${bid.corp_addr?.province || '-'}</td>
+                            <td style="${bid.corp_addr?.province === '湖南省' ? `color: ${colors['湖南省内']}` : ''}">
+                                ${bid.corp_addr?.province === '湖南省' ? (bid.corp_addr?.city || '湖南省') : (bid.corp_addr?.province || '-')}
+                            </td>
                             <td>${bid.bid_select_result || '-'}</td>
                             <td>${bid.bid_stat || '-'}</td>
                         </tr>
