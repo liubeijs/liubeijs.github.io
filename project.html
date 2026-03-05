@@ -103,7 +103,6 @@
                     <button id="sunshineRoomButton" class="btn btn-primary">省中心阳光房</button>
                     <button id="analysisButton" class="btn btn-primary">六随机基准值分析</button>
                     <button id="pubButton" class="btn btn-primary">招标公示</button>
-                    <button id="regionAnalysisButton" class="btn btn-primary">区域分析</button>
                 </div>
             </div>
             <div class="card-body">
@@ -261,6 +260,15 @@ function parse6Params(paramStr) {
                         border-radius: 2px;
                         margin-right: 8px;
                     }
+                    .icon-button {
+                        text-decoration: none !important;
+                        display: inline-flex;
+                        align-items: center;
+                    }
+                    .icon-button span {
+                        font-size: 12px;
+                        margin-left: 3px;
+                    }
                 </style>
             `;
             $('head').append(styleBlock);
@@ -298,30 +306,27 @@ function parse6Params(paramStr) {
                                     <a href="https://www.qcc.com/web/search?key=${encodeURIComponent(bid.bid_corp_name)}" 
                                        target="_blank" class="icon-button" title="企业信息查询">
                                         <i class="bi bi-search"></i>
-                                    </a>
-                                    <a href="https://pages.liubeijs.com/views/corp/view.html?name=${encodeURIComponent(bid.bid_corp_name)}" 
-                                       target="_blank" class="icon-button" title="企业内部信息查询">
-                                        <i class="bi bi-database"></i>
+                                        <span>企查查</span>
                                     </a>
                                     <a href="https://jst.cbi360.net/company/?companyname=${encodeURIComponent(bid.bid_corp_name)}" 
                                        target="_blank" class="icon-button" title="建设通查询">
                                         <i class="bi bi-building-gear"></i>
+                                        <span>建设通</span>
                                     </a>
                                     <a href="http://yyjc.hnsdzjy.org:20005/sun/main?searchValue=${encodeURIComponent(bid.bid_corp_name)}&searchType=mainInfo" 
                                        target="_blank" class="icon-button" title="阳光房信息">
                                         <i class="bi bi-sun"></i>
+                                        <span>阳光房</span>
                                     </a>
                                     <a href="https://hwdms.mot.gov.cn/BMWebSite/company/indexSearch.do?text=${encodeURIComponent(bid.bid_corp_name)}" 
                                        target="_blank" class="icon-button" title="公路信息">
                                         <i class="bi bi-truck"></i>
+                                        <span>公路网</span>
                                     </a>
                                     <a href="https://jzsc.mohurd.gov.cn/data/company?complexname=${encodeURIComponent(bid.bid_corp_name)}" 
                                        target="_blank" class="icon-button" title="建筑信息">
                                         <i class="bi bi-building"></i>
-                                    </a>
-                                    <a href="https://pages.liubeijs.com/traffic-credit.html?company_name=${encodeURIComponent(bid.bid_corp_name)}" 
-                                       target="_blank" class="icon-button" title="公路信用评价">
-                                        <i class="bi bi-award"></i>
+                                        <span>建筑网</span>
                                     </a>
                                 </div>
                             </td>
@@ -469,14 +474,9 @@ function parse6Params(paramStr) {
                 }
             } catch (error) {
                 console.error('区域分析失败：', error);
-                alert('区域分析失败，请稍后重试');
+                // alert('区域分析失败，请稍后重试');
             }
-        }
-
-        // 绑定区域分析按钮点击事件
-        $('#regionAnalysisButton').click(function() {
-            analyzeRegions();
-        });            
+        }            
 
             function getCompanyType(bid) {
                 const companyName = bid.bid_corp_name;
@@ -708,6 +708,9 @@ function parse6Params(paramStr) {
 
                         renderBidList(sortedBids);
                         createScatterChart(sortedBids, project.project_max_price);
+
+                        // 自动加载区域分析数据
+                        analyzeRegions();
                     },
                     error: function(xhr, status, error) {
                         let errorMessage = '加载失败';
