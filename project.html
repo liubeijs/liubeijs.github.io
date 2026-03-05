@@ -140,6 +140,9 @@
                     <button class="btn btn-sm btn-outline-secondary" id="sortByRegion">
                         <i class="bi bi-geo-alt"></i> 按区域排序
                     </button>
+                    <button class="btn btn-sm btn-outline-secondary" id="sortByScore">
+                        <i class="bi bi-star"></i> 按信用评分排序
+                    </button>
                 </div>
             </div>
             <div class="card-body">
@@ -151,6 +154,7 @@
                             <th>投标价格</th>
                             <th>下浮率</th>
                             <th>所在区域</th>
+                            <th>信用评分</th>
                             <th>入围情况</th>
                             <th>状态</th>
                         </tr>
@@ -342,6 +346,7 @@ function parse6Params(paramStr) {
                             <td style="${bid.corp_addr?.province === '湖南省' ? `color: ${colors['湖南省内']}` : ''}">
                                 ${bid.corp_addr?.province === '湖南省' ? (bid.corp_addr?.city || '湖南省') : (bid.corp_addr?.province || '-')}
                             </td>
+                            <td>${bid.score || '-'}</td>
                             <td>${bid.bid_select_result || '-'}</td>
                             <td>${bid.bid_stat || '-'}</td>
                         </tr>
@@ -481,6 +486,78 @@ function parse6Params(paramStr) {
             } catch (error) {
                 console.error('区域分析失败：', error);
                 // alert('区域分析失败，请稍后重试');
+            }
+        }            
+
+        // 信用评分分析功能
+        async function analyzeScores() {
+            try {
+                if (!window.bid_openning_time) {
+                    console.log('未找到开标时间，跳过信用评分分析');
+                    return;
+                }
+
+                // 计算 score_time
+                const openTime = new Date(window.bid_openning_time);
+                let targetDate = new Date(openTime);
+                
+                // 如果是本月15日及之前，使用上个月
+                if (openTime.getDate() <= 15) {
+                    targetDate.setMonth(targetDate.getMonth() - 1);
+                } else {
+                     // 如果是本月16日及之后，使用本月
+                     // 无需操作，targetDate 已经是本月
+                }
+                
+                const year = targetDate.getFullYear();
+                const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+                const scoreTime = `${year}-${month}`;
+                
+                console.log(`计算信用评分月份: 开标时间=${window.bid_openning_time}, 评分月份=${scoreTime}`);
+
+                // 获取所有投标单位名称
+                const companyNames = sortedBids.map(bid => bid.bid_corp_name);
+                
+                const baseUrl = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') 
+                    ? 'http://localhost' 
+                    : 'https://liubeijs.com';
+
+                // 调用API
+                const response = await fetch(`${baseUrl}/api/corps_score`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        score_time: scoreTime,
+                        corp_names: companyNames
+                    })
+                });
+
+                const result = await response.json();
+                console.log('信用评分结果:', result);
+
+                if (response.ok && result) {
+                    // 创建评分映射
+                    const scoreMap = {};
+                    result.forEach(item => {
+                        scoreMap[item.corp_name] = item.score;
+                    });
+
+                    // 更新 sortedBids 数据
+                    sortedBids = sortedBids.map(bid => {
+                        return {
+                            ...bid,
+                            score: scoreMap[bid.bid_corp_name] || '-'
+                        };
+                    });
+
+                    // 重新渲染表格
+                    renderBidList(sortedBids);
+                }
+
+            } catch (error) {
+                console.error('信用评分分析失败：', error);
             }
         }            
 
@@ -730,6 +807,9 @@ function parse6Params(paramStr) {
 
                         // 自动加载区域分析数据
                         analyzeRegions();
+                        
+                        // 自动加载信用评分
+                        analyzeScores();
                     },
                     error: function(xhr, status, error) {
                         let errorMessage = '加载失败';
@@ -793,6 +873,26 @@ function parse6Params(paramStr) {
 
                 // 重新渲染列表
                 renderBidList(sortedBids);
+            });
+
+            $('#sortByScore').click(function() {
+                $(this).addClass('active').siblings().removeClass('active');
+                
+                // 按信用评分从高到低排序
+                sortedBids.sort((a, b) => {
+                    const scoreA = parseFloat(a.score) || 0;
+                    const scoreB = parseFloat(b.score) || 0;
+                    
+                    if (scoreA !== scoreB) {
+                        return scoreB - scoreA;
+                    }
+                    
+                    // 评分相同按价格
+                    return a.bid_price - b.bid_price;
+                });
+                
+                renderBidList(sortedBids);
+                createScatterChart(sortedBids);
             });
             $('thead th:nth-child(2)').html('投标单位');
             
