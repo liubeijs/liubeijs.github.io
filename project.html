@@ -518,16 +518,6 @@ function parse6Params(paramStr) {
                     return '中标人';
                 }
 
-                // 如果有企业地址信息，优先使用地址判断
-                if (bid.corp_addr && bid.corp_addr.province) {
-                    return bid.corp_addr.province === '湖南省' ? '湖南省内' : '其他省外';
-                }
-
-                // 检查是否为湖南省内单位 (降级策略：按名称判断)
-                if (companyName.includes('湖南') || 
-                    hunanCities.some(city => companyName.includes(city))) {
-                    return '湖南省内';
-                }
                 // 检查是否为中字头单位
                 const centralEnterprises = [
                     '中国', '中交', '中建', '中铁', '中冶', '中核', '中能建', '中广核',
@@ -542,7 +532,19 @@ function parse6Params(paramStr) {
 
                 if (centralEnterprises.some(prefix => companyName.startsWith(prefix))) {
                     return '中字头';
+                }                
+
+                // 如果有企业地址信息，优先使用地址判断
+                if (bid.corp_addr && bid.corp_addr.province) {
+                    return bid.corp_addr.province === '湖南省' ? '湖南省内' : '其他省外';
                 }
+
+                // 检查是否为湖南省内单位 (降级策略：按名称判断)
+                if (companyName.includes('湖南') || 
+                    hunanCities.some(city => companyName.includes(city))) {
+                    return '湖南省内';
+                }
+
                 // 其他省外单位
                 return '其他省外';
             }

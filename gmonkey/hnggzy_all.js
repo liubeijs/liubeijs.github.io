@@ -489,7 +489,8 @@
                 bid_max_price: { value: parseFloat(bid.controlPrice) * 10000.0 },
                 bid_price_score: { value: calculateBidScore(benchmarkPrice, bid.bidPrice) },
                 bid_stat: { value: "" },
-                bid_comment: { value: "" }
+                bid_comment: { value: "" },
+                bid_select_result: { value: (bid.enterround != null && bid.enterround >= 0 && bid.enterround <= 3) ? ["中位点及中位点附近入围单位","四分位点及四分位点入围单位","第二轮筛选入围单位","第三轮筛选入围单位"][bid.enterround] : "有限数量入围机制筛选未入围" }
             }));
 
         // 更新 bids 数组中的 bid_stat 和 bid_comment
@@ -1009,6 +1010,14 @@
         const analyzeButton = projectInfoBar.querySelector('#analyze-btn');
         if (analyzeButton) {
             analyzeButton.addEventListener('click', function () {
+
+                // 检查是否有项目ID且符合GUID格式
+                const guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                if (CUR_HNGGZY_ID && guidPattern.test(CUR_HNGGZY_ID)) {
+                    const url = `https://liubeijs.com/p/project.html?hnggzy_id=${CUR_HNGGZY_ID}`;
+                    window.open(url, '_blank');
+                    return;
+                }
 
                 if (API_CONFIG[3].data && API_CONFIG[3].data.data && API_CONFIG[4].data && API_CONFIG[4].data.data) {
                     const sortedBids = convertBidData(API_CONFIG[4].data.data.constructionBid, true);
