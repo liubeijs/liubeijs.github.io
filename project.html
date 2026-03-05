@@ -518,7 +518,12 @@ function parse6Params(paramStr) {
                     return '中标人';
                 }
 
-                // 检查是否为湖南省内单位
+                // 如果有企业地址信息，优先使用地址判断
+                if (bid.corp_addr && bid.corp_addr.province) {
+                    return bid.corp_addr.province === '湖南省' ? '湖南省内' : '其他省外';
+                }
+
+                // 检查是否为湖南省内单位 (降级策略：按名称判断)
                 if (companyName.includes('湖南') || 
                     hunanCities.some(city => companyName.includes(city))) {
                     return '湖南省内';
