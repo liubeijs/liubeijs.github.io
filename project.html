@@ -829,36 +829,61 @@ function parse6Params(paramStr) {
                 });
             }
 
-            // 修改排序事件处理
-            $('#sortById').click(function() {
-                $(this).addClass('active').siblings().removeClass('active');
-                sortedBids.sort((a, b) => (parseInt(a.bid_id) || 0) - (parseInt(b.bid_id) || 0));
+            // 通用排序处理函数
+            function handleSort(btn, compareFn, defaultDesc = false) {
+                // 切换激活状态和方向
+                if (!btn.hasClass('active')) {
+                    $('.btn-group .btn').removeClass('active');
+                    btn.addClass('active');
+                    // 新激活时，使用默认排序方向
+                    btn.data('dir', defaultDesc ? 'desc' : 'asc');
+                } else {
+                    // 已激活，切换方向
+                    const currentDir = btn.data('dir');
+                    btn.data('dir', currentDir === 'asc' ? 'desc' : 'asc');
+                }
+
+                const dir = btn.data('dir');
+                
+                // 更新图标（仅针对序号排序）
+                if (btn.attr('id') === 'sortById') {
+                    const icon = btn.find('i');
+                    icon.removeClass('bi-sort-numeric-down bi-sort-numeric-up');
+                    icon.addClass(dir === 'asc' ? 'bi-sort-numeric-down' : 'bi-sort-numeric-up');
+                }
+
+                // 执行排序
+                sortedBids.sort((a, b) => {
+                    const result = compareFn(a, b);
+                    return dir === 'asc' ? result : -result;
+                });
+
                 renderBidList(sortedBids);
                 createScatterChart(sortedBids);
+            }
+
+            // 修改排序事件处理
+            $('#sortById').click(function() {
+                handleSort($(this), (a, b) => {
+                    return (parseInt(a.bid_id) || 0) - (parseInt(b.bid_id) || 0);
+                }, false); // 默认升序
             });
 
             $('#sortByRatio').click(function() {
-                $(this).addClass('active').siblings().removeClass('active');
-                sortedBids.sort((a, b) => b.bid_down_ratio - a.bid_down_ratio);
-                renderBidList(sortedBids);
-                createScatterChart(sortedBids);
+                handleSort($(this), (a, b) => {
+                    return a.bid_down_ratio - b.bid_down_ratio;
+                }, true); // 默认降序
             });
-            $('#sortByRegion').click(function() {
-                // 移除其他按钮的active类
-                $('.btn-group .btn').removeClass('active');
-                $(this).addClass('active');
 
-                // 按区域和报价排序
-                sortedBids.sort((a, b) => {
+            $('#sortByRegion').click(function() {
+                handleSort($(this), (a, b) => {
                     const provinceA = a.corp_addr?.province || '';
                     const provinceB = b.corp_addr?.province || '';
                     
-                    // 首先按省份排序
                     if (provinceA !== provinceB) {
                         return provinceA.localeCompare(provinceB);
                     }
 
-                    // 如果都是湖南省，按城市排序
                     if (provinceA === '湖南省') {
                         const cityA = a.corp_addr?.city || '';
                         const cityB = b.corp_addr?.city || '';
@@ -867,32 +892,20 @@ function parse6Params(paramStr) {
                         }
                     }
                     
-                    // 如果省份相同（且城市相同或非湖南省），按投标价格从低到高排序
                     return a.bid_price - b.bid_price;
-                });
-
-                // 重新渲染列表
-                renderBidList(sortedBids);
+                }, false); // 默认升序
             });
 
             $('#sortByScore').click(function() {
-                $(this).addClass('active').siblings().removeClass('active');
-                
-                // 按信用评分从高到低排序
-                sortedBids.sort((a, b) => {
+                handleSort($(this), (a, b) => {
                     const scoreA = parseFloat(a.score) || 0;
                     const scoreB = parseFloat(b.score) || 0;
                     
                     if (scoreA !== scoreB) {
-                        return scoreB - scoreA;
+                        return scoreA - scoreB;
                     }
-                    
-                    // 评分相同按价格
                     return a.bid_price - b.bid_price;
-                });
-                
-                renderBidList(sortedBids);
-                createScatterChart(sortedBids);
+                }, true); // 默认降序
             });
             $('thead th:nth-child(2)').html('投标单位');
             
