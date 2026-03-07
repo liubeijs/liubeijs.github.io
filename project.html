@@ -827,7 +827,16 @@ function parse6Params(paramStr) {
                         } else {
                             $('#basePrice').text('-');
                         }
-                        $('#floatRange').text(((project.bid_floating_range*100).toFixed(2) + '%') || '-');
+                        if (project.bid_floating_range && parseFloat(project.bid_floating_range) !== 0) {
+                            let range = String(project.bid_floating_range);
+                            // 如果是纯数字（未包含%），则按百分比格式化
+                            if (!range.includes('%')) {
+                                range = (parseFloat(range) * 100).toFixed(2) + '%';
+                            }
+                            $('#floatRange').text(range);
+                        } else {
+                            $('#floatRange').text('-');
+                        }
 
                         // 处理项目地点
                         let placeStr = '-';
