@@ -124,7 +124,7 @@
                             <th class="bg-light">项目地点</th>
                             <td id="projectPlace"></td>
                             <th class="bg-light">招标方法
-                                <i class="bi bi-info-circle text-primary ms-1" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-html="true" title="一、合理低价基准价公式为:<br>T=[(Y×C1)+(C×(1−C1))]×(1−r)<br><br>二、经评审最低价异常低价警戒线计算步骤：<br>1. 剔除超最高限价95%或低于78%的报价，再去掉剩余中最低15%和最高10%，余者为有效报价。<br>2. 用算术平均、中位数平均、四分位数平均三者均值作为综合平均数（少于5家时仅取算术平均）。<br>3. 基准价 = 综合平均数 × (1 - 下浮值)，下浮值在5%-10%间由招标人选定。"></i>
+                                <i class="bi bi-info-circle text-primary ms-1" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-html="true" title="一、合理低价基准价公式为:<br>基准价=[(最高限价×C1)+(平均价×(1−C1))]×(1−r)<br><br>二、经评审最低价异常低价警戒线计算步骤：<br>1. 剔除超最高限价95%或低于78%的报价，再去掉剩余中最低15%和最高10%，余者为有效报价。<br>2. 用算术平均、中位数平均、四分位数平均三者均值作为综合平均数（少于5家时仅取算术平均）。<br>3. 基准价 = 综合平均数 × (1 - 下浮值)，下浮值在5%-10%间由招标人选定。"></i>
                             </th>
                             <td id="evalMethod"></td>
                         </tr>
@@ -278,7 +278,8 @@ function parse6Params(paramStr) {
                 '中标人': 'rgba(255, 165, 86, 0.8)', // 亮黄色
                 '湖南省内': 'rgba(255, 99, 132, 0.6)',   // 红色
                 '中字头': 'rgba(54, 162, 235, 0.6)',    // 蓝色
-                '其他省外': 'rgba(75, 192, 192, 0.6)'   // 青色
+                '其他省外': 'rgba(75, 192, 192, 0.6)',   // 青色
+                '本地市州': 'rgba(153, 102, 255, 0.6)'   // 紫色
             };
 
             // 统一的渲染函数
@@ -317,10 +318,21 @@ function parse6Params(paramStr) {
                     '中字头': 0,
                     '其他省外': 0
                 };
+                
+                // 项目所在市州统计
+                let cityStatKey = null;
+                let cityCount = 0;
+                if (window.project_place && window.project_place.province === '湖南省' && window.project_place.city) {
+                    cityStatKey = window.project_place.city;
+                }
 
                 bids.forEach((bid) => {
                     const type = getCompanyType(bid);
                     stats[type]++;
+                    
+                    if (cityStatKey && bid.corp_addr && bid.corp_addr.city === cityStatKey) {
+                        cityCount++;
+                    }
                     
                     const row = `
                         <tr>
@@ -379,11 +391,24 @@ function parse6Params(paramStr) {
                 });
 
                 // 渲染统计信息
-                const statsHtml = Object.entries(stats)
-                    .map(([type, count]) => `
+                const statItems = [
+                    { key: '中标人', count: stats['中标人'], color: colors['中标人'] }
+                ];
+
+                if (cityStatKey) {
+                    statItems.push({ key: cityStatKey, count: cityCount, color: colors['本地市州'] });
+                }
+
+                statItems.push(
+                    { key: '湖南省内', count: stats['湖南省内'], color: colors['湖南省内'] },
+                    { key: '中字头', count: stats['中字头'], color: colors['中字头'] },
+                    { key: '其他省外', count: stats['其他省外'], color: colors['其他省外'] }
+                );
+
+                const statsHtml = statItems.map(item => `
                         <span class="me-3">
-                            <span class="company-type-indicator" style="background-color: ${colors[type]}"></span>
-                            ${type}：${count}
+                            <span class="company-type-indicator" style="background-color: ${item.color}"></span>
+                            ${item.key}：${item.count}
                         </span>
                     `)
                     .join('') + `
@@ -903,6 +928,7 @@ function parse6Params(paramStr) {
                         window.bid_6param = project.bid_6param;
                         window.project_pub_url = project.project_pub_url;
                         window.bid_openning_time = project.bid_openning_time;
+                        window.project_place = project.project_place;
 
                         // 对投标数据按序号排序（从小到大）
                         sortedBids = project.project_bids
