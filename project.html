@@ -431,10 +431,22 @@ function parse6Params(paramStr) {
                 });
 
                 const $thShortlist = $('#th_shortlist_status');
-                if (Object.keys(shortlistStats).length > 0) {
-                    const tooltipText = Object.entries(shortlistStats)
-                        .map(([k, v]) => `${k}（${v}家）`)
+                const shortlistCount = Object.keys(shortlistStats).length;
+                
+                if (shortlistCount > 0) {
+                    // 计算总入围数
+                    const totalShortlisted = Object.values(shortlistStats).reduce((a, b) => a + b, 0);
+                    const totalBids = bids.length;
+                    const percentage = totalBids > 0 ? ((totalShortlisted / totalBids) * 100).toFixed(2) + '%' : '0%';
+
+                    // 构建 tooltip 内容
+                    let tooltipContent = `<div style="text-align: left;">`;
+                    tooltipContent += `<strong>全部入围数量: ${totalShortlisted} (${percentage})</strong><br>`;
+                    tooltipContent += `<hr style="margin: 5px 0; border-color: rgba(255,255,255,0.5);">`;
+                    tooltipContent += Object.entries(shortlistStats)
+                        .map(([k, v]) => `${k}: ${v}`)
                         .join('<br>');
+                    tooltipContent += `</div>`;
                     
                     const $icon = $('<i>')
                         .addClass('bi bi-info-circle text-primary ms-1')
@@ -442,7 +454,7 @@ function parse6Params(paramStr) {
                         .attr({
                             'data-bs-toggle': 'tooltip',
                             'data-bs-html': 'true',
-                            'title': tooltipText
+                            'title': tooltipContent
                         });
                     
                     $thShortlist.empty().append('入围情况', $icon);
