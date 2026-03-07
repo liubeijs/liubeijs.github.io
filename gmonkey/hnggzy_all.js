@@ -166,7 +166,40 @@
             },
             postJianDaoYun() {
                 console.log('更新项目开标参数');
-                if (this.data.data.length === 0) {
+
+                const postData = { };
+                // 尝试从 DOM 提取下浮区间值
+                try {
+                    const ths = Array.from(document.querySelectorAll('th'));
+                    const rangeTh = ths.find(th => th.textContent.trim().includes('下浮区间值'));
+                    if (rangeTh) {
+                        const rangeTd = rangeTh.nextElementSibling;
+                        if (rangeTd && rangeTd.textContent.trim()) {
+                            const rangeVal = rangeTd.textContent.trim();
+                            console.log('提取到下浮区间值:', rangeVal);
+                            postData.bid_floating_range = {
+                                "value": rangeVal
+                            };
+                        }
+                    }
+                } catch (e) {
+                    console.error('提取下浮区间值失败:', e);
+                }
+
+                const hasApiData = this.data && this.data.data && this.data.data.length > 0;
+
+                // 如果有API数据，则填充基准价和六参数
+                if (hasApiData) {
+                    postData.project_base_price = {
+                        "value": this.data.data[0].benchmarkPrice,
+                    };
+                    postData.bid_6param = {
+                        "value": formatCoefficients(this.data.data),
+                    };
+                }
+
+                // 如果既没有API数据，也没有从DOM提取到下浮区间值，则提示
+                if (!hasApiData && !postData.bid_floating_range) {
                     alert('未获取到开标参数');
                     return;
                 }
@@ -178,14 +211,7 @@
                         "app_id": JIANDAOYUN_APP_ID,
                         "entry_id": JIANDAOYUN_ENTRY_PROJECT_ID,
                         "data_id": CUR_PROJECTS[CUR_HNGGZY_ID]?._id,
-                        "data": {
-                            "project_base_price": {
-                                "value": this.data.data[0].benchmarkPrice,
-                            },
-                            "bid_6param": {
-                                "value": formatCoefficients(this.data.data),
-                            },
-                        }
+                        "data": postData
                     },
                     3
                 );
