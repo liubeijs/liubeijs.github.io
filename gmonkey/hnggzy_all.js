@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         湖南公共资源交易平台【全接口】拦截器
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1.0
 // @description  拦截湖南公共资源交易平台的所有相关接口并展示数据
 // @author       Jiexin Li (LB)
 // @match        https://www.hnsggzy.com/*
