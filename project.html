@@ -831,7 +831,7 @@ function parse6Params(paramStr) {
                             let range = String(project.bid_floating_range);
                             // 如果是纯数字（未包含%），则按百分比格式化
                             if (!range.includes('%')) {
-                                range = (parseFloat(range) * 100).toFixed(2) + '%';
+                                range = (parseFloat(range) * 100).toFixed(1) + '%';
                             }
                             $('#floatRange').text(range);
                         } else {
