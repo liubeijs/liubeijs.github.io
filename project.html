@@ -316,12 +316,12 @@ function parse6Params(paramStr) {
                     '中标人': 0,                    
                     '湖南省内': 0,
                     '中字头': 0,
-                    '其他省外': 0
+                    '其他省外': 0,
+                    '本地市州': 0
                 };
                 
-                // 项目所在市州统计
+                // 获取本地市州名称
                 let cityStatKey = null;
-                let cityCount = 0;
                 if (window.project_place && window.project_place.province === '湖南省' && window.project_place.city) {
                     cityStatKey = window.project_place.city;
                 }
@@ -330,10 +330,14 @@ function parse6Params(paramStr) {
                     const type = getCompanyType(bid);
                     stats[type]++;
                     
-                    if (cityStatKey && bid.corp_addr && bid.corp_addr.city === cityStatKey) {
-                        cityCount++;
+                    // 计算所在区域列的样式
+                    let regionStyle = '';
+                    if (window.project_place && window.project_place.province === '湖南省' && window.project_place.city && bid.corp_addr && bid.corp_addr.city === window.project_place.city) {
+                        regionStyle = `color: ${colors['本地市州']}`;
+                    } else if (bid.corp_addr?.province === '湖南省') {
+                        regionStyle = `color: ${colors['湖南省内']}`;
                     }
-                    
+
                     const row = `
                         <tr>
                             <td>${bid.bid_id}</td>
@@ -379,7 +383,7 @@ function parse6Params(paramStr) {
                                 currency: 'CNY'
                             })}</td>
                             <td>${(bid.bid_down_ratio * 100).toFixed(2)}%</td>
-                            <td style="${bid.corp_addr?.province === '湖南省' ? `color: ${colors['湖南省内']}` : ''}">
+                            <td style="${regionStyle}">
                                 ${bid.corp_addr?.province === '湖南省' ? (bid.corp_addr?.city || '湖南省') : (bid.corp_addr?.province || '-')}
                             </td>
                             <td>${bid.score || '-'}</td>
@@ -396,7 +400,7 @@ function parse6Params(paramStr) {
                 ];
 
                 if (cityStatKey) {
-                    statItems.push({ key: cityStatKey, count: cityCount, color: colors['本地市州'] });
+                    statItems.push({ key: cityStatKey, count: stats['本地市州'], color: colors['本地市州'] });
                 }
 
                 statItems.push(
@@ -663,7 +667,14 @@ function parse6Params(paramStr) {
 
                 if (centralEnterprises.some(prefix => companyName.startsWith(prefix))) {
                     return '中字头';
-                }                
+                }
+
+                // 检查是否为本地市州单位
+                if (window.project_place && window.project_place.province === '湖南省' && window.project_place.city) {
+                    if (bid.corp_addr && bid.corp_addr.city === window.project_place.city) {
+                        return '本地市州';
+                    }
+                }
 
                 // 如果有企业地址信息，优先使用地址判断
                 if (bid.corp_addr && bid.corp_addr.province) {
