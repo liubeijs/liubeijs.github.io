@@ -434,8 +434,11 @@ function parse6Params(paramStr) {
                 const shortlistCount = Object.keys(shortlistStats).length;
                 
                 if (shortlistCount > 0) {
-                    // 计算总入围数
-                    const totalShortlisted = Object.values(shortlistStats).reduce((a, b) => a + b, 0);
+                    // 计算总入围数 (排除 "有限数量入围机制筛选未入围")
+                    const totalShortlisted = Object.entries(shortlistStats)
+                        .filter(([k, v]) => k !== '有限数量入围机制筛选未入围')
+                        .reduce((a, [k, v]) => a + v, 0);
+                        
                     const totalBids = bids.length;
                     const percentage = totalBids > 0 ? ((totalShortlisted / totalBids) * 100).toFixed(2) + '%' : '0%';
 
