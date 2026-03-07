@@ -175,7 +175,11 @@
                     if (rangeTh) {
                         const rangeTd = rangeTh.nextElementSibling;
                         if (rangeTd && rangeTd.textContent.trim()) {
-                            const rangeVal = rangeTd.textContent.trim();
+                            let rangeVal = rangeTd.textContent.trim();
+                            // 如果包含%，转成小数
+                            if (rangeVal.includes('%')) {
+                                rangeVal = (parseFloat(rangeVal) / 100).toString();
+                            }
                             console.log('提取到下浮区间值:', rangeVal);
                             postData.bid_floating_range = {
                                 "value": rangeVal
@@ -203,6 +207,8 @@
                     alert('未获取到开标参数');
                     return;
                 }
+
+                console.log('postData:', postData);
 
                 safePostToJianDaoYun(
                     "POST",
