@@ -827,7 +827,7 @@ function parse6Params(paramStr) {
                         } else {
                             $('#basePrice').text('-');
                         }
-                        $('#floatRange').text(project.bid_floating_range || '-');
+                        $('#floatRange').text(((project.bid_floating_range*100).toFixed(2) + '%') || '-');
 
                         // 处理项目地点
                         let placeStr = '-';
