@@ -469,6 +469,11 @@ function parse6Params(paramStr) {
 
                     // 重新渲染表格
                     renderBidList(sortedBids);
+                    
+                    // 重新渲染下浮率分布图
+                    if (window.project_max_price) {
+                        createScatterChart(sortedBids, window.project_max_price);
+                    }
 
                     // 统计各省份投标单位数量
                     const provinceData = {};
@@ -940,6 +945,7 @@ function parse6Params(paramStr) {
                         window.project_pub_url = project.project_pub_url;
                         window.bid_openning_time = project.bid_openning_time;
                         window.project_place = project.project_place;
+                        window.project_max_price = project.project_max_price;
 
                         // 对投标数据按序号排序（从小到大）
                         sortedBids = project.project_bids
