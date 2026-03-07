@@ -177,7 +177,7 @@
                             <th>下浮率</th>
                             <th>所在区域</th>
                             <th>信用评分</th>
-                            <th>入围情况</th>
+                            <th id="th_shortlist_status">入围情况</th>
                             <th>状态</th>
                         </tr>
                     </thead>
@@ -422,6 +422,39 @@ function parse6Params(paramStr) {
                         </span>
                     `;
                 
+                // 更新入围情况统计
+                const shortlistStats = {};
+                bids.forEach(bid => {
+                    if (bid.bid_select_result && bid.bid_select_result !== '-') {
+                        shortlistStats[bid.bid_select_result] = (shortlistStats[bid.bid_select_result] || 0) + 1;
+                    }
+                });
+
+                const $thShortlist = $('#th_shortlist_status');
+                if (Object.keys(shortlistStats).length > 0) {
+                    const tooltipText = Object.entries(shortlistStats)
+                        .map(([k, v]) => `${k}（${v}家）`)
+                        .join('<br>');
+                    
+                    const $icon = $('<i>')
+                        .addClass('bi bi-info-circle text-primary ms-1')
+                        .css({'cursor': 'pointer', 'font-size': '0.8em'})
+                        .attr({
+                            'data-bs-toggle': 'tooltip',
+                            'data-bs-html': 'true',
+                            'title': tooltipText
+                        });
+                    
+                    $thShortlist.empty().append('入围情况', $icon);
+                    
+                    // 初始化 tooltip
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                        new bootstrap.Tooltip($icon[0]);
+                    }
+                } else {
+                    $thShortlist.text('入围情况');
+                }
+
                 $('#companyStats').html(statsHtml);
             }
 
