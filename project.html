@@ -106,19 +106,37 @@
                 </div>
             </div>
             <div class="card-body">
-                <table class="table">
-                    <tr>
-                        <th width="200">项目编号</th>
-                        <td id="projectId"></td>
-                    </tr>
-                    <tr>
-                        <th>最高限价</th>
-                        <td id="maxPrice"></td>
-                    </tr>
-                    <tr>
-                        <th>开标时间</th>
-                        <td id="bidOpenTime"></td>
-                    </tr>
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th width="15%" class="bg-light">项目编号</th>
+                            <td width="35%" id="projectId"></td>
+                            <th width="15%" class="bg-light">项目类型</th>
+                            <td width="35%" id="projectType"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">最高限价</th>
+                            <td id="maxPrice"></td>
+                            <th class="bg-light">开标时间</th>
+                            <td id="bidOpenTime"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">项目地点</th>
+                            <td id="projectPlace"></td>
+                            <th class="bg-light">招标方法</th>
+                            <td id="evalMethod"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">基准价</th>
+                            <td id="basePrice"></td>
+                            <th class="bg-light">下浮区间值</th>
+                            <td id="floatRange"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">抽取参数</th>
+                            <td colspan="3" id="bidParams"></td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -218,8 +236,11 @@ function parse6Params(paramStr) {
         const trimmedLine = line.trim();  // 添加这行，去除首尾空格
         for (const [key, value] of Object.entries(paramMap)) {
             if (trimmedLine.startsWith(key)) {
-                const numStr = trimmedLine.split('：')[1];
-                result[value] = parseFloat(numStr);
+                // 支持中文冒号和英文冒号
+                const parts = trimmedLine.split(/[:：]/);
+                if (parts.length > 1) {
+                    result[value] = parseFloat(parts[1]);
+                }
                 break;
             }
         }
@@ -778,6 +799,60 @@ function parse6Params(paramStr) {
                             style: 'currency',
                             currency: 'CNY'
                         }));
+
+                        // 填充新增字段
+                        $('#projectType').text(project.hnggzy_type || '-');
+                        $('#evalMethod').text(project.evaluation_method || '-');
+                        $('#basePrice').text(project.project_base_price ? parseFloat(project.project_base_price).toLocaleString('zh-CN', {
+                            style: 'currency',
+                            currency: 'CNY'
+                        }) : '-');
+                        $('#floatRange').text(project.bid_floating_range || '-');
+
+                        // 处理项目地点
+                        let placeStr = '-';
+                        if (project.project_place) {
+                            if (typeof project.project_place === 'object') {
+                                const p = project.project_place;
+                                placeStr = [p.province, p.city, p.district].filter(Boolean).join('/');
+                            } else {
+                                placeStr = project.project_place;
+                            }
+                        }
+                        $('#projectPlace').text(placeStr);
+
+                        // 处理抽取参数
+                        const params = parse6Params(project.bid_6param);
+                        if (params) {
+                            const {C1, r, ...others} = params;
+                            const labelMap = {
+                                'a': '算术平均数随机权重a',
+                                'b': '中位数随机权重b',
+                                'c': '四分位数随机权重c',
+                                'd': '几何平均数随机权重d',
+                                'e': '算术平均数随机权重e',
+                                'f': '中位数随机权重f',
+                                'g': '几何平均数随机权重g'
+                            };
+
+                            const tooltipText = Object.entries(others)
+                                .map(([k, v]) => `${labelMap[k] || k}: ${v}`)
+                                .join('<br>');
+
+                            const html = `
+                                <span class="me-3">比例系数C1: ${C1 !== undefined ? C1 : '-'}</span>
+                                <span class="me-3">下浮系数r: ${r !== undefined ? r : '-'}</span>
+                                <i class="bi bi-info-circle text-primary" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltipText}"></i>
+                            `;
+                            $('#bidParams').html(html);
+                            
+                            // 初始化 tooltip
+                            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                                new bootstrap.Tooltip(document.querySelector('[data-bs-toggle="tooltip"]'));
+                            }
+                        } else {
+                            $('#bidParams').text('-');
+                        }
                         
                         // 格式化并显示开标时间
                         if (project.bid_openning_time) {
