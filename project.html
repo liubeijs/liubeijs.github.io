@@ -127,7 +127,10 @@
                             <td id="evalMethod"></td>
                         </tr>
                         <tr>
-                            <th class="bg-light">基准价</th>
+                            <th class="bg-light">
+                                基准价
+                                <i class="bi bi-info-circle text-primary ms-1" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-html="true" title="一、合理低价基准价公式为:<br>T=[(Y×C1)+(C×(1−C1))]×(1−r)<br><br>二、经评审最低价基准价（异常低价警戒线）计算步骤：<br>1. 剔除超最高限价95%或低于78%的报价，再去掉剩余中最低15%和最高10%，余者为有效报价。<br>2. 用算术平均、中位数平均、四分位数平均三者均值作为综合平均数（少于5家时仅取算术平均）。<br>3. 基准价 = 综合平均数 × (1 - 下浮值)，下浮值在5%-10%间由招标人选定。"></i>
+                            </th>
                             <td id="basePrice"></td>
                             <th class="bg-light">下浮区间值</th>
                             <td id="floatRange"></td>
@@ -803,10 +806,26 @@ function parse6Params(paramStr) {
                         // 填充新增字段
                         $('#projectType').text(project.hnggzy_type || '-');
                         $('#evalMethod').text(project.evaluation_method || '-');
-                        $('#basePrice').text(project.project_base_price ? parseFloat(project.project_base_price).toLocaleString('zh-CN', {
-                            style: 'currency',
-                            currency: 'CNY'
-                        }) : '-');
+                        // 计算基准价及其下浮率
+                        if (project.project_base_price) {
+                            const basePrice = parseFloat(project.project_base_price);
+                            let basePriceText = basePrice.toLocaleString('zh-CN', {
+                                style: 'currency',
+                                currency: 'CNY'
+                            });
+                            
+                            // 如果有最高限价，计算下浮率
+                            if (project.project_max_price) {
+                                const maxPrice = parseFloat(project.project_max_price);
+                                if (maxPrice > 0) {
+                                    const ratio = ((maxPrice - basePrice) / maxPrice) * 100;
+                                    basePriceText += ` (${ratio.toFixed(2)}%)`;
+                                }
+                            }
+                            $('#basePrice').text(basePriceText);
+                        } else {
+                            $('#basePrice').text('-');
+                        }
                         $('#floatRange').text(project.bid_floating_range || '-');
 
                         // 处理项目地点
@@ -845,13 +864,16 @@ function parse6Params(paramStr) {
                                 <i class="bi bi-info-circle text-primary" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltipText}"></i>
                             `;
                             $('#bidParams').html(html);
-                            
-                            // 初始化 tooltip
-                            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                                new bootstrap.Tooltip(document.querySelector('[data-bs-toggle="tooltip"]'));
-                            }
                         } else {
                             $('#bidParams').text('-');
+                        }
+
+                        // 初始化所有 tooltip
+                        if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                                return new bootstrap.Tooltip(tooltipTriggerEl)
+                            })
                         }
                         
                         // 格式化并显示开标时间
