@@ -274,15 +274,26 @@
             },
             postJianDaoYun() {
                 console.log('更新项目中标候选人');
-                let candidates = parseCandidatesAndRejectedBidder();
+                var candidates = parseCandidatesAndRejectedBidder();
                 console.log(candidates);
 
-                if (candidates.length === 0) {
+                // 从 API_CONFIG.data 中获取已解析数据
+                if (!candidates || candidates.length === 0) {
+                    if (API_CONFIG[5].data) {
+                        candidates = API_CONFIG[5].data;        
+                    }
+                } else {
+                    //如果解析成功了，就更新 data
+                    API_CONFIG[5].data = candidates;
+                }
+
+                if (!candidates || candidates.length === 0) {
+
                     alert("未获取到中标候选人信息");
                     return;
                 }
 
-                alert(JSON.stringify(candidates));
+                //alert(JSON.stringify(candidates));
 
                 const bids = convertBidData(getConstructionBid(), false, null, candidates);
                 if (bids.length === 0) {
@@ -926,6 +937,7 @@
                 <button id="analyze-btn" style="padding: 4px 12px; background: #67C23A; color: white; border: none; border-radius: 4px; cursor: pointer;">分析</button>
                 <button id="bid-list-btn" style="padding: 4px 12px; background:rgb(198, 185, 43); color: white; border: none; border-radius: 4px; cursor: pointer;">报价</button>
                 <button id="jiandaoyun-project-btn" style="padding: 4px 12px; background: #409EFF; color: white; border: none; border-radius: 4px; cursor: pointer;">简道云</button>
+                <button id="batch-update-btn" style="padding: 4px 12px; background: #E6A23C; color: white; border: none; border-radius: 4px; cursor: pointer;">更新</button>
             </div>
         `;
 
@@ -1009,6 +1021,40 @@
                     window.open(jian_p_url, '_blank');
                 } else {
                     showNotification('打开失败', '项目链接不存在');
+                }
+            });
+        }
+
+        // 添加批量更新按钮点击事件
+        const batchUpdateButton = projectInfoBar.querySelector('#batch-update-btn');
+        if (batchUpdateButton) {
+            batchUpdateButton.addEventListener('click', function () {
+                // 定义需要批量更新的API名称列表（按顺序）
+                const updateOrder = ['开标参数', '开标报价', '中标公示'];
+
+                // 依次处理每个API
+                for (const apiName of updateOrder) {
+                    const api = API_CONFIG.find(a => a.name === apiName);
+                    if (!api) continue;
+
+                    // 检查是否有数据
+                    if (!api.enabled || !api.data) {
+                        console.log(`[${apiName}] 暂无数据，跳过`);
+                        alert(`[${apiName}] 暂无数据，跳过`);
+                        continue;
+                    }
+
+                    // 检查是否有postJianDaoYun方法
+                    if (typeof api.postJianDaoYun !== 'function') {
+                        console.log(`[${apiName}] 不支持更新操作，跳过`);
+                        continue;
+                    }
+
+                    // 弹出确认对话框
+                    const confirmed = confirm(`[${api.name}] 确定在简道云${api.btn_title}/${CUR_PROJECTS[CUR_HNGGZY_ID]?.project_name || '?'}吗？`);
+                    if (confirmed) {
+                        api.postJianDaoYun();
+                    }
                 }
             });
         }
